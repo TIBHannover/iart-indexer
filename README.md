@@ -2,7 +2,7 @@
 The main task of the indexer is to perform different analysis steps and to store the individual features in a database. The system can be extended by several different plugins.
 
 
-![](doc/indexer.svg)
+![](doc/indexer.png)
 
 
 ## Plugin Structure
