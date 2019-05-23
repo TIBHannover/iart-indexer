@@ -4,6 +4,8 @@ import sys
 
 import importlib
 
+from indexer.plugins.plugin import Plugin
+
 _feature_plugins = {}
 
 
@@ -25,17 +27,21 @@ def find_plugins(path=os.path.join(os.path.abspath(os.path.dirname(__file__)), '
     for pl in os.listdir(path):
         match = re.match(file_re, pl)
         if match:
-            a = importlib.import_module('plugins.feature.{}'.format(match.group(1)))
+            a = importlib.import_module('indexer.plugins.feature.{}'.format(match.group(1)))
             print(a)
             function_dir = dir(a)
             if "register" in function_dir:
                 a.register(self)
 
 
-class FeaturePlugin():
+class FeaturePlugin(Plugin):
+    _type = 'feature'
+
+    def __init__(self, **kwargs):
+        super(FeaturePlugin, self).__init__(**kwargs)
 
     def __call__(self, images):
-        self.call(images)
+        return self.call(images)
 
 
 # __all__ = []
