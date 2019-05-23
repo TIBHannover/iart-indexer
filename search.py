@@ -9,7 +9,7 @@ import json
 from indexer.plugins import *
 from indexer.config import IndexerConfig
 
-from indexer.database.elasticsearch_database import ElasticSearchDatabase
+from database.elasticsearch_database import ElasticSearchDatabase
 
 from indexer.utils import copy_image_hash, filename_without_ext
 
