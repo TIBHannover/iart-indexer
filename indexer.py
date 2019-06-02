@@ -1,16 +1,18 @@
 import os
 import sys
 import re
+import json
 import argparse
 import logging
 import uuid
+import imageio
 
 from indexer.plugins import *
 from indexer.config import IndexerConfig
 
 from database.elasticsearch_database import ElasticSearchDatabase
 
-from indexer.utils import copy_image_hash, filename_without_ext
+from indexer.utils import copy_image_hash, filename_without_ext, image_resolution
 
 
 def parse_args():
@@ -21,6 +23,7 @@ def parse_args():
     parser.add_argument('-p', '--path', required=True, help='path to image or folder to indexing')
     parser.add_argument('-o', '--output', help='copy image to new folder with hash id')
     parser.add_argument('-a', '--append', action='store_true', help='add all found documents to the index')
+    parser.add_argument('-j', '--jsonl', help='add all found documents to the index')
     # parser.add_argument('-d', '--database', help='database type for index')
     parser.add_argument('-c', '--config', help='config path')
     parser.add_argument('-m', '--mode', choices=['local', 'server'], default='local', help='verbose output')
@@ -40,13 +43,9 @@ def update_database(database, plugin_results):
                                annotations=annotations)
 
 
-def indexing(paths, output):
-
-    # TODO replace with abstract class
-    database = ElasticSearchDatabase(config=None)
-
-    find_plugins()
+def list_images(paths):
     if not isinstance(paths, (list, set)):
+
         if os.path.isdir(paths):
             file_paths = []
             for root, dirs, files in os.walk(paths):
@@ -59,27 +58,79 @@ def indexing(paths, output):
         else:
             paths = [os.path.abspath(paths)]
 
-    if output:
-        entries = []
-        for path in paths:
-            copy = copy_image_hash(path, output)
-            if copy is not None:
+    entries = [{
+        'id': uuid.uuid4().hex,
+        'filename': os.path.basename(path),
+        'path': os.path.abspath(path),
+        'meta': []
+    } for path in paths]
 
-                hash, output_file = copy
-                result.append({'id': hash, 'filename': os.path.basename(path), 'path': os.path.abspath(output_file)})
+    return entries
 
+
+def list_jsonl(paths):
+    entries = []
+    with open(paths, 'r') as f:
+        for line in f:
+            entry = json.loads(line)
+            entries.append(entry)
+
+    return entries
+
+
+def copy_images(entries, output, resolutions=[500, 200, -1]):
+    entires_result = []
+    for i in range(len(entries)):
+
+        entry = entries[i]
+        print(entry['path'])
+        copy_result = copy_image_hash(entry['path'], output, entry['id'], resolutions)
+        if copy_result is not None:
+            hash_value, path = copy_result
+            entry.update({'path': path})
+            entires_result.append(entry)
+
+    return entires_result
+
+
+def indexing(paths, output):
+
+    # TODO replace with abstract class
+    database = ElasticSearchDatabase(config=None)
+
+    find_plugins()
+
+    # handel images or jsonl
+    if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == '.jsonl':
+        entries = list_jsonl(paths)
+        print('test')
     else:
-        entries = [{
-            'id': filename_without_ext(path),
-            'filename': os.path.basename(path),
-            'path': os.path.abspath(path)
-        } for path in paths]
+        entries = list_images(paths)
+        print('test2')
+    print(entries[:3])
+
+    if output:
+        entries = copy_images(entries, output)
 
     # TODO scroll
     existing_hash = [x['id'] for x in list(database.search(None))]
     for x in entries:
         if x['id'] not in existing_hash:
-            database.insert_entry(x['id'], {'id': x['id'], 'path': x['path'], 'filename': x['filename']})
+            resolution = image_resolution(x['path'])
+            if resolution is None:
+                continue
+            print(x['meta'])
+            database.insert_entry(
+                x['id'], {
+                    'id': x['id'],
+                    'path': x['path'],
+                    'filename': x['filename'],
+                    'meta': x['meta'],
+                    'image': {
+                        'height': resolution[0],
+                        'width': resolution[1]
+                    }
+                })
 
     logging.info(f'Indexing {len(entries)} documents')
 

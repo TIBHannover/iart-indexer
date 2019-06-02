@@ -20,7 +20,7 @@ import logging
 
 @export_classifier_plugin('KaggleDenseClassifierPlugin')
 class KaggleDenseClassifierPlugin(ClassifierPlugin):
-    default_config = {'host': 'localhost', 'port': 8500, 'threshold': 0.8}
+    default_config = {'host': 'localhost', 'port': 8500, 'threshold': 0.5}
     default_version = 0.2
 
     def __init__(self, **kwargs):
