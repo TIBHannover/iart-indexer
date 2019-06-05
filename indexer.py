@@ -119,13 +119,19 @@ def indexing(paths, output):
             resolution = image_resolution(x['path'])
             if resolution is None:
                 continue
+<<<<<<< HEAD
             print(x['meta'])
+=======
+>>>>>>> Add a script to add autocompletion index.
             database.insert_entry(
                 x['id'], {
                     'id': x['id'],
                     'path': x['path'],
                     'filename': x['filename'],
+<<<<<<< HEAD
                     'meta': x['meta'],
+=======
+>>>>>>> Add a script to add autocompletion index.
                     'image': {
                         'height': resolution[0],
                         'width': resolution[1]
