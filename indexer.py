@@ -21,6 +21,8 @@ def parse_args():
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
     # parser.add_argument('-l', '--list', help='list all plugins')
     parser.add_argument('-p', '--path', required=True, help='path to image or folder to indexing')
+
+    parser.add_argument('-b', '--batch', default=512, type=int, help='split images in batch')
     parser.add_argument('-o', '--output', help='copy image to new folder with hash id')
     parser.add_argument('-a', '--append', action='store_true', help='add all found documents to the index')
     parser.add_argument('-j', '--jsonl', help='add all found documents to the index')
@@ -113,25 +115,18 @@ def indexing(paths, output):
         entries = copy_images(entries, output)
 
     # TODO scroll
-    existing_hash = [x['id'] for x in list(database.search(None))]
+    existing_hash = [x['id'] for x in list(database.all())]
     for x in entries:
         if x['id'] not in existing_hash:
             resolution = image_resolution(x['path'])
             if resolution is None:
                 continue
-<<<<<<< HEAD
-            print(x['meta'])
-=======
->>>>>>> Add a script to add autocompletion index.
             database.insert_entry(
                 x['id'], {
                     'id': x['id'],
                     'path': x['path'],
                     'filename': x['filename'],
-<<<<<<< HEAD
                     'meta': x['meta'],
-=======
->>>>>>> Add a script to add autocompletion index.
                     'image': {
                         'height': resolution[0],
                         'width': resolution[1]
