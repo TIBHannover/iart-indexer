@@ -24,3 +24,7 @@ class TestFeaturePlugin(FeaturePlugin):
         print('TestPlugin')
         return np.array([1,2,3], dtype=np.float32)
 ```
+
+```bash
+sudo docker run -t --rm -p 8500:8500 -v "/home/springsteinm/tmp/kaggle_iart_densenet_201_export/:/models/kaggle_iart_densenet_201_export" -e MODEL_NAME=kaggle_iart_densenet_201_export tensorflow/serving
+```

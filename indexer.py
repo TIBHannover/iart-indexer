@@ -137,12 +137,12 @@ def indexing(paths, output):
 
     for plugin_name, plugin_class in feature_plugins().items():
         plugin = plugin_class()
-        features = plugin(entries)
+        entries_processed = plugin(entries)
+        update_database(database, entries_processed)
 
     for plugin_name, plugin_class in classifier_plugins().items():
         plugin = plugin_class()
         entries_processed = plugin(entries)
-        print(entries_processed)
         update_database(database, entries_processed)
 
 
