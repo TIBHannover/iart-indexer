@@ -1,9 +1,9 @@
 from indexer.plugins import FeaturePlugin
-from indexer.plugins import export_feature_plugin
+from indexer.plugins import FeaturePluginManager
 from indexer.plugins import PluginResult
 
 
-@export_feature_plugin('TestFeature')
+@FeaturePluginManager.export('TestFeature')
 class TestFeaturePlugin(FeaturePlugin):
 
     def __init__(self, **kwargs):

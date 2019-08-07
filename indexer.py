@@ -95,12 +95,17 @@ def copy_images(entries, output, resolutions=[500, 200, -1]):
     return entires_result
 
 
-def indexing(paths, output):
+def split_batch(entries, batch_size=512):
+    if batch_size < 1:
+        return [entries]
+
+    return [entries[x * batch_size:(x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
+
+
+def indexing(paths, output, batch_size=512):
 
     # TODO replace with abstract class
     database = ElasticSearchDatabase(config=None)
-
-    find_plugins()
 
     # handel images or jsonl
     if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == '.jsonl':
@@ -135,12 +140,19 @@ def indexing(paths, output):
 
     logging.info(f'Indexing {len(entries)} documents')
 
-    for plugin_name, plugin_class in feature_plugins().items():
-        plugin = plugin_class()
-        entries_processed = plugin(entries)
-        update_database(database, entries_processed)
+    entries_list = split_batch(entries, batch_size)
 
-    for plugin_name, plugin_class in classifier_plugins().items():
+    feature_manager = FeaturePluginManager()
+    feature_manager.find()
+    for plugin_name, plugin_class in feature_manager.plugins().items():
+        plugin = plugin_class()
+        for entries_subset in entries_list:
+            entries_processed = plugin(entries_subset)
+            update_database(database, entries_processed)
+
+    classifier_manager = ClassifierPluginManager()
+    classifier_manager.find()
+    for plugin_name, plugin_class in classifier_manager.plugins().items():
         plugin = plugin_class()
         entries_processed = plugin(entries)
         update_database(database, entries_processed)
@@ -153,7 +165,7 @@ def main():
         level = logging.INFO
 
     logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', datefmt='%d-%m-%Y %H:%M:%S', level=level)
-    indexing(args.path, args.output)
+    indexing(args.path, args.output, args.batch)
     return 0
 
 

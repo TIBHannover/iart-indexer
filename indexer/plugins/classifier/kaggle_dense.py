@@ -1,5 +1,5 @@
 from indexer.plugins import ClassifierPlugin
-from indexer.plugins import export_classifier_plugin
+from indexer.plugins import ClassifierPluginManager
 from indexer.plugins import PluginResult
 
 import os
@@ -18,7 +18,7 @@ from tensorflow_serving.apis import prediction_service_pb2_grpc
 import logging
 
 
-@export_classifier_plugin('KaggleDenseClassifierPlugin')
+@ClassifierPluginManager.export('KaggleDenseClassifierPlugin')
 class KaggleDenseClassifierPlugin(ClassifierPlugin):
     default_config = {'host': 'localhost', 'port': 8500, 'threshold': 0.5}
     default_version = 0.2
