@@ -22,6 +22,7 @@ def build_autocompletion():
     suggester = ElasticSearchSuggester()
 
     for x in database.all():
+        print(x)
         meta_values = []
         if 'meta' in x:
             for key, value in x['meta'].items():
