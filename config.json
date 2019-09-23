@@ -1,0 +1,22 @@
+{
+  "db":{
+    "index": "test_99"
+  },
+  "features": [{
+    "type": "ImageNetInceptionFeature",
+    "output": "image_net_inception",
+    "params": {
+      "model_path": "static/imagenet_inception_graphDef.pb",
+      "pca_path": "static/imagenet_inception_pca.pkl"
+    }
+  }],
+
+  "classifier": [{
+    "type": "KaggleDenseClassifierPlugin",
+    "output": "image_net_inception",
+    "params": {
+
+    }
+  }]
+
+}
