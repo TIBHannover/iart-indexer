@@ -102,10 +102,11 @@ def split_batch(entries, batch_size=512):
     return [entries[x * batch_size:(x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
 
 
-def indexing(paths, output, batch_size=512):
+def indexing(paths, output, batch_size: int = 512, config: dict = {}):
 
     # TODO replace with abstract class
-    database = ElasticSearchDatabase(config=None)
+    if 'db' in config:
+        database = ElasticSearchDatabase(config=config['db'])
 
     # handel images or jsonl
     if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == '.jsonl':
@@ -165,7 +166,12 @@ def main():
         level = logging.INFO
 
     logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', datefmt='%d-%m-%Y %H:%M:%S', level=level)
-    indexing(args.path, args.output, args.batch)
+
+    config = {}
+    if args.config:
+        with open(args.config, 'r') as f:
+            config = json.load(f)
+    indexing(args.path, args.output, args.batch, config)
     return 0
 
 
