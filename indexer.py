@@ -7,6 +7,8 @@ import logging
 import uuid
 import imageio
 
+import tensorflow as tf
+
 from indexer.plugins import *
 from indexer.config import IndexerConfig
 
@@ -19,12 +21,13 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Indexing a set of images')
 
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose output')
-    # parser.add_argument('-l', '--list', help='list all plugins')
-    parser.add_argument('-p', '--path', required=True, help='path to image or folder to indexing')
+    parser.add_argument('-l', '--list', action='store_true', help='list all plugins')
+    parser.add_argument('--plugins', nargs='+', default=[], help='list all plugins')
+    parser.add_argument('-p', '--path', help='path to image or folder to indexing')
 
     parser.add_argument('-b', '--batch', default=512, type=int, help='split images in batch')
     parser.add_argument('-o', '--output', help='copy image to new folder with hash id')
-    parser.add_argument('-a', '--append', action='store_true', help='add all found documents to the index')
+    # parser.add_argument('-u', '--update', action='store_true', help='only reindexing existing documents')
     parser.add_argument('-j', '--jsonl', help='add all found documents to the index')
     # parser.add_argument('-d', '--database', help='database type for index')
     parser.add_argument('-c', '--config', help='config path')
@@ -45,7 +48,7 @@ def update_database(database, plugin_results):
                                annotations=annotations)
 
 
-def list_images(paths):
+def list_images(paths, name_as_hash=False):
     if not isinstance(paths, (list, set)):
 
         if os.path.isdir(paths):
@@ -61,7 +64,7 @@ def list_images(paths):
             paths = [os.path.abspath(paths)]
 
     entries = [{
-        'id': uuid.uuid4().hex,
+        'id': os.path.splitext(os.path.basename(path))[0] if name_as_hash else uuid.uuid4().hex,
         'filename': os.path.basename(path),
         'path': os.path.abspath(path),
         'meta': []
@@ -102,23 +105,24 @@ def split_batch(entries, batch_size=512):
     return [entries[x * batch_size:(x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
 
 
-def indexing(paths, output, batch_size: int = 512, config: dict = {}):
+def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: dict = {}):
 
     # TODO replace with abstract class
     if 'db' in config:
         database = ElasticSearchDatabase(config=config['db'])
 
     # handel images or jsonl
-    if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == '.jsonl':
-        entries = list_jsonl(paths)
-        print('test')
-    else:
-        entries = list_images(paths)
-        print('test2')
-    print(entries[:3])
+    if paths is not None:
+        if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == '.jsonl':
+            entries = list_jsonl(paths)
+        else:
+            entries = list_images(paths)
 
-    if output:
-        entries = copy_images(entries, output)
+        if output:
+            entries = copy_images(entries, output)
+
+    else:
+        entries = list(database.all())
 
     # TODO scroll
     existing_hash = [x['id'] for x in list(database.all())]
@@ -146,7 +150,15 @@ def indexing(paths, output, batch_size: int = 512, config: dict = {}):
     feature_manager = FeaturePluginManager()
     feature_manager.find()
     for plugin_name, plugin_class in feature_manager.plugins().items():
-        plugin = plugin_class()
+        if plugin_name not in plugins:
+            continue
+
+        plugin_config = {'params': {}}
+        for x in config['features']:
+            print(x)
+            if x['type'].lower() == plugin_name.lower():
+                plugin_config.update(x)
+        plugin = plugin_class(config=plugin_config['params'])
         for entries_subset in entries_list:
             entries_processed = plugin(entries_subset)
             update_database(database, entries_processed)
@@ -154,9 +166,34 @@ def indexing(paths, output, batch_size: int = 512, config: dict = {}):
     classifier_manager = ClassifierPluginManager()
     classifier_manager.find()
     for plugin_name, plugin_class in classifier_manager.plugins().items():
-        plugin = plugin_class()
-        entries_processed = plugin(entries)
-        update_database(database, entries_processed)
+        if plugin_name not in plugins:
+            continue
+
+        plugin_config = {'params': {}}
+        for x in config['classifiers']:
+            print(x)
+            if x['type'].lower() == plugin_name.lower():
+                plugin_config.update(x)
+        plugin = plugin_class(config=plugin_config['params'])
+
+        for entries_subset in entries_list:
+            entries_processed = plugin(entries_subset)
+            update_database(database, entries_processed)
+
+
+def listing():
+    results = []
+    feature_manager = FeaturePluginManager()
+    feature_manager.find()
+    for plugin_name, plugin_class in feature_manager.plugins().items():
+        results.append(plugin_name)
+
+    classifier_manager = ClassifierPluginManager()
+    classifier_manager.find()
+    for plugin_name, plugin_class in classifier_manager.plugins().items():
+        results.append(plugin_name)
+
+    return results
 
 
 def main():
@@ -167,11 +204,30 @@ def main():
 
     logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', datefmt='%d-%m-%Y %H:%M:%S', level=level)
 
+    plugins = listing()
+
+    if args.list:
+        for x in plugins:
+            print(x)
+        return
+
     config = {}
     if args.config:
         with open(args.config, 'r') as f:
             config = json.load(f)
-    indexing(args.path, args.output, args.batch, config)
+
+    if args.plugins is not None and len(args.plugins) > 1:
+        filtered_plugins = []
+        for white_plugin in args.plugins:
+
+            print(white_plugin.lower())
+            for plugin in plugins:
+                if plugin.lower() == white_plugin.lower():
+                    filtered_plugins.append(plugin)
+        plugins = filtered_plugins
+
+    print(plugins)
+    indexing(args.path, args.output, args.batch, plugins, config)
     return 0
 
 

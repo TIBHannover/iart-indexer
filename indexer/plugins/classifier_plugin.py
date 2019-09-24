@@ -28,7 +28,7 @@ class ClassifierPluginManager():
             match = re.match(file_re, pl)
             if match:
                 a = importlib.import_module('indexer.plugins.classifier.{}'.format(match.group(1)))
-                print(a)
+                # print(a)
                 function_dir = dir(a)
                 if "register" in function_dir:
                     a.register(self)

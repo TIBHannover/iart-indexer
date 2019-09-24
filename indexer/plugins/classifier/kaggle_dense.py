@@ -18,13 +18,13 @@ from tensorflow_serving.apis import prediction_service_pb2_grpc
 import logging
 
 
-@ClassifierPluginManager.export('KaggleDenseClassifierPlugin')
-class KaggleDenseClassifierPlugin(ClassifierPlugin):
+@ClassifierPluginManager.export('KaggleDenseClassifier')
+class KaggleDenseClassifier(ClassifierPlugin):
     default_config = {'host': 'localhost', 'port': 8500, 'threshold': 0.5}
     default_version = 0.2
 
     def __init__(self, **kwargs):
-        super(KaggleDenseClassifierPlugin, self).__init__(**kwargs)
+        super(KaggleDenseClassifier, self).__init__(**kwargs)
         self._channel = grpc.insecure_channel(f'{self.config["host"]}:{self.config["port"]}')
         self._stub = prediction_service_pb2_grpc.PredictionServiceStub(self._channel)
         request = predict_pb2.PredictRequest()

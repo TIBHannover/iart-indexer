@@ -1,6 +1,6 @@
 {
   "db":{
-    "index": "test_99"
+    "index": "iart_prod"
   },
   "features": [{
     "type": "ImageNetInceptionFeature",
@@ -11,8 +11,8 @@
     }
   }],
 
-  "classifier": [{
-    "type": "KaggleDenseClassifierPlugin",
+  "classifiers": [{
+    "type": "KaggleDenseClassifier",
     "output": "image_net_inception",
     "params": {
 
