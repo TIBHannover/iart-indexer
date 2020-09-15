@@ -14,14 +14,20 @@ import pickle
 
 
 def image_from_proto(image_proto):
-    print(image_proto)
-    print(image_proto.path)
     if image_proto.path is not None:
         image = imageio.imread(image_proto.path)
     if image_proto.data is not None:
         pass
 
     return image
+
+
+def prediction_to_proto(prediction):
+    result = indexer_pb2.PluginResult()
+
+
+def prediction_from_proto(proto):
+    pass
 
 
 def convert_name(name):

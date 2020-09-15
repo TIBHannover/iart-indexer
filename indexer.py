@@ -24,6 +24,8 @@ import indexer_pb2
 import indexer_pb2_grpc
 import grpc
 
+from indexer.plugins import FeaturePlugin, ClassifierPlugin
+
 from indexer.utils import image_from_proto
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
@@ -48,6 +50,7 @@ def parse_args():
 
 
 def compute_plugins(args):
+    logging.info("Start computing job")
     plugin_classes = args["plugin_classes"]
     images = args["images"]
     database = args["database"]
@@ -68,15 +71,35 @@ def compute_plugins(args):
                         "image": {"height": resolution[0], "width": resolution[1]},
                     },
                 )
-    plugin_result_list = [{}] * len(images)
-    for i, plugin_class in enumerate(plugin_classes):
+    plugin_result_list = {}
+    for plugin_class in plugin_classes:
         plugin = plugin_class()
-        entries_processed = plugin(images)
-        plugin_result_list[i]
+        plugin_results = plugin(images)
+        # # TODO entries_processed also contains the entries zip will be
+
+        # for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
+        #     if entry["id"] not in plugin_result_list:
+        #         plugin_result_list[entry["id"]] = {}
+        #     if isinstance(plugin, ClassifierPlugin):
+        #         if "classifier" not in plugin_result_list[i]:
+
+        #             plugin_result_list[i]["classifier"] = []
+
+        #         plugin_result_list[i]["classifier"].append(prediction)
+        #     if isinstance(plugin, FeaturePlugin):
+        #         if "feature" not in plugin_result_list[i]:
+
+        #             plugin_result_list[i]["feature"] = []
+        #         plugin_result_list[i]["feature"].append(prediction)
+        # print(plugin_class)
+        # print(plugin_results)
 
         if database is not None:
-            update_database(database, entries_processed)
+            update_database(database, plugin_results)
 
+        print(plugin_results)
+
+    logging.info(plugin_result_list)
     return plugin_result_list
 
 
@@ -120,7 +143,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             if plugin_name.lower() not in plugin_name_list:
                 continue
             plugin_list.append(plugin_class)
-
         database = None
         if request.update_database:
             database = ElasticSearchDatabase(config=None)
@@ -212,13 +234,15 @@ def list_images(paths, name_as_hash=False):
         else:
             paths = [os.path.abspath(paths)]
 
-    entries = [{
-        'id': os.path.splitext(os.path.basename(path))[0] if name_as_hash else uuid.uuid4().hex,
-        'filename': os.path.basename(path),
-        'path': os.path.abspath(path),
-        'meta': []
-    } for path in paths]
-
+    entries = [
+        {
+            "id": os.path.splitext(os.path.basename(path))[0] if name_as_hash else uuid.uuid4().hex,
+            "filename": os.path.basename(path),
+            "path": os.path.abspath(path),
+            "meta": [],
+        }
+        for path in paths
+    ]
 
     return entries
 
@@ -268,12 +292,12 @@ class Indexer:
 def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: dict = {}):
 
     # TODO replace with abstract class
-    if 'db' in config:
-        database = ElasticSearchDatabase(config=config['db'])
+    if "db" in config:
+        database = ElasticSearchDatabase(config=config["db"])
 
     # handel images or jsonl
     if paths is not None:
-        if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == '.jsonl':
+        if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
             entries = list_jsonl(paths)
         else:
             entries = list_images(paths)
@@ -312,12 +336,12 @@ def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: d
         if plugin_name not in plugins:
             continue
 
-        plugin_config = {'params': {}}
-        for x in config['features']:
+        plugin_config = {"params": {}}
+        for x in config["features"]:
             print(x)
-            if x['type'].lower() == plugin_name.lower():
+            if x["type"].lower() == plugin_name.lower():
                 plugin_config.update(x)
-        plugin = plugin_class(config=plugin_config['params'])
+        plugin = plugin_class(config=plugin_config["params"])
         for entries_subset in entries_list:
             entries_processed = plugin(entries_subset)
             update_database(database, entries_processed)
@@ -328,12 +352,12 @@ def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: d
         if plugin_name not in plugins:
             continue
 
-        plugin_config = {'params': {}}
-        for x in config['classifiers']:
+        plugin_config = {"params": {}}
+        for x in config["classifiers"]:
             print(x)
-            if x['type'].lower() == plugin_name.lower():
+            if x["type"].lower() == plugin_name.lower():
                 plugin_config.update(x)
-        plugin = plugin_class(config=plugin_config['params'])
+        plugin = plugin_class(config=plugin_config["params"])
 
         for entries_subset in entries_list:
             entries_processed = plugin(entries_subset)
@@ -399,7 +423,7 @@ def main():
 
     if args.mode == "local":
         plugins = listing()
-        
+
         if args.plugins is not None and len(args.plugins) > 1:
             filtered_plugins = []
             for white_plugin in args.plugins:

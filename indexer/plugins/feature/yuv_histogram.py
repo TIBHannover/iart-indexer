@@ -11,6 +11,10 @@ from indexer.utils import image_from_proto
 
 @FeaturePluginManager.export("YUVHistogramFeature")
 class YUVHistogramFeature(FeaturePlugin):
+    default_config = {"host": "localhost", "port": 8500, "threshold": 0.5}
+
+    default_version = 0.2
+
     def __init__(self, **kwargs):
         super(YUVHistogramFeature, self).__init__(**kwargs)
         self.host = "localhost"
