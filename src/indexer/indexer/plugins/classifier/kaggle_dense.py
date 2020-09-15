@@ -1,6 +1,6 @@
-from indexer.plugins import ClassifierPlugin
-from indexer.plugins import ClassifierPluginManager
-from indexer.plugins import PluginResult
+from indexer.indexer.plugins import ClassifierPlugin
+from indexer.indexer.plugins import ClassifierPluginManager
+from indexer.indexer.plugins import PluginResult
 
 import os
 import sys
@@ -18,9 +18,9 @@ import numpy as np
 import logging
 
 
-@ClassifierPluginManager.export('KaggleDenseClassifier')
+@ClassifierPluginManager.export("KaggleDenseClassifier")
 class KaggleDenseClassifier(ClassifierPlugin):
-    default_config = {'host': 'localhost', 'port': 8500, 'threshold': 0.5}
+    default_config = {"host": "localhost", "port": 8500, "threshold": 0.5}
 
     default_version = 0.2
 

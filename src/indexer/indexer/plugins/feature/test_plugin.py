@@ -1,11 +1,10 @@
-from indexer.plugins import FeaturePlugin
-from indexer.plugins import FeaturePluginManager
-from indexer.plugins import PluginResult
+from indexer.indexer.plugins import FeaturePlugin
+from indexer.indexer.plugins import FeaturePluginManager
+from indexer.indexer.plugins import PluginResult
 
 
-@FeaturePluginManager.export('TestFeature')
+@FeaturePluginManager.export("TestFeature")
 class TestFeaturePlugin(FeaturePlugin):
-
     def __init__(self, **kwargs):
         super(TestFeaturePlugin, self).__init__(**kwargs)
 

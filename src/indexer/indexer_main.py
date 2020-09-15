@@ -9,24 +9,24 @@ import imageio
 
 import tensorflow as tf
 
-from indexer.plugins import *
-from indexer.config import IndexerConfig
+from indexer.indexer.plugins import *
+from indexer.indexer.config import IndexerConfig
 
-from database.elasticsearch_database import ElasticSearchDatabase
+from indexer.database.elasticsearch_database import ElasticSearchDatabase
 
-from indexer.utils import copy_image_hash, filename_without_ext, image_resolution
+from indexer.indexer.utils import copy_image_hash, filename_without_ext, image_resolution
 
 import time
 from concurrent import futures
 import threading
 
-import indexer_pb2
-import indexer_pb2_grpc
+from . import indexer_pb2
+from . import indexer_pb2_grpc
 import grpc
 
-from indexer.plugins import FeaturePlugin, ClassifierPlugin
+from indexer.indexer.plugins import FeaturePlugin, ClassifierPlugin
 
-from indexer.utils import image_from_proto
+from indexer.indexer.utils import image_from_proto
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -287,7 +287,9 @@ class Indexer:
         pass
 
     def indexing_files(
-        self, paths=None, images=None,
+        self,
+        paths=None,
+        images=None,
     ):
         pass
 

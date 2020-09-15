@@ -1,28 +1,28 @@
-from indexer.plugins import FeaturePlugin
-from indexer.plugins import FeaturePluginManager
-from indexer.plugins import PluginResult
+from indexer.indexer.plugins import FeaturePlugin
+from indexer.indexer.plugins import FeaturePluginManager
+from indexer.indexer.plugins import PluginResult
 import numpy as np
 import math
 import redisai as rai
 import ml2rt
 
-from indexer.utils import image_from_proto
-import indexer_pb2
+from indexer.indexer.utils import image_from_proto
+from indexer import indexer_pb2
 
 
-@FeaturePluginManager.export("ByolEmbeddingFeature")
-class ByolEmbeddingFeature(FeaturePlugin):
+@FeaturePluginManager.export("YUVHistogramFeature")
+class YUVHistogramFeature(FeaturePlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
-        "model_name": "byol_wikipedia",
-        "model_file": "/home/matthias/byol_wikipedia.pt",
+        "model_name": "yuv_histogram",
+        "model_file": "/home/matthias/yuv_histogram.pt",
     }
 
     default_version = 0.1
 
     def __init__(self, **kwargs):
-        super(ByolEmbeddingFeature, self).__init__(**kwargs)
+        super(YUVHistogramFeature, self).__init__(**kwargs)
         self.host = self.config["host"]
         self.port = self.config["port"]
         self.model_name = self.config["model_name"]
@@ -33,7 +33,10 @@ class ByolEmbeddingFeature(FeaturePlugin):
         model = ml2rt.load_model(self.model_file)
 
         con.modelset(
-            self.model_name, backend="torch", device="cpu", data=model,
+            self.model_name,
+            backend="torch",
+            device="cpu",
+            data=model,
         )
 
     def check_rai(self):
@@ -44,7 +47,6 @@ class ByolEmbeddingFeature(FeaturePlugin):
         return False
 
     def call(self, entries):
-
         if not self.check_rai():
             self.register_rai()
 
@@ -54,20 +56,18 @@ class ByolEmbeddingFeature(FeaturePlugin):
         for entry in entries:
             entry_annotation = []
             image = image_from_proto(entry)
-            print(image.shape)
 
             con.tensorset("image", image)
-            print(self.model_name)
             result = con.modelrun(self.model_name, "image", "output")
-            output = con.tensorget("output")[0, ...]
-            output_bin = (output > 0).astype(np.int32).tolist()
-            output_bin_str = "".join([str(x) for x in output_bin])
+            output = con.tensorget("output")
+            uv_histogram_norm_bin = "".join([str(int(x > 0)) for x in (output / np.mean(output)).tolist()])
 
             hash_splits_list = []
-            for x in range(math.ceil(len(output_bin_str) / 16)):
+            for x in range(math.ceil(len(uv_histogram_norm_bin) / 16)):
                 # print(uv_histogram_norm_bin[x * 16:(x + 1) * 16])
-                hash_splits_list.append(output_bin_str[x * 16 : (x + 1) * 16])
-            print(output.shape)
+                hash_splits_list.append(uv_histogram_norm_bin[x * 16 : (x + 1) * 16])
+
+            # TODO split yuv and lab color.rgb2lab
             entry_annotation.append(
                 indexer_pb2.PluginResult(
                     plugin=self.name,

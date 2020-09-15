@@ -9,7 +9,7 @@ import PIL
 
 
 import numpy as np
-import indexer_pb2
+from indexer import indexer_pb2
 import pickle
 
 
@@ -132,4 +132,3 @@ def numpy_from_proto(proto):
     # content = np.frombuffer(proto.proto_content, dtype=DECODE_DTYPE_LUP[proto.dtype])
     content.reshape(proto.shape)
     return proto.name, content, proto.frame_number, proto.timestamp
-
