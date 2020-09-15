@@ -6,7 +6,7 @@ import math
 import redisai as rai
 import ml2rt
 
-from indexer.indexer.utils import image_from_proto
+from indexer.indexer.utils import image_from_proto, image_resize
 from indexer import indexer_pb2
 
 
@@ -38,10 +38,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
         model = ml2rt.load_model(self.model_file)
 
         con.modelset(
-            self.model_name,
-            backend="torch",
-            device="cpu",
-            data=model,
+            self.model_name, backend="torch", device="cpu", data=model,
         )
 
     def check_rai(self):
