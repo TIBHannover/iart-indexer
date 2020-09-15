@@ -39,6 +39,9 @@ def run_plugin(plugin, image):
     request_plugin.name = "ByolEmbeddingFeature"
     request_image = request.images.add()
     request_image.id = uuid.uuid4().hex
+
+    year_field = request_image.meta.add()
+
     request_image.path = image.encode()
     response = stub.indexing(request)
 
@@ -57,7 +60,6 @@ def status(job_id):
 
 
 job_id = run_plugin("yuv_histogram", image="/home/matthias/images/test_2.jpg")
-print(job_id)
 
 while True:
     s = status(job_id)

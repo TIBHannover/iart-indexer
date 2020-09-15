@@ -17,6 +17,9 @@ class ByolEmbeddingFeature(FeaturePlugin):
         "port": 6379,
         "model_name": "byol_wikipedia",
         "model_file": "/home/matthias/byol_wikipedia.pt",
+        "multicrop": True,
+        "min_dim": 244,
+        "max_dim": None,
     }
 
     default_version = 0.1
@@ -27,6 +30,8 @@ class ByolEmbeddingFeature(FeaturePlugin):
         self.port = self.config["port"]
         self.model_name = self.config["model_name"]
         self.model_file = self.config["model_file"]
+        self.max_dim = self.config["max_dim"]
+        self.min_dim = self.config["min_dim"]
 
     def register_rai(self):
         con = rai.Client(host=self.host, port=self.port)
@@ -57,10 +62,9 @@ class ByolEmbeddingFeature(FeaturePlugin):
         for entry in entries:
             entry_annotation = []
             image = image_from_proto(entry)
-            print(image.shape)
+            image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
 
             con.tensorset("image", image)
-            print(self.model_name)
             result = con.modelrun(self.model_name, "image", "output")
             output = con.tensorget("output")[0, ...]
             output_bin = (output > 0).astype(np.int32).tolist()
@@ -70,7 +74,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
             for x in range(math.ceil(len(output_bin_str) / 16)):
                 # print(uv_histogram_norm_bin[x * 16:(x + 1) * 16])
                 hash_splits_list.append(output_bin_str[x * 16 : (x + 1) * 16])
-            print(output.shape)
+
             entry_annotation.append(
                 indexer_pb2.PluginResult(
                     plugin=self.name,

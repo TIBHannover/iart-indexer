@@ -22,6 +22,31 @@ def image_from_proto(image_proto):
     return image
 
 
+def image_resize(image, max_dim=None, min_dim=None, size=None):
+    if max_dim is not None:
+        shape = np.asarray(image.shape[:-1], dtype=np.float32)
+
+        long_dim = max(shape)
+        scale = min(1, max_dim / long_dim)
+        new_shape = np.asarray(shape * scale, dtype=np.int32)
+
+    elif min_dim is not None:
+        shape = np.asarray(image.shape[:-1], dtype=np.float32)
+
+        short_dim = min(shape)
+        scale = min(1, min_dim / short_dim)
+        new_shape = np.asarray(shape * scale, dtype=np.int32)
+    elif size is not None:
+        new_shape = size
+    else:
+        return image
+    print(f"Resize image: {image.shape} {new_shape}")
+
+    img = PIL.Image.fromarray(image)
+    img = img.resize(size=new_shape)
+    return np.array(img)
+
+
 def prediction_to_proto(prediction):
     result = indexer_pb2.PluginResult()
 

@@ -73,21 +73,17 @@ def compute_plugins(args):
                 )
     plugin_result_list = {}
     for plugin_class in plugin_classes:
-        print(plugin_class["plugin"])
-        print(plugin_class["config"]["params"])
         plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
         plugin_results = plugin(images)
         # # TODO entries_processed also contains the entries zip will be
 
         for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-            print(entry.id)
             if entry.id not in plugin_result_list:
                 plugin_result_list[entry.id] = {"image": entry, "results": []}
             plugin_result_list[entry.id]["results"].extend(annotations)
         if database is not None:
             update_database(database, plugin_results)
 
-    logging.info(plugin_result_list)
     return indexer_pb2.IndexingResult(
         results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
     )
@@ -96,7 +92,6 @@ def compute_plugins(args):
 class Commune(indexer_pb2_grpc.IndexerServicer):
     def __init__(self, config, feature_manager, classifier_manager):
         self.config = config
-        print(self.config)
         self.feature_manager = feature_manager
         self.classifier_manager = classifier_manager
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=1)
@@ -132,8 +127,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
             plugin_config = {"params": {}}
             for x in self.config["features"]:
-                print(f'{x["type"].lower()} == {plugin_name.lower()}')
-
                 if x["type"].lower() == plugin_name.lower():
                     plugin_config.update(x)
             plugin_list.append({"plugin": plugin_class, "config": plugin_config})
@@ -143,7 +136,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 continue
             plugin_config = {"params": {}}
             for x in self.config["classifier"]:
-                print(x)
                 if x["type"].lower() == plugin_name.lower():
                     plugin_config.update(x)
             plugin_list.append({"plugin": plugin_class, "config": plugin_config})
@@ -265,7 +257,6 @@ def copy_images(entries, output, resolutions=[500, 200, -1]):
     for i in range(len(entries)):
 
         entry = entries[i]
-        print(entry["path"])
         copy_result = copy_image_hash(entry["path"], output, entry["id"], resolutions)
         if copy_result is not None:
             hash_value, path = copy_result
@@ -343,7 +334,6 @@ def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: d
 
         plugin_config = {"params": {}}
         for x in config["features"]:
-            print(x)
             if x["type"].lower() == plugin_name.lower():
                 plugin_config.update(x)
         plugin = plugin_class(config=plugin_config["params"])
@@ -359,7 +349,6 @@ def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: d
 
         plugin_config = {"params": {}}
         for x in config["classifiers"]:
-            print(x)
             if x["type"].lower() == plugin_name.lower():
                 plugin_config.update(x)
         plugin = plugin_class(config=plugin_config["params"])
@@ -434,7 +423,6 @@ def main():
             filtered_plugins = []
             for white_plugin in args.plugins:
 
-                print(white_plugin.lower())
                 for plugin in plugins:
                     if plugin.lower() == white_plugin.lower():
                         filtered_plugins.append(plugin)
