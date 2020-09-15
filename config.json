@@ -1,22 +1,47 @@
 {
-  "db":{
-    "index": "iart_prod"
+  "grpc": {
+    "port": 50051
   },
-  "features": [{
-    "type": "ImageNetInceptionFeature",
-    "output": "image_net_inception",
-    "params": {
-      "model_path": "static/imagenet_inception_graphDef.pb",
-      "pca_path": "static/imagenet_inception_pca.pkl"
+  "db": {
+    "host": "localhost",
+    "port": 9200,
+    "index": "iart"
+  },
+  "features": [
+    {
+      "type": "ImageNetInceptionFeature",
+      "output": "image_net_inception",
+      "params": {
+        "model_path": "static/imagenet_inception_graphDef.pb",
+        "pca_path": "static/imagenet_inception_pca.pkl"
+      }
+    },
+    {
+      "type": "YUVHistogramFeature",
+      "output": "yuv_histogram",
+      "params": {
+        "host": "localhost",
+        "port": 6379,
+        "model_name": "yuv_histogram",
+        "model_file": "/home/matthias/yuv_histogram.pt"
+      }
+    },
+    {
+      "type": "ByolEmbeddingFeature",
+      "output": "byol_wikipedia",
+      "params": {
+        "host": "localhost",
+        "port": 6379,
+        "model_name": "byol_wikipedia",
+        "model_file": "/home/matthias/byol_wikipedia.pt"
+      }
     }
-  }],
-
-  "classifiers": [{
-    "type": "KaggleDenseClassifier",
-    "output": "image_net_inception",
-    "params": {
-
+  ],
+  "classifiers": [
+    {
+      "type": "KaggleDenseClassifier",
+      "output": "image_net_inception",
+      "params": {}
     }
-  }]
-
+  ]
 }

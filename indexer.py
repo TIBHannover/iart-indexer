@@ -73,38 +73,30 @@ def compute_plugins(args):
                 )
     plugin_result_list = {}
     for plugin_class in plugin_classes:
-        plugin = plugin_class()
+        print(plugin_class["plugin"])
+        print(plugin_class["config"]["params"])
+        plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
         plugin_results = plugin(images)
         # # TODO entries_processed also contains the entries zip will be
 
-        # for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-        #     if entry["id"] not in plugin_result_list:
-        #         plugin_result_list[entry["id"]] = {}
-        #     if isinstance(plugin, ClassifierPlugin):
-        #         if "classifier" not in plugin_result_list[i]:
-
-        #             plugin_result_list[i]["classifier"] = []
-
-        #         plugin_result_list[i]["classifier"].append(prediction)
-        #     if isinstance(plugin, FeaturePlugin):
-        #         if "feature" not in plugin_result_list[i]:
-
-        #             plugin_result_list[i]["feature"] = []
-        #         plugin_result_list[i]["feature"].append(prediction)
-        # print(plugin_class)
-        # print(plugin_results)
-
+        for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
+            print(entry.id)
+            if entry.id not in plugin_result_list:
+                plugin_result_list[entry.id] = {"image": entry, "results": []}
+            plugin_result_list[entry.id]["results"].extend(annotations)
         if database is not None:
             update_database(database, plugin_results)
 
-        print(plugin_results)
-
     logging.info(plugin_result_list)
-    return plugin_result_list
+    return indexer_pb2.IndexingResult(
+        results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
+    )
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, feature_manager, classifier_manager):
+    def __init__(self, config, feature_manager, classifier_manager):
+        self.config = config
+        print(self.config)
         self.feature_manager = feature_manager
         self.classifier_manager = classifier_manager
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=1)
@@ -137,15 +129,27 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         for plugin_name, plugin_class in self.feature_manager.plugins().items():
             if plugin_name.lower() not in plugin_name_list:
                 continue
-            plugin_list.append(plugin_class)
+
+            plugin_config = {"params": {}}
+            for x in self.config["features"]:
+                print(f'{x["type"].lower()} == {plugin_name.lower()}')
+
+                if x["type"].lower() == plugin_name.lower():
+                    plugin_config.update(x)
+            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
 
         for plugin_name, plugin_class in self.classifier_manager.plugins().items():
             if plugin_name.lower() not in plugin_name_list:
                 continue
-            plugin_list.append(plugin_class)
+            plugin_config = {"params": {}}
+            for x in self.config["classifier"]:
+                print(x)
+                if x["type"].lower() == plugin_name.lower():
+                    plugin_config.update(x)
+            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
         database = None
         if request.update_database:
-            database = ElasticSearchDatabase(config=None)
+            database = ElasticSearchDatabase(config=self.config.get("db", {}))
 
         variable = {
             "plugin_classes": plugin_list,
@@ -190,8 +194,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 return indexer_pb2.StatusReply(status="running")
 
             result = job_data["future"].result()
-            print(result)
-            return indexer_pb2.StatusReply(status="done")
+            return indexer_pb2.StatusReply(status="done", result=result)
 
             # for x in content:
             #     infoReply = GI.info.add()
@@ -383,8 +386,9 @@ def serve(config, feature_manager, classifier_manager):
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    indexer_pb2_grpc.add_IndexerServicer_to_server(Commune(feature_manager, classifier_manager), server)
-    port = config.get("port", 50051)
+    indexer_pb2_grpc.add_IndexerServicer_to_server(Commune(config, feature_manager, classifier_manager), server)
+    grpc_config = config.get("grpc", {})
+    port = grpc_config.get("port", 50051)
 
     server.add_insecure_port(f"[::]:{port}")
     server.start()

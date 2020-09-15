@@ -7,20 +7,26 @@ import redisai as rai
 import ml2rt
 
 from indexer.utils import image_from_proto
+import indexer_pb2
 
 
 @FeaturePluginManager.export("YUVHistogramFeature")
 class YUVHistogramFeature(FeaturePlugin):
-    default_config = {"host": "localhost", "port": 8500, "threshold": 0.5}
+    default_config = {
+        "host": "localhost",
+        "port": 6379,
+        "model_name": "yuv_histogram",
+        "model_file": "/home/matthias/yuv_histogram.pt",
+    }
 
-    default_version = 0.2
+    default_version = 0.1
 
     def __init__(self, **kwargs):
         super(YUVHistogramFeature, self).__init__(**kwargs)
-        self.host = "localhost"
-        self.port = 6379
-        self.model_name = "yuv_histogram"  # "yuv_histogram"
-        self.model_file = "/home/matthias/yuv_histogram.pt"
+        self.host = self.config["host"]
+        self.port = self.config["port"]
+        self.model_name = self.config["model_name"]
+        self.model_file = self.config["model_file"]
 
     def register_rai(self):
         con = rai.Client(host=self.host, port=self.port)
@@ -53,13 +59,22 @@ class YUVHistogramFeature(FeaturePlugin):
             output = con.tensorget("output")
             uv_histogram_norm_bin = "".join([str(int(x > 0)) for x in (output / np.mean(output)).tolist()])
 
-            hash_splits_dict = {}
+            hash_splits_list = []
             for x in range(math.ceil(len(uv_histogram_norm_bin) / 16)):
                 # print(uv_histogram_norm_bin[x * 16:(x + 1) * 16])
-                hash_splits_dict[f"split_{x}"] = uv_histogram_norm_bin[x * 16 : (x + 1) * 16]
+                hash_splits_list.append(uv_histogram_norm_bin[x * 16 : (x + 1) * 16])
 
             # TODO split yuv and lab color.rgb2lab
-            entry_annotation.append({"type": "color", "hash": hash_splits_dict, "value": output.tolist()})
+            entry_annotation.append(
+                indexer_pb2.PluginResult(
+                    plugin=self.name,
+                    type=self._type,
+                    version=str(self._version),
+                    feature=indexer_pb2.FeatureResult(
+                        binary=[x.encode() for x in hash_splits_list], feature=output.tolist()
+                    ),
+                )
+            )
 
             result_annotations.append(entry_annotation)
             result_entries.append(entry)

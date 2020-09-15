@@ -3,6 +3,7 @@ import indexer_pb2_grpc
 
 import grpc
 import time
+import uuid
 
 
 def get_plugin_list():
@@ -34,7 +35,10 @@ def run_plugin(plugin, image):
     request.update_database = False
     request_plugin = request.plugins.add()
     request_plugin.name = "YUVHistogramFeature"
+    request_plugin = request.plugins.add()
+    request_plugin.name = "ByolEmbeddingFeature"
     request_image = request.images.add()
+    request_image.id = uuid.uuid4().hex
     request_image.path = image.encode()
     response = stub.indexing(request)
 
@@ -55,6 +59,10 @@ def status(job_id):
 job_id = run_plugin("yuv_histogram", image="/home/matthias/images/test_2.jpg")
 print(job_id)
 
-print(status(job_id))
-time.sleep(1)
+while True:
+    s = status(job_id)
+    print(status(job_id))
+    if s.status == "ok":
+        break
+    time.sleep(1)
 print(status(job_id))

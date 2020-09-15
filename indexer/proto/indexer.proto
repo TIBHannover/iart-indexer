@@ -127,14 +127,16 @@ message ClassifierResult { repeated Concept concept = 1; }
 
 message FeatureResult {
   repeated string binary = 1;
-  Tensor hash = 2;
+  repeated float feature = 2;
 }
 
 message PluginResult {
   string plugin = 1;
+  string type = 2;
+  string version = 3;
   oneof result {
-    ClassifierResult classifier = 2;
-    FeatureResult feature = 3;
+    ClassifierResult classifier = 4;
+    FeatureResult feature = 5;
   }
 }
 
@@ -164,6 +166,6 @@ message IndexingReply { string id = 1; }
 message StatusRequest { string id = 1; }
 message StatusReply {
   string status = 1;
-  Tensor result = 2;
+  IndexingResult result = 2;
   // Tensor video = 3;
 }

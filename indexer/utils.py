@@ -82,7 +82,7 @@ def filename_without_ext(path):
     return os.path.splitext(base)[0]
 
 
-def encode(proto, name, value, frame_number, timestamp):
+def numpy_to_proto(proto, name, value, frame_number, timestamp):
     ENCODE_DTYPE_LUP = {
         np.dtype("float16"): indexer_pb2.DT_HALF,
         np.dtype("float32"): indexer_pb2.DT_FLOAT,
@@ -111,7 +111,7 @@ def encode(proto, name, value, frame_number, timestamp):
     return proto
 
 
-def decode(proto):
+def numpy_from_proto(proto):
     DECODE_DTYPE_LUP = {
         indexer_pb2.DT_HALF: np.float16,
         indexer_pb2.DT_FLOAT: np.float32,
