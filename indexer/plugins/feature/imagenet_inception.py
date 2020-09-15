@@ -7,7 +7,6 @@ import math
 import pickle
 import logging
 
-tf.enable_eager_execution()
 
 
 @FeaturePluginManager.export('ImageNetInceptionFeature')

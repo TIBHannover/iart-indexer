@@ -1,0 +1,169 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+enum DataType {
+  // Not a legal value for DataType.  Used to indicate a DataType field
+  // has not been set.
+  DT_INVALID = 0;
+
+  // Data types that all computation devices are expected to be
+  // capable to support.
+  DT_FLOAT = 1;
+  DT_DOUBLE = 2;
+  DT_INT32 = 3;
+  DT_UINT8 = 4;
+  DT_INT16 = 5;
+  DT_INT8 = 6;
+  DT_STRING = 7;
+  DT_INT64 = 9;
+  DT_BOOL = 10;
+
+  DT_UINT16 = 17;
+  DT_HALF = 19;
+  DT_UINT32 = 22;
+  DT_UINT64 = 23;
+}
+
+message Tensor {
+  DataType dtype = 1;
+
+  repeated int32 shape = 2;
+
+  enum Inerpretation {
+    DOT = 0;
+    LINE = 1;
+    TRIANGLE = 2;
+    RECTANGLE = 3;
+    PENTAGON = 4;
+    IMAGE = 5;
+  }
+
+  string name = 14;
+
+  bytes proto_content = 4;
+
+  Inerpretation inter = 13;
+
+  // DT_FLOAT.
+  repeated float float_val = 5;
+
+  // DT_DOUBLE.
+  repeated double double_val = 6 [ packed = true ];
+
+  // DT_INT32, DT_INT16, DT_INT8, DT_UINT8.
+  repeated int32 int_val = 7 [ packed = true ];
+
+  // DT_STRING
+  repeated bytes string_val = 8;
+
+  // DT_COMPLEX64. scomplex_val(2*i) and scomplex_val(2*i+1) are real
+  // and imaginary parts of i-th single precision complex.
+  repeated float scomplex_val = 9 [ packed = true ];
+
+  // DT_INT64
+  repeated int64 int64_val = 10 [ packed = true ];
+
+  // DT_BOOL
+  repeated bool bool_val = 11 [ packed = true ];
+
+  repeated int32 half_val = 12 [ packed = true ];
+}
+
+// python -m grpc_tools.protoc -I../web --python_out=. --grpc_python_out=.
+// ../web/tunnel.proto python -m grpc_tools.protoc -I../backend --python_out=.
+// --grpc_python_out=. ../backend/tunnel.proto create json stringds
+
+service Indexer {
+  rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
+  rpc indexing(IndexingRequest) returns (IndexingReply) {}
+  rpc status(StatusRequest) returns (StatusReply) {}
+  // rpc GetInfo(UpdateRequest) returns (Info) {}
+}
+
+message PluginRun { string name = 1; }
+
+message RoI {
+  float x = 1;
+  float y = 2;
+  float width = 3;
+  float height = 4;
+}
+
+message MetaField {
+  string key = 1;
+
+  oneof value {
+    string string_val = 2;
+    int32 int_val = 3;
+    float float_val = 4;
+  }
+}
+
+message Image {
+  string id = 1;
+  oneof image {
+    string path = 2;
+    Tensor data = 3;
+  }
+  RoI roi = 4;
+  repeated MetaField meta = 5;
+}
+
+message PluginConfig {
+  string name = 1;
+  string default = 2;
+  string type = 3;
+  string state = 4;
+  //
+}
+
+message Concept {
+  string concept = 1;
+  string type = 2;
+  float prob = 3;
+}
+
+message ClassifierResult { repeated Concept concept = 1; }
+
+message FeatureResult {
+  repeated string binary = 1;
+  Tensor hash = 2;
+}
+
+message PluginResult {
+  string plugin = 1;
+  oneof result {
+    ClassifierResult classifier = 2;
+    FeatureResult feature = 3;
+  }
+}
+
+message ImageResult {
+  Image image = 1;
+  repeated PluginResult results = 2;
+}
+
+message IndexingResult { repeated ImageResult results = 1; }
+
+message PluginInfo {
+  string name = 1;
+  string type = 2;
+  repeated PluginConfig settings = 3;
+}
+
+message ListPluginsRequest {}
+message ListPluginsReply { repeated PluginInfo plugins = 1; }
+
+message IndexingRequest {
+  repeated PluginRun plugins = 1;
+  repeated Image images = 2;
+  bool update_database = 3;
+}
+message IndexingReply { string id = 1; }
+
+message StatusRequest { string id = 1; }
+message StatusReply {
+  string status = 1;
+  Tensor result = 2;
+  // Tensor video = 3;
+}
