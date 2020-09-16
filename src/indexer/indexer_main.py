@@ -7,25 +7,9 @@ import logging
 import uuid
 import imageio
 
-import tensorflow as tf
 
-from indexer.plugins import *
-from indexer.database.elasticsearch_database import ElasticSearchDatabase
-
-
-import time
-from concurrent import futures
-import threading
-
-from indexer import indexer_pb2
-from indexer import indexer_pb2_grpc
-import grpc
-
-from indexer.plugins import FeaturePlugin, ClassifierPlugin
-
-from indexer.utils import image_from_proto, meta_from_proto
-
-_ONE_DAY_IN_SECONDS = 60 * 60 * 24
+from indexer.client import Client
+from indexer.server import Server
 
 
 def parse_args():
@@ -33,340 +17,24 @@ def parse_args():
 
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
     # parser.add_argument('-l', '--list', help='list all plugins')
-    parser.add_argument("-p", "--path", help="path to image or folder to indexing")
 
-    parser.add_argument("-b", "--batch", default=512, type=int, help="split images in batch")
-    parser.add_argument("-o", "--output", help="copy image to new folder with hash id")
-    parser.add_argument("-a", "--append", action="store_true", help="add all found documents to the index")
-    parser.add_argument("-j", "--jsonl", help="add all found documents to the index")
-    # parser.add_argument('-d', '--database', help='database type for index')
+    parser.add_argument("--host", help="")
+    parser.add_argument("--port", type=int, help="")
+    parser.add_argument("--plugins", nargs="+", help="")
+    parser.add_argument("--image_input", help="")
+    parser.add_argument("--batch", default=512, type=int, help="split images in batch")
+
+    parser.add_argument("--task", choices=["list_plugins", "copy_images", "indexing"], help="verbose output")
+
+    parser.add_argument("--path", help="path to image or folder to indexing")
+
+    parser.add_argument("--output", help="copy image to new folder with hash id")
+    parser.add_argument("--image_output", help="copy image to new folder with hash id")
+
     parser.add_argument("-c", "--config", help="config path")
-    parser.add_argument("-m", "--mode", choices=["local", "server"], default="local", help="verbose output")
+    parser.add_argument("-m", "--mode", choices=["client", "server"], default="local", help="verbose output")
     args = parser.parse_args()
     return args
-
-
-def compute_plugins(args):
-    logging.info("Start computing job")
-    plugin_classes = args["plugin_classes"]
-    images = args["images"]
-    database = args["database"]
-    if database is not None:
-        existing_hash = [x["id"] for x in list(database.all())]
-        for x in images:
-            if x.id not in existing_hash:
-
-                meta = meta_from_proto(x.meta)
-
-                database.insert_entry(
-                    x.id, {"id": x.id, "meta": meta},
-                )
-    plugin_result_list = {}
-    for plugin_class in plugin_classes:
-        plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
-        plugin_results = plugin(images)
-        # # TODO entries_processed also contains the entries zip will be
-
-        for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-            if entry.id not in plugin_result_list:
-                plugin_result_list[entry.id] = {"image": entry, "results": []}
-            plugin_result_list[entry.id]["results"].extend(annotations)
-        if database is not None:
-            update_database(database, plugin_results)
-
-    return indexer_pb2.IndexingResult(
-        results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
-    )
-
-
-class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, config, feature_manager, classifier_manager):
-        self.config = config
-        self.feature_manager = feature_manager
-        self.classifier_manager = classifier_manager
-        self.thread_pool = futures.ThreadPoolExecutor(max_workers=1)
-        self.futures = {}
-
-    def list_plugins(self, request, context):
-        reply = indexer_pb2.ListPluginsReply()
-
-        for plugin_name, plugin_class in self.feature_manager.plugins().items():
-            pluginInfo = reply.plugins.add()
-            pluginInfo.name = plugin_name
-            pluginInfo.type = "feature"
-
-        for plugin_name, plugin_class in self.classifier_manager.plugins().items():
-            pluginInfo = reply.plugins.add()
-            pluginInfo.name = plugin_name
-            pluginInfo.type = "classifier"
-
-            # for setting in self.pluginManager.settings(pluginName):
-            #     settingReply = pluginInfo.settings.add()
-            #     settingReply.name = setting["name"]
-            #     settingReply.default = setting["default"]
-            #     settingReply.type = setting["type"]
-
-        return reply
-
-    def indexing(self, request, context):
-        plugin_list = []
-        plugin_name_list = [x.name.lower() for x in request.plugins]
-        for plugin_name, plugin_class in self.feature_manager.plugins().items():
-            if plugin_name.lower() not in plugin_name_list:
-                continue
-
-            plugin_config = {"params": {}}
-            for x in self.config["features"]:
-                if x["type"].lower() == plugin_name.lower():
-                    plugin_config.update(x)
-            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
-
-        for plugin_name, plugin_class in self.classifier_manager.plugins().items():
-            if plugin_name.lower() not in plugin_name_list:
-                continue
-            plugin_config = {"params": {}}
-            for x in self.config["classifier"]:
-                if x["type"].lower() == plugin_name.lower():
-                    plugin_config.update(x)
-            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
-        database = None
-        if request.update_database:
-            database = ElasticSearchDatabase(config=self.config.get("db", {}))
-
-        variable = {
-            "plugin_classes": plugin_list,
-            "images": request.images,
-            "database": database,
-            "progress": 0,
-            "status": 0,
-            "result": "",
-            "future": None,
-        }
-
-        future = self.thread_pool.submit(compute_plugins, variable)
-
-        job_id = uuid.uuid4().hex
-        variable["future"] = future
-        self.futures[job_id] = variable
-
-        # thread = threading.Thread(target=compute_plugins, args=(variable,))
-
-        # self.threads[job_id] = (thread, variable)
-        # thread.start()
-
-        return indexer_pb2.IndexingReply(id=job_id)
-
-    # def UpdateStatus(self, request, context):
-
-    #     unique_id = request.unique_id
-    #     if unique_id in self.threads:
-    #         US = indexer_pb2.Status()
-    #         US.status = self.threads[unique_id][1]["progress"]
-    #         US.result.dtype = indexer_pb2.DT_STRING
-    #         US.result.proto_content = codecs.encode(self.threads[unique_id][1]["result"], "utf-8")
-
-    #         return US
-
-    def status(self, request, context):
-
-        if request.id in self.futures:
-            job_data = self.futures[request.id]
-            done = job_data["future"].done()
-            if not done:
-                return indexer_pb2.StatusReply(status="running")
-
-            result = job_data["future"].result()
-            return indexer_pb2.StatusReply(status="done", result=result)
-
-            # for x in content:
-            #     infoReply = GI.info.add()
-            #     infoReply.dtype = indexer_pb2.DT_FLOAT
-            #     infoReply.name = name
-            #     print(x)
-            #     infoReply.proto_content = x.tobytes()
-            #     print(len(infoReply.proto_content))
-            #     infoReply.shape.extend(x.shape)
-
-        return indexer_pb2.StatusReply(status="error")
-
-
-def update_database(database, plugin_results):
-    for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-
-        hash_id = entry.id
-
-        database.update_plugin(
-            hash_id,
-            plugin_name=plugin_results._plugin.name,
-            plugin_version=plugin_results._plugin.version,
-            plugin_type=plugin_results._plugin.type,
-            annotations=annotations,
-        )
-
-
-def list_images(paths, name_as_hash=False):
-    if not isinstance(paths, (list, set)):
-
-        if os.path.isdir(paths):
-            file_paths = []
-            for root, dirs, files in os.walk(paths):
-                for f in files:
-                    file_path = os.path.abspath(os.path.join(root, f))
-                    # TODO filter
-                    file_paths.append(file_path)
-
-            paths = file_paths
-        else:
-            paths = [os.path.abspath(paths)]
-
-    entries = [
-        {
-            "id": os.path.splitext(os.path.basename(path))[0] if name_as_hash else uuid.uuid4().hex,
-            "filename": os.path.basename(path),
-            "path": os.path.abspath(path),
-            "meta": [],
-        }
-        for path in paths
-    ]
-
-    return entries
-
-
-def list_jsonl(paths):
-    entries = []
-    with open(paths, "r") as f:
-        for line in f:
-            entry = json.loads(line)
-            entries.append(entry)
-
-    return entries
-
-
-def copy_images(entries, output, resolutions=[500, 200, -1]):
-    entires_result = []
-    for i in range(len(entries)):
-
-        entry = entries[i]
-        copy_result = copy_image_hash(entry["path"], output, entry["id"], resolutions)
-        if copy_result is not None:
-            hash_value, path = copy_result
-            entry.update({"path": path})
-            entires_result.append(entry)
-
-    return entires_result
-
-
-def split_batch(entries, batch_size=512):
-    if batch_size < 1:
-        return [entries]
-
-    return [entries[x * batch_size : (x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
-
-
-def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: dict = {}):
-
-    # TODO replace with abstract class
-    if "db" in config:
-        database = ElasticSearchDatabase(config=config["db"])
-
-    # handel images or jsonl
-    if paths is not None:
-        if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
-            entries = list_jsonl(paths)
-        else:
-            entries = list_images(paths)
-
-        if output:
-            entries = copy_images(entries, output)
-
-    else:
-        entries = list(database.all())
-
-    # TODO scroll
-    existing_hash = [x["id"] for x in list(database.all())]
-    for x in entries:
-        if x["id"] not in existing_hash:
-            resolution = image_resolution(x["path"])
-            if resolution is None:
-                continue
-            database.insert_entry(
-                x["id"],
-                {
-                    "id": x["id"],
-                    "path": x["path"],
-                    "filename": x["filename"],
-                    "meta": x["meta"],
-                    "image": {"height": resolution[0], "width": resolution[1]},
-                },
-            )
-
-    logging.info(f"Indexing {len(entries)} documents")
-
-    entries_list = split_batch(entries, batch_size)
-
-    feature_manager = FeaturePluginManager()
-    feature_manager.find()
-    for plugin_name, plugin_class in feature_manager.plugins().items():
-        if plugin_name not in plugins:
-            continue
-
-        plugin_config = {"params": {}}
-        for x in config["features"]:
-            if x["type"].lower() == plugin_name.lower():
-                plugin_config.update(x)
-        plugin = plugin_class(config=plugin_config["params"])
-        for entries_subset in entries_list:
-            entries_processed = plugin(entries_subset)
-            update_database(database, entries_processed)
-
-    classifier_manager = ClassifierPluginManager()
-    classifier_manager.find()
-    for plugin_name, plugin_class in classifier_manager.plugins().items():
-        if plugin_name not in plugins:
-            continue
-
-        plugin_config = {"params": {}}
-        for x in config["classifiers"]:
-            if x["type"].lower() == plugin_name.lower():
-                plugin_config.update(x)
-        plugin = plugin_class(config=plugin_config["params"])
-
-        for entries_subset in entries_list:
-            entries_processed = plugin(entries_subset)
-            update_database(database, entries_processed)
-
-
-def listing():
-    results = []
-    feature_manager = FeaturePluginManager()
-    feature_manager.find()
-    for plugin_name, plugin_class in feature_manager.plugins().items():
-        results.append(plugin_name)
-
-    classifier_manager = ClassifierPluginManager()
-    classifier_manager.find()
-    for plugin_name, plugin_class in classifier_manager.plugins().items():
-        results.append(plugin_name)
-
-    return results
-
-
-def serve(config, feature_manager, classifier_manager):
-
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-
-    indexer_pb2_grpc.add_IndexerServicer_to_server(Commune(config, feature_manager, classifier_manager), server)
-    grpc_config = config.get("grpc", {})
-    port = grpc_config.get("port", 50051)
-
-    server.add_insecure_port(f"[::]:{port}")
-    server.start()
-    logging.info("Server is now running.")
-    try:
-        while True:
-            time.sleep(_ONE_DAY_IN_SECONDS)
-    except KeyboardInterrupt:
-        server.stop(0)
 
 
 def read_config(path):
@@ -388,26 +56,41 @@ def main():
     else:
         config = {}
 
-    feature_manager = FeaturePluginManager()
-    feature_manager.find()
+    if args.mode == "client":
+        if args.host is not None:
+            config["host"] = args.host
 
-    classifier_manager = ClassifierPluginManager()
-    classifier_manager.find()
+        if args.port is not None:
+            config["port"] = args.port
 
-    if args.mode == "local":
-        plugins = listing()
+        client = Client(config)
+        available_plugins = client.plugin_list()
+        if args.task == "list_plugins":
+            print(available_plugins)
+        elif args.task == "copy_images":
+            entries = client.copy_images(paths=args.path, image_input=args.image_input, image_output=args.image_output)
+            if args.output is not None:
+                with open(args.output, "w") as f:
+                    for line in entries:
+                        f.write(json.dumps(line) + "\n")
+        elif args.task == "indexing":
+            plugins = []
+            plugins_selected = None
+            if args.plugins:
+                plugins_selected = [x.lower() for x in args.plugins]
+            for t, plugin_list in available_plugins.items():
+                for plugin in plugin_list:
+                    if plugins_selected is not None:
+                        if plugin.lower() in plugins_selected:
+                            plugins.append(plugin)
+                    else:
+                        plugins.append(plugin)
 
-        if args.plugins is not None and len(args.plugins) > 1:
-            filtered_plugins = []
-            for white_plugin in args.plugins:
+            client.indexing(paths=args.path, plugins=plugins)
 
-                for plugin in plugins:
-                    if plugin.lower() == white_plugin.lower():
-                        filtered_plugins.append(plugin)
-            plugins = filtered_plugins
-        indexing(config, args.path, args.output, args.batch)
     elif args.mode == "server":
-        serve(config, feature_manager, classifier_manager)
+        server = Server(config)
+        server.run()
     return 0
 
 

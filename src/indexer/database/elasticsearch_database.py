@@ -134,7 +134,6 @@ class ElasticSearchDatabase(Database):
         if entry is None:
             # TODO logging
             return
-        print(f"Entry: {entry} PluginName: {plugin_name}  PluginVersion: {plugin_version} PluginType: {plugin_type}")
 
         # convert protobuf to dict
         annotations_list = []
@@ -149,15 +148,11 @@ class ElasticSearchDatabase(Database):
 
                 hash_splits_list = []
                 for x in range(4):
-                    # print(uv_histogram_norm_bin[x * 16:(x + 1) * 16])
                     hash_splits_list.append(binary[x * len(binary) // 4 : (x + 1) * len(binary) // 4])
-                print(binary)
-                print(hash_splits_list)
                 annotation_dict["hash"] = {f"split_{i}": x for i, x in enumerate(hash_splits_list)}
                 annotation_dict["type"] = anno.feature.type
             annotations_list.append(annotation_dict)
 
-        print(annotations_list)
         # exit()
         if plugin_type in entry:
             founded = False
@@ -178,8 +173,6 @@ class ElasticSearchDatabase(Database):
             entry.update(
                 {plugin_type: [{"plugin": plugin_name, "version": plugin_version, "annotations": annotations_list}]}
             )
-        # exit()
-        print(entry)
         self._es.index(index=self._index, doc_type=self._type, id=hash_id, body=entry)
 
     def search(self, meta=None, features=None, classifiers=None, sort=None, size=5):
@@ -269,12 +262,9 @@ class ElasticSearchDatabase(Database):
                     )
 
             body.update({"sort": sort_list})
-        print(body)
         try:
             results = self._es.search(index=self._index, body=body, size=size)
             for x in results["hits"]["hits"]:
-                print("#####################")
-                print(x)
                 yield x["_source"]
         except exceptions.NotFoundError:
             return []

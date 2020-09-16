@@ -14,24 +14,27 @@ import pickle
 
 
 def image_from_proto(image_proto):
-    if image_proto.path is not None:
+    image_field = image_proto.WhichOneof("image")
+    if image_field == "path":
         image = imageio.imread(image_proto.path)
-    if image_proto.data is not None:
-        pass
+    if image_field == "encoded":
+        image = imageio.imread(image_proto.encoded)
 
+    if len(image.shape) == 2:
+        image = np.stack([image] * 3, -1)
     return image
 
 
 def image_resize(image, max_dim=None, min_dim=None, size=None):
     if max_dim is not None:
-        shape = np.asarray(image.shape[:-1], dtype=np.float32)
+        shape = np.asarray(image.shape[:2], dtype=np.float32)
 
         long_dim = max(shape)
         scale = min(1, max_dim / long_dim)
         new_shape = np.asarray(shape * scale, dtype=np.int32)
 
     elif min_dim is not None:
-        shape = np.asarray(image.shape[:-1], dtype=np.float32)
+        shape = np.asarray(image.shape[:2], dtype=np.float32)
 
         short_dim = min(shape)
         scale = min(1, min_dim / short_dim)
@@ -40,9 +43,8 @@ def image_resize(image, max_dim=None, min_dim=None, size=None):
         new_shape = size
     else:
         return image
-
     img = PIL.Image.fromarray(image)
-    img = img.resize(size=new_shape)
+    img = img.resize(size=new_shape[::-1])
     return np.array(img)
 
 

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'P\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rindexer.proto\"\x87\x03\n\x06Tensor\x12\x18\n\x05\x64type\x18\x01 \x01(\x0e\x32\t.DataType\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\x0c\n\x04name\x18\x0e \x01(\t\x12\x15\n\rproto_content\x18\x04 \x01(\x0c\x12$\n\x05inter\x18\r \x01(\x0e\x32\x15.Tensor.Inerpretation\x12\x11\n\tfloat_val\x18\x05 \x03(\x02\x12\x16\n\ndouble_val\x18\x06 \x03(\x01\x42\x02\x10\x01\x12\x13\n\x07int_val\x18\x07 \x03(\x05\x42\x02\x10\x01\x12\x12\n\nstring_val\x18\x08 \x03(\x0c\x12\x18\n\x0cscomplex_val\x18\t \x03(\x02\x42\x02\x10\x01\x12\x15\n\tint64_val\x18\n \x03(\x03\x42\x02\x10\x01\x12\x14\n\x08\x62ool_val\x18\x0b \x03(\x08\x42\x02\x10\x01\x12\x14\n\x08half_val\x18\x0c \x03(\x05\x42\x02\x10\x01\"X\n\rInerpretation\x12\x07\n\x03\x44OT\x10\x00\x12\x08\n\x04LINE\x10\x01\x12\x0c\n\x08TRIANGLE\x10\x02\x12\r\n\tRECTANGLE\x10\x03\x12\x0c\n\x08PENTAGON\x10\x04\x12\t\n\x05IMAGE\x10\x05\"\x19\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"_\n\tMetaField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"r\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x17\n\x04\x64\x61ta\x18\x03 \x01(\x0b\x32\x07.TensorH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x18\n\x04meta\x18\x05 \x03(\x0b\x32\n.MetaFieldB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\"-\n\x10\x43lassifierResult\x12\x19\n\x07\x63oncept\x18\x01 \x03(\x0b\x32\x08.Concept\">\n\rFeatureResult\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0e\n\x06\x62inary\x18\x02 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x03 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"_\n\x0fIndexingRequest\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x16\n\x06images\x18\x02 \x03(\x0b\x32\x06.Image\x12\x17\n\x0fupdate_database\x18\x03 \x01(\x08\"\x1b\n\rIndexingReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\">\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x1f\n\x06result\x18\x02 \x01(\x0b\x32\x0f.IndexingResult*\xd2\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0c\n\x08\x44T_FLOAT\x10\x01\x12\r\n\tDT_DOUBLE\x10\x02\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\r\n\tDT_STRING\x10\x07\x12\x0c\n\x08\x44T_INT64\x10\t\x12\x0b\n\x07\x44T_BOOL\x10\n\x12\r\n\tDT_UINT16\x10\x11\x12\x0b\n\x07\x44T_HALF\x10\x13\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x32\x9d\x01\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12.\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x42\x02P\x01\x62\x06proto3'
+  serialized_pb=b'\n\rindexer.proto\"\x87\x03\n\x06Tensor\x12\x18\n\x05\x64type\x18\x01 \x01(\x0e\x32\t.DataType\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\x0c\n\x04name\x18\x0e \x01(\t\x12\x15\n\rproto_content\x18\x04 \x01(\x0c\x12$\n\x05inter\x18\r \x01(\x0e\x32\x15.Tensor.Inerpretation\x12\x11\n\tfloat_val\x18\x05 \x03(\x02\x12\x16\n\ndouble_val\x18\x06 \x03(\x01\x42\x02\x10\x01\x12\x13\n\x07int_val\x18\x07 \x03(\x05\x42\x02\x10\x01\x12\x12\n\nstring_val\x18\x08 \x03(\x0c\x12\x18\n\x0cscomplex_val\x18\t \x03(\x02\x42\x02\x10\x01\x12\x15\n\tint64_val\x18\n \x03(\x03\x42\x02\x10\x01\x12\x14\n\x08\x62ool_val\x18\x0b \x03(\x08\x42\x02\x10\x01\x12\x14\n\x08half_val\x18\x0c \x03(\x05\x42\x02\x10\x01\"X\n\rInerpretation\x12\x07\n\x03\x44OT\x10\x00\x12\x08\n\x04LINE\x10\x01\x12\x0c\n\x08TRIANGLE\x10\x02\x12\r\n\tRECTANGLE\x10\x03\x12\x0c\n\x08PENTAGON\x10\x04\x12\t\n\x05IMAGE\x10\x05\"\x19\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"_\n\tMetaField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"l\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x18\n\x04meta\x18\x05 \x03(\x0b\x32\n.MetaFieldB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\"-\n\x10\x43lassifierResult\x12\x19\n\x07\x63oncept\x18\x01 \x03(\x0b\x32\x08.Concept\">\n\rFeatureResult\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0e\n\x06\x62inary\x18\x02 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x03 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"_\n\x0fIndexingRequest\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x16\n\x06images\x18\x02 \x03(\x0b\x32\x06.Image\x12\x17\n\x0fupdate_database\x18\x03 \x01(\x08\"\x1b\n\rIndexingReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\">\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x1f\n\x06result\x18\x02 \x01(\x0b\x32\x0f.IndexingResult*\xd2\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0c\n\x08\x44T_FLOAT\x10\x01\x12\r\n\tDT_DOUBLE\x10\x02\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\r\n\tDT_STRING\x10\x07\x12\x0c\n\x08\x44T_INT64\x10\t\x12\x0b\n\x07\x44T_BOOL\x10\n\x12\r\n\tDT_UINT16\x10\x11\x12\x0b\n\x07\x44T_HALF\x10\x13\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x32\x9d\x01\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12.\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x42\x02P\x01\x62\x06proto3'
 )
 
 _DATATYPE = _descriptor.EnumDescriptor(
@@ -103,8 +103,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1590,
-  serialized_end=1800,
+  serialized_start=1584,
+  serialized_end=1794,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -454,9 +454,9 @@ _IMAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='data', full_name='Image.data', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      name='encoded', full_name='Image.encoded', index=2,
+      number=3, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -492,7 +492,7 @@ _IMAGE = _descriptor.Descriptor(
     fields=[]),
   ],
   serialized_start=595,
-  serialized_end=709,
+  serialized_end=703,
 )
 
 
@@ -544,8 +544,8 @@ _PLUGINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=711,
-  serialized_end=785,
+  serialized_start=705,
+  serialized_end=779,
 )
 
 
@@ -590,8 +590,8 @@ _CONCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=787,
-  serialized_end=841,
+  serialized_start=781,
+  serialized_end=835,
 )
 
 
@@ -622,8 +622,8 @@ _CLASSIFIERRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=843,
-  serialized_end=888,
+  serialized_start=837,
+  serialized_end=882,
 )
 
 
@@ -668,8 +668,8 @@ _FEATURERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=890,
-  serialized_end=952,
+  serialized_start=884,
+  serialized_end=946,
 )
 
 
@@ -733,8 +733,8 @@ _PLUGINRESULT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=955,
-  serialized_end=1102,
+  serialized_start=949,
+  serialized_end=1096,
 )
 
 
@@ -772,8 +772,8 @@ _IMAGERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1104,
-  serialized_end=1172,
+  serialized_start=1098,
+  serialized_end=1166,
 )
 
 
@@ -804,8 +804,8 @@ _INDEXINGRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1174,
-  serialized_end=1221,
+  serialized_start=1168,
+  serialized_end=1215,
 )
 
 
@@ -850,8 +850,8 @@ _PLUGININFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1223,
-  serialized_end=1296,
+  serialized_start=1217,
+  serialized_end=1290,
 )
 
 
@@ -875,8 +875,8 @@ _LISTPLUGINSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1298,
-  serialized_end=1318,
+  serialized_start=1292,
+  serialized_end=1312,
 )
 
 
@@ -907,8 +907,8 @@ _LISTPLUGINSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1320,
-  serialized_end=1368,
+  serialized_start=1314,
+  serialized_end=1362,
 )
 
 
@@ -953,8 +953,8 @@ _INDEXINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1370,
-  serialized_end=1465,
+  serialized_start=1364,
+  serialized_end=1459,
 )
 
 
@@ -985,8 +985,8 @@ _INDEXINGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1467,
-  serialized_end=1494,
+  serialized_start=1461,
+  serialized_end=1488,
 )
 
 
@@ -1017,8 +1017,8 @@ _STATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1496,
-  serialized_end=1523,
+  serialized_start=1490,
+  serialized_end=1517,
 )
 
 
@@ -1056,8 +1056,8 @@ _STATUSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1525,
-  serialized_end=1587,
+  serialized_start=1519,
+  serialized_end=1581,
 )
 
 _TENSOR.fields_by_name['dtype'].enum_type = _DATATYPE
@@ -1072,15 +1072,14 @@ _METAFIELD.fields_by_name['int_val'].containing_oneof = _METAFIELD.oneofs_by_nam
 _METAFIELD.oneofs_by_name['value'].fields.append(
   _METAFIELD.fields_by_name['float_val'])
 _METAFIELD.fields_by_name['float_val'].containing_oneof = _METAFIELD.oneofs_by_name['value']
-_IMAGE.fields_by_name['data'].message_type = _TENSOR
 _IMAGE.fields_by_name['roi'].message_type = _ROI
 _IMAGE.fields_by_name['meta'].message_type = _METAFIELD
 _IMAGE.oneofs_by_name['image'].fields.append(
   _IMAGE.fields_by_name['path'])
 _IMAGE.fields_by_name['path'].containing_oneof = _IMAGE.oneofs_by_name['image']
 _IMAGE.oneofs_by_name['image'].fields.append(
-  _IMAGE.fields_by_name['data'])
-_IMAGE.fields_by_name['data'].containing_oneof = _IMAGE.oneofs_by_name['image']
+  _IMAGE.fields_by_name['encoded'])
+_IMAGE.fields_by_name['encoded'].containing_oneof = _IMAGE.oneofs_by_name['image']
 _CLASSIFIERRESULT.fields_by_name['concept'].message_type = _CONCEPT
 _PLUGINRESULT.fields_by_name['classifier'].message_type = _CLASSIFIERRESULT
 _PLUGINRESULT.fields_by_name['feature'].message_type = _FEATURERESULT
@@ -1269,8 +1268,8 @@ _INDEXER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1803,
-  serialized_end=1960,
+  serialized_start=1797,
+  serialized_end=1954,
   methods=[
   _descriptor.MethodDescriptor(
     name='list_plugins',

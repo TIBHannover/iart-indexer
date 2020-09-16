@@ -46,8 +46,8 @@ def run_plugin(plugin, image):
     title_field = request_image.meta.add()
     title_field.key = "title"
     title_field.string_val = "Rice Terrace"
-
-    request_image.path = image.encode()
+    request_image.encoded = open(image, "rb").read()
+    # request_image.path = image.encode()
     response = stub.indexing(request)
 
     return response.id
@@ -68,7 +68,7 @@ job_id = run_plugin("yuv_histogram", image="/home/matthias/images/test_2.jpg")
 
 while True:
     s = status(job_id)
-    print(status(job_id))
+    print(s.status)
     if s.status == "ok":
         break
     time.sleep(1)

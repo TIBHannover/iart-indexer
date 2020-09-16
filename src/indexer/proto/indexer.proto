@@ -103,7 +103,7 @@ message Image {
   string id = 1;
   oneof image {
     string path = 2;
-    Tensor data = 3;
+    bytes encoded = 3;
   }
   RoI roi = 4;
   repeated MetaField meta = 5;
