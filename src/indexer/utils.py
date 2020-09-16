@@ -40,7 +40,6 @@ def image_resize(image, max_dim=None, min_dim=None, size=None):
         new_shape = size
     else:
         return image
-    print(f"Resize image: {image.shape} {new_shape}")
 
     img = PIL.Image.fromarray(image)
     img = img.resize(size=new_shape)
@@ -55,56 +54,22 @@ def prediction_from_proto(proto):
     pass
 
 
+def meta_from_proto(proto):
+    result_dict = {}
+    for m in proto:
+        field = m.WhichOneof("value")
+        if field == "string_val":
+            result_dict[m.key] = m.string_val
+        if field == "int_val":
+            result_dict[m.key] = m.int_val
+        if field == "float_val":
+            result_dict[m.key] = m.float_val
+    return result_dict
+
+
 def convert_name(name):
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
-
-
-def copy_image_hash(image_path, output_path, hash_value=None, resolutions=[-1]):
-    try:
-        if hash_value is None:
-            hash_value = uuid.uuid4().hex
-
-        output_dir = os.path.join(output_path, hash_value[0:2], hash_value[2:4])
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-        image = imageio.imread(image_path)
-
-        for res in resolutions:
-            if res > 0:
-                scale_factor = max(image.shape[0] / float(res), image.shape[1] / float(res))
-                new_image = skimage.transform.rescale(image, 1 / scale_factor)
-
-                output_file = os.path.join(output_dir, f"{hash_value}_{res}.jpg")
-            else:
-                new_image = image
-                output_file = os.path.join(output_dir, f"{hash_value}.jpg")
-
-            imageio.imwrite(output_file, new_image)
-
-        output_file = os.path.abspath(os.path.join(output_dir, f"{hash_value}.jpg"))
-        return hash, output_file
-    except ValueError as e:
-        return None
-    except struct.error as e:
-        return None
-
-
-def image_resolution(image_path):
-    try:
-        image = imageio.imread(image_path)
-
-        return image.shape[0], image.shape[1]
-    except ValueError as e:
-        return None
-    except struct.error as e:
-        return None
-
-
-def filename_without_ext(path):
-    base = os.path.basename(path)
-    return os.path.splitext(base)[0]
 
 
 def numpy_to_proto(proto, name, value, frame_number, timestamp):

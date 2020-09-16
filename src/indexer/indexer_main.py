@@ -9,24 +9,21 @@ import imageio
 
 import tensorflow as tf
 
-from indexer.indexer.plugins import *
-from indexer.indexer.config import IndexerConfig
-
+from indexer.plugins import *
 from indexer.database.elasticsearch_database import ElasticSearchDatabase
 
-from indexer.indexer.utils import copy_image_hash, filename_without_ext, image_resolution
 
 import time
 from concurrent import futures
 import threading
 
-from . import indexer_pb2
-from . import indexer_pb2_grpc
+from indexer import indexer_pb2
+from indexer import indexer_pb2_grpc
 import grpc
 
-from indexer.indexer.plugins import FeaturePlugin, ClassifierPlugin
+from indexer.plugins import FeaturePlugin, ClassifierPlugin
 
-from indexer.indexer.utils import image_from_proto
+from indexer.utils import image_from_proto, meta_from_proto
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -57,19 +54,12 @@ def compute_plugins(args):
     if database is not None:
         existing_hash = [x["id"] for x in list(database.all())]
         for x in images:
-            if x["id"] not in existing_hash:
-                resolution = image_resolution(x["path"])
-                if resolution is None:
-                    continue
+            if x.id not in existing_hash:
+
+                meta = meta_from_proto(x.meta)
+
                 database.insert_entry(
-                    x["id"],
-                    {
-                        "id": x["id"],
-                        "path": x["path"],
-                        "filename": x["filename"],
-                        "meta": x["meta"],
-                        "image": {"height": resolution[0], "width": resolution[1]},
-                    },
+                    x.id, {"id": x.id, "meta": meta},
                 )
     plugin_result_list = {}
     for plugin_class in plugin_classes:
@@ -203,7 +193,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 def update_database(database, plugin_results):
     for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
 
-        hash_id = entry["id"]
+        hash_id = entry.id
 
         database.update_plugin(
             hash_id,
@@ -271,18 +261,6 @@ def split_batch(entries, batch_size=512):
         return [entries]
 
     return [entries[x * batch_size : (x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
-
-
-class Indexer:
-    def __init__(self, config):
-        pass
-
-    def indexing_files(
-        self,
-        paths=None,
-        images=None,
-    ):
-        pass
 
 
 def indexing(paths, output, batch_size: int = 512, plugins: list = [], config: dict = {}):
@@ -383,7 +361,7 @@ def serve(config, feature_manager, classifier_manager):
 
     server.add_insecure_port(f"[::]:{port}")
     server.start()
-    logging.info("Server is running.")
+    logging.info("Server is now running.")
     try:
         while True:
             time.sleep(_ONE_DAY_IN_SECONDS)

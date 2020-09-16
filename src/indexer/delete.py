@@ -5,12 +5,12 @@ import argparse
 import logging
 import uuid
 
-from indexer.indexer.plugins import *
-from indexer.indexer.config import IndexerConfig
+from indexer.plugins import *
+from indexer.config import IndexerConfig
 
 from indexer.database.elasticsearch_database import ElasticSearchDatabase
 
-from indexer.indexer.utils import copy_image_hash, filename_without_ext
+from indexer.utils import copy_image_hash, filename_without_ext
 
 
 def parse_args():

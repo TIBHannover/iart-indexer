@@ -1,12 +1,12 @@
-from indexer.indexer.plugins import FeaturePlugin
-from indexer.indexer.plugins import FeaturePluginManager
-from indexer.indexer.plugins import PluginResult
+from indexer.plugins import FeaturePlugin
+from indexer.plugins import FeaturePluginManager
+from indexer.plugins import PluginResult
 import numpy as np
 import math
 import redisai as rai
 import ml2rt
 
-from indexer.indexer.utils import image_from_proto, image_resize
+from indexer.utils import image_from_proto, image_resize
 from indexer import indexer_pb2
 
 
@@ -16,10 +16,11 @@ class ByolEmbeddingFeature(FeaturePlugin):
         "host": "localhost",
         "port": 6379,
         "model_name": "byol_wikipedia",
+        "model_device": "gpu",
         "model_file": "/home/matthias/byol_wikipedia.pt",
         "multicrop": True,
-        "min_dim": 244,
         "max_dim": None,
+        "min_dim": 244,
     }
 
     default_version = 0.1
@@ -29,6 +30,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
         self.host = self.config["host"]
         self.port = self.config["port"]
         self.model_name = self.config["model_name"]
+        self.model_device = self.config["model_device"]
         self.model_file = self.config["model_file"]
         self.max_dim = self.config["max_dim"]
         self.min_dim = self.config["min_dim"]
@@ -67,18 +69,13 @@ class ByolEmbeddingFeature(FeaturePlugin):
             output_bin = (output > 0).astype(np.int32).tolist()
             output_bin_str = "".join([str(x) for x in output_bin])
 
-            hash_splits_list = []
-            for x in range(math.ceil(len(output_bin_str) / 16)):
-                # print(uv_histogram_norm_bin[x * 16:(x + 1) * 16])
-                hash_splits_list.append(output_bin_str[x * 16 : (x + 1) * 16])
-
             entry_annotation.append(
                 indexer_pb2.PluginResult(
                     plugin=self.name,
                     type=self._type,
                     version=str(self._version),
                     feature=indexer_pb2.FeatureResult(
-                        binary=[x.encode() for x in hash_splits_list], feature=output.tolist()
+                        type="byol_embedding", binary=output_bin_str, feature=output.tolist()
                     ),
                 )
             )

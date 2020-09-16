@@ -1,6 +1,6 @@
-from indexer.indexer.plugins import ClassifierPlugin
-from indexer.indexer.plugins import ClassifierPluginManager
-from indexer.indexer.plugins import PluginResult
+from indexer.plugins import ClassifierPlugin
+from indexer.plugins import ClassifierPluginManager
+from indexer.plugins import PluginResult
 
 import os
 import sys

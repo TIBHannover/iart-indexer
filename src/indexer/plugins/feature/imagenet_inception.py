@@ -1,6 +1,6 @@
-from indexer.indexer.plugins import FeaturePlugin
-from indexer.indexer.plugins import FeaturePluginManager
-from indexer.indexer.plugins import PluginResult
+from indexer.plugins import FeaturePlugin
+from indexer.plugins import FeaturePluginManager
+from indexer.plugins import PluginResult
 import tensorflow as tf
 import numpy as np
 import math

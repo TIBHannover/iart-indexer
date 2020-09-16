@@ -114,7 +114,6 @@ message PluginConfig {
   string default = 2;
   string type = 3;
   string state = 4;
-  //
 }
 
 message Concept {
@@ -125,9 +124,11 @@ message Concept {
 
 message ClassifierResult { repeated Concept concept = 1; }
 
+// TODO maybe move this to feature list
 message FeatureResult {
-  repeated string binary = 1;
-  repeated float feature = 2;
+  string type = 1;
+  string binary = 2;
+  repeated float feature = 3;
 }
 
 message PluginResult {

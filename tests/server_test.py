@@ -32,7 +32,7 @@ def run_plugin(plugin, image):
     channel = grpc.insecure_channel("localhost:50051")
     stub = indexer_pb2_grpc.IndexerStub(channel)
     request = indexer_pb2.IndexingRequest()
-    request.update_database = False
+    request.update_database = True
     request_plugin = request.plugins.add()
     request_plugin.name = "YUVHistogramFeature"
     request_plugin = request.plugins.add()
@@ -40,7 +40,12 @@ def run_plugin(plugin, image):
     request_image = request.images.add()
     request_image.id = uuid.uuid4().hex
 
-    year_field = request_image.meta.add()
+    artist_field = request_image.meta.add()
+    artist_field.key = "artist_name"
+    artist_field.string_val = "shriyaputra"
+    title_field = request_image.meta.add()
+    title_field.key = "title"
+    title_field.string_val = "Rice Terrace"
 
     request_image.path = image.encode()
     response = stub.indexing(request)
