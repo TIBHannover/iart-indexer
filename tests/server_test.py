@@ -64,7 +64,7 @@ def status(job_id):
     return response
 
 
-job_id = run_plugin("yuv_histogram", image="/home/matthias/images/test_2.jpg")
+job_id = run_plugin("yuv_histogram", image="res/img.jpg")
 
 while True:
     s = status(job_id)

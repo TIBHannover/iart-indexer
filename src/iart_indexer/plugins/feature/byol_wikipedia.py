@@ -41,7 +41,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
         con.modelset(
             self.model_name,
             backend="torch",
-            device="gpu",
+            device=self.model_device,
             data=model,
         )
 
