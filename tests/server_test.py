@@ -1,5 +1,5 @@
-from indexer import indexer_pb2
-from indexer import indexer_pb2_grpc
+from iart_indexer import indexer_pb2
+from iart_indexer import indexer_pb2_grpc
 
 import grpc
 import time

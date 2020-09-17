@@ -8,8 +8,8 @@ import uuid
 import imageio
 
 
-from indexer.client import Client
-from indexer.server import Server
+from iart_indexer.client import Client
+from iart_indexer.server import Server
 
 
 def parse_args():

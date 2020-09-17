@@ -1,4 +1,4 @@
-from indexer.utils import convert_name
+from iart_indexer.utils import convert_name
 
 
 class PluginResult:

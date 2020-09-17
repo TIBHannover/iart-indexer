@@ -6,12 +6,12 @@ from concurrent import futures
 
 import grpc
 
-from indexer.plugins import *
-from indexer.database.elasticsearch_database import ElasticSearchDatabase
-from indexer import indexer_pb2
-from indexer import indexer_pb2_grpc
-from indexer.plugins import FeaturePlugin, ClassifierPlugin
-from indexer.utils import image_from_proto, meta_from_proto
+from iart_indexer.plugins import *
+from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
+from iart_indexer import indexer_pb2
+from iart_indexer import indexer_pb2_grpc
+from iart_indexer.plugins import FeaturePlugin, ClassifierPlugin
+from iart_indexer.utils import image_from_proto, meta_from_proto
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -22,33 +22,34 @@ def compute_plugins(args):
     images = args["images"]
     database = args["database"]
     for x in images:
-        exist_entry = database.get_entry(x.id) 
+        exist_entry = database.get_entry(x.id)
         if exist_entry is None:
             meta = meta_from_proto(x.meta)
             database.insert_entry(
-                x.id, {"id": x.id, "meta": meta},
+                x.id,
+                {"id": x.id, "meta": meta},
             )
 
     # if database is not None:
     #     existing_hash = [x["id"] for x in list(database.all())]
     #     for x in images:
     #         if x.id not in existing_hash:
-    
+
     plugin_result_list = {}
     for plugin_class in plugin_classes:
-        print(f'Plugin start {plugin_class}')
+        print(f"Plugin start {plugin_class}")
         plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
         plugin_results = plugin(images)
         # # TODO entries_processed also contains the entries zip will be
 
-        print(f'Plugin done {plugin_class}')
+        print(f"Plugin done {plugin_class}")
         for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
             if entry.id not in plugin_result_list:
                 plugin_result_list[entry.id] = {"image": entry, "results": []}
             plugin_result_list[entry.id]["results"].extend(annotations)
         if database is not None:
             update_database(database, plugin_results)
-            print(f'Plugin result save {plugin_class}')
+            print(f"Plugin result save {plugin_class}")
 
     return indexer_pb2.IndexingResult(
         results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]

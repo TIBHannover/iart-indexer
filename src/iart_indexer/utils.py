@@ -9,7 +9,7 @@ import PIL
 
 
 import numpy as np
-from indexer import indexer_pb2
+from iart_indexer import indexer_pb2
 import pickle
 
 

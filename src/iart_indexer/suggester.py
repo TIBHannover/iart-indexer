@@ -3,8 +3,8 @@ import sys
 import re
 import argparse
 
-from indexer.database.elasticsearch_suggester import ElasticSearchSuggester
-from indexer.database.elasticsearch_database import ElasticSearchDatabase
+from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
+from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
 
 
 def parse_args():

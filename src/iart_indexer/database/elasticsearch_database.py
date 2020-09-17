@@ -5,7 +5,7 @@ from elasticsearch import exceptions
 
 # from elasticsearch_dsl import Search
 
-from indexer.database.database import Database
+from iart_indexer.database.database import Database
 
 
 class ElasticSearchDatabase(Database):

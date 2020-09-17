@@ -11,10 +11,10 @@ import multiprocessing as mp
 import grpc
 import json
 
-from indexer import indexer_pb2
-from indexer import indexer_pb2_grpc
+from iart_indexer import indexer_pb2
+from iart_indexer import indexer_pb2_grpc
 
-from indexer.utils import image_resize
+from iart_indexer.utils import image_resize
 
 
 def list_images(paths, name_as_hash=False):

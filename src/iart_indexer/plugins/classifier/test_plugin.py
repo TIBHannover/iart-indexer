@@ -1,6 +1,6 @@
-from indexer.plugins import ClassifierPlugin
-from indexer.plugins import ClassifierPluginManager
-from indexer.plugins import PluginResult
+from iart_indexer.plugins import ClassifierPlugin
+from iart_indexer.plugins import ClassifierPluginManager
+from iart_indexer.plugins import PluginResult
 
 
 @ClassifierPluginManager.export("TestClassfier")

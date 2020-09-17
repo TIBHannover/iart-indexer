@@ -4,7 +4,7 @@ from elasticsearch import exceptions
 
 # from elasticsearch_dsl import Search
 
-from indexer.database.suggester import Suggester
+from iart_indexer.database.suggester import Suggester
 
 
 class ElasticSearchSuggester(Suggester):
