@@ -30,6 +30,8 @@ sudo docker run -t --rm -p 8500:8500 -v "/home/springsteinm/tmp/kaggle_iart_dens
 ```
 
 ## Compose Up
+First change the bind paths in `docker-compose.yml` to absolut paths on your system.
+
 To test the services simply type:
 
 ```bash
