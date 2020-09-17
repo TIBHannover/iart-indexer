@@ -40,7 +40,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
         model = ml2rt.load_model(self.model_file)
 
         con.modelset(
-            self.model_name, backend="torch", device="cpu", data=model,
+            self.model_name, backend="torch", device="gpu", data=model,
         )
 
     def check_rai(self):

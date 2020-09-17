@@ -10,12 +10,16 @@ from indexer.database.database import Database
 
 class ElasticSearchDatabase(Database):
     def __init__(self, config: dict = {}):
-        self._es = Elasticsearch()
 
-        self._index = config.get("index", "iart")
-        self._type = config.get("type", "_doc")
+        self.hosts = config.get("host", "localhost")
+        self.port = config.get("port", 9200)
 
-        if not self._es.indices.exists(index=self._index):
+        self.es = Elasticsearch([{"host": self.hosts, "port": self.port}])
+
+        self.index = config.get("index", "iart")
+        self.type = config.get("type", "_doc")
+
+        if not self.es.indices.exists(index=self.index):
             # pass
             request_body = {
                 "mappings": {
@@ -118,16 +122,19 @@ class ElasticSearchDatabase(Database):
                 }
             }
 
-            self._es.indices.create(index=self._index, body=request_body)
+            self.es.indices.create(index=self.index, body=request_body)
 
     def insert_entry(self, hash_id, doc):
-        self._es.index(index=self._index, doc_type=self._type, id=hash_id, body=doc)
+        self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=doc)
 
     def update_entry(self, hash_id, doc):
-        self._es.update(index=self._index, doc_type=self._type, id=hash_id, body={"doc": doc})
+        self.es.update(index=self.index, doc_type=self.type, id=hash_id, body={"doc": doc})
 
     def get_entry(self, hash_id):
-        return self._es.get(index=self._index, doc_type=self._type, id=hash_id)["_source"]
+        try:
+            return self.es.get(index=self.index, doc_type=self.type, id=hash_id)["_source"]
+        except exceptions.NotFoundError:
+            return None
 
     def update_plugin(self, hash_id, plugin_name, plugin_version, plugin_type, annotations):
         entry = self.get_entry(hash_id=hash_id)
@@ -173,10 +180,10 @@ class ElasticSearchDatabase(Database):
             entry.update(
                 {plugin_type: [{"plugin": plugin_name, "version": plugin_version, "annotations": annotations_list}]}
             )
-        self._es.index(index=self._index, doc_type=self._type, id=hash_id, body=entry)
+        self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=entry)
 
     def search(self, meta=None, features=None, classifiers=None, sort=None, size=5):
-        if not self._es.indices.exists(index=self._index):
+        if not self.es.indices.exists(index=self.index):
             return []
         terms = []
 
@@ -263,24 +270,24 @@ class ElasticSearchDatabase(Database):
 
             body.update({"sort": sort_list})
         try:
-            results = self._es.search(index=self._index, body=body, size=size)
+            results = self.es.search(index=self.index, body=body, size=size)
             for x in results["hits"]["hits"]:
                 yield x["_source"]
         except exceptions.NotFoundError:
             return []
-        # self._es.update('')
+        # self.es.update('')
 
     def all(self, pagesize=250, scroll_timeout="10m", **kwargs):
-        if not self._es.indices.exists(index=self._index):
+        if not self.es.indices.exists(index=self.index):
             return None
         is_first = True
         while True:
             # Scroll next
             if is_first:  # Initialize scroll
-                result = self._es.search(index=self._index, scroll="1m", **kwargs, body={"size": pagesize})
+                result = self.es.search(index=self.index, scroll="1m", **kwargs, body={"size": pagesize})
                 is_first = False
             else:
-                result = self._es.scroll(body={"scroll_id": scroll_id, "scroll": scroll_timeout})
+                result = self.es.scroll(body={"scroll_id": scroll_id, "scroll": scroll_timeout})
             scroll_id = result["_scroll_id"]
             hits = result["hits"]["hits"]
             # Stop after no more docs
@@ -290,4 +297,4 @@ class ElasticSearchDatabase(Database):
             yield from (hit["_source"] for hit in hits)
 
     def drop(self):
-        self._es.indices.delete(index=self._index, ignore=[400, 404])
+        self.es.indices.delete(index=self.index, ignore=[400, 404])

@@ -209,7 +209,7 @@ class Client:
                     break
                 print(status)
                 time.sleep(1)
-            count += len(entries)
+            count += len(entries_split)
             logging.info(f"Client: Indexing {count}/{len(entries)} images")
 
     def status(self, job_id):
