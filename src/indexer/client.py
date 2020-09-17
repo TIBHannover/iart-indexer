@@ -215,7 +215,7 @@ class Client:
     def status(self, job_id):
 
         channel = grpc.insecure_channel(
-            "localhost:50051",
+            f"{self.host}:{self.port}",
             options=[
                 ("grpc.max_send_message_length", 50 * 1024 * 1024),
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
