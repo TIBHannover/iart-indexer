@@ -1,8 +1,7 @@
+import importlib
 import os
 import re
 import sys
-
-import importlib
 
 from iart_indexer.plugins.plugin import Plugin
 

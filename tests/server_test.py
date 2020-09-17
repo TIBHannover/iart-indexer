@@ -1,9 +1,9 @@
-from iart_indexer import indexer_pb2
-from iart_indexer import indexer_pb2_grpc
-
-import grpc
 import time
 import uuid
+
+import grpc
+
+from iart_indexer import indexer_pb2, indexer_pb2_grpc
 
 
 def get_plugin_list():

@@ -1,13 +1,12 @@
-from iart_indexer.plugins import FeaturePlugin
-from iart_indexer.plugins import FeaturePluginManager
-from iart_indexer.plugins import PluginResult
-import numpy as np
 import math
-import redisai as rai
-import ml2rt
 
-from iart_indexer.utils import image_from_proto
+import ml2rt
+import numpy as np
+import redisai as rai
+
 from iart_indexer import indexer_pb2
+from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
+from iart_indexer.utils import image_from_proto
 
 
 @FeaturePluginManager.export("YUVHistogramFeature")

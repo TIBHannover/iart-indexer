@@ -1,21 +1,19 @@
-from iart_indexer.plugins import ClassifierPlugin
-from iart_indexer.plugins import ClassifierPluginManager
-from iart_indexer.plugins import PluginResult
-
-import os
-import sys
-import re
 import argparse
+import logging
+import os
+import re
+import sys
 import threading
+
 import grpc
 import numpy as np
+
+from iart_indexer.plugins import ClassifierPlugin, ClassifierPluginManager, PluginResult
 
 # import tensorflow as tf
 
 # from tensorflow_serving.apis import predict_pb2
 # from tensorflow_serving.apis import prediction_service_pb2_grpc
-
-import logging
 
 
 @ClassifierPluginManager.export("KaggleDenseClassifier")

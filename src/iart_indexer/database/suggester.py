@@ -1,2 +1,2 @@
-class Suggester():
+class Suggester:
     pass

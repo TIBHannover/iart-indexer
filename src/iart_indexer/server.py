@@ -6,11 +6,10 @@ from concurrent import futures
 
 import grpc
 
-from iart_indexer.plugins import *
+from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
-from iart_indexer import indexer_pb2
-from iart_indexer import indexer_pb2_grpc
-from iart_indexer.plugins import FeaturePlugin, ClassifierPlugin
+from iart_indexer.plugins import *
+from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin
 from iart_indexer.utils import image_from_proto, meta_from_proto
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24

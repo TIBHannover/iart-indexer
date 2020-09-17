@@ -1,11 +1,11 @@
-from iart_indexer.plugins import FeaturePlugin
-from iart_indexer.plugins import FeaturePluginManager
-from iart_indexer.plugins import PluginResult
-import tensorflow as tf
-import numpy as np
+import logging
 import math
 import pickle
-import logging
+
+import numpy as np
+import tensorflow as tf
+
+from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
 
 
 @FeaturePluginManager.export("ImageNetInceptionFeature")

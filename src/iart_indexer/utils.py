@@ -1,16 +1,16 @@
-import os
-import sys
-import re
 import argparse
-import uuid
-import imageio
+import os
+import pickle
+import re
 import struct
+import sys
+import uuid
+
+import imageio
+import numpy as np
 import PIL
 
-
-import numpy as np
 from iart_indexer import indexer_pb2
-import pickle
 
 
 def image_from_proto(image_proto):

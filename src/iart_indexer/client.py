@@ -1,19 +1,17 @@
-import re
+import functools
+import json
+import logging
+import multiprocessing as mp
 import os
+import re
+import struct
 import time
 import uuid
-import imageio
-import struct
-import logging
-import functools
-import multiprocessing as mp
 
 import grpc
-import json
+import imageio
 
-from iart_indexer import indexer_pb2
-from iart_indexer import indexer_pb2_grpc
-
+from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.utils import image_resize
 
 

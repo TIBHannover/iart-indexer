@@ -1,11 +1,11 @@
 import math
 from datetime import datetime
-from elasticsearch import Elasticsearch
-from elasticsearch import exceptions
 
-# from elasticsearch_dsl import Search
+from elasticsearch import Elasticsearch, exceptions
 
 from iart_indexer.database.database import Database
+
+# from elasticsearch_dsl import Search
 
 
 class ElasticSearchDatabase(Database):

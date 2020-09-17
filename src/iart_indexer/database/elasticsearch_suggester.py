@@ -1,10 +1,10 @@
 from datetime import datetime
-from elasticsearch import Elasticsearch
-from elasticsearch import exceptions
 
-# from elasticsearch_dsl import Search
+from elasticsearch import Elasticsearch, exceptions
 
 from iart_indexer.database.suggester import Suggester
+
+# from elasticsearch_dsl import Search
 
 
 class ElasticSearchSuggester(Suggester):

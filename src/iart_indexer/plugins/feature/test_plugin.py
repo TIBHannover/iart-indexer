@@ -1,6 +1,4 @@
-from iart_indexer.plugins import FeaturePlugin
-from iart_indexer.plugins import FeaturePluginManager
-from iart_indexer.plugins import PluginResult
+from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
 
 
 @FeaturePluginManager.export("TestFeature")

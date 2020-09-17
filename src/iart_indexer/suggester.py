@@ -1,10 +1,10 @@
-import os
-import sys
-import re
 import argparse
+import os
+import re
+import sys
 
-from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
+from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
 
 
 def parse_args():

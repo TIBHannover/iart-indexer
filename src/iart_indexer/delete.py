@@ -1,15 +1,13 @@
-import os
-import sys
-import re
 import argparse
 import logging
+import os
+import re
+import sys
 import uuid
 
-from iart_indexer.plugins import *
 from iart_indexer.config import IndexerConfig
-
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
-
+from iart_indexer.plugins import *
 from iart_indexer.utils import copy_image_hash, filename_without_ext
 
 

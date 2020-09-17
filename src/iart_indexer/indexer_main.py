@@ -1,12 +1,12 @@
-import os
-import sys
-import re
-import json
 import argparse
+import json
 import logging
+import os
+import re
+import sys
 import uuid
-import imageio
 
+import imageio
 
 from iart_indexer.client import Client
 from iart_indexer.server import Server
