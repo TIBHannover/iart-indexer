@@ -122,7 +122,7 @@ message Concept {
   float prob = 3;
 }
 
-message ClassifierResult { repeated Concept concept = 1; }
+message ClassifierResult { repeated Concept concepts = 1; }
 
 // TODO maybe move this to feature list
 message FeatureResult {

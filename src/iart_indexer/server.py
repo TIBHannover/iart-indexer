@@ -101,7 +101,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             if plugin_name.lower() not in plugin_name_list:
                 continue
             plugin_config = {"params": {}}
-            for x in self.config["classifier"]:
+            for x in self.config["classifiers"]:
                 if x["type"].lower() == plugin_name.lower():
                     plugin_config.update(x)
             plugin_list.append({"plugin": plugin_class, "config": plugin_config})

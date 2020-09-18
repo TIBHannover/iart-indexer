@@ -3,7 +3,6 @@ import math
 import pickle
 
 import numpy as np
-import tensorflow as tf
 
 from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
 

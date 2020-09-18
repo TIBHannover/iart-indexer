@@ -145,9 +145,9 @@ class ElasticSearchDatabase(Database):
         # convert protobuf to dict
         annotations_list = []
         for anno in annotations:
-            annotation_dict = {}
             result_type = anno.WhichOneof("result")
             if result_type == "feature":
+                annotation_dict = {}
                 binary = anno.feature.binary
                 feature = list(anno.feature.feature)
 
@@ -158,7 +158,19 @@ class ElasticSearchDatabase(Database):
                     hash_splits_list.append(binary[x * len(binary) // 4 : (x + 1) * len(binary) // 4])
                 annotation_dict["hash"] = {f"split_{i}": x for i, x in enumerate(hash_splits_list)}
                 annotation_dict["type"] = anno.feature.type
-            annotations_list.append(annotation_dict)
+
+                annotations_list.append(annotation_dict)
+
+            if result_type == "classifier":
+                for concept in anno.classifier.concepts:
+                    annotation_dict = {}
+                    annotation_dict["name"] = concept.concept
+                    annotation_dict["type"] = concept.type
+                    annotation_dict["value"] = concept.prob
+
+                    annotations_list.append(annotation_dict)
+
+        print(annotations_list)
 
         # exit()
         if plugin_type in entry:
