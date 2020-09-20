@@ -33,6 +33,11 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.StatusRequest.SerializeToString,
             response_deserializer=indexer__pb2.StatusReply.FromString,
         )
+        self.build_suggester = channel.unary_unary(
+            "/Indexer/build_suggester",
+            request_serializer=indexer__pb2.SuggesterRequest.SerializeToString,
+            response_deserializer=indexer__pb2.SuggesterReply.FromString,
+        )
 
 
 class IndexerServicer(object):
@@ -60,6 +65,12 @@ class IndexerServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def build_suggester(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_IndexerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -77,6 +88,11 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.status,
             request_deserializer=indexer__pb2.StatusRequest.FromString,
             response_serializer=indexer__pb2.StatusReply.SerializeToString,
+        ),
+        "build_suggester": grpc.unary_unary_rpc_method_handler(
+            servicer.build_suggester,
+            request_deserializer=indexer__pb2.SuggesterRequest.FromString,
+            response_serializer=indexer__pb2.SuggesterReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("Indexer", rpc_method_handlers)
@@ -177,3 +193,33 @@ class Indexer(object):
             timeout,
             metadata,
         )
+
+    @staticmethod
+    def build_suggester(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/build_suggester",
+            indexer__pb2.SuggesterRequest.SerializeToString,
+            indexer__pb2.SuggesterReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+

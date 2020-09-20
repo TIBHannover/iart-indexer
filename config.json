@@ -5,7 +5,8 @@
     "elasticsearch": {
         "host": "elasticsearch",
         "port": 9200,
-        "index": "iart"
+        "index": "iart",
+        "suggester": "suggester"
     },
     "features": [
         {

@@ -10,10 +10,10 @@ services:
       - elasticsearch
     volumes:
       - type: bind
-        source: path/to/models
+        source: /data/iart/models/web/
         target: /models
       - type: bind
-        source: path/to/config.json
+        source: /home/matthias/projects/iart/indexer/config.json
         target: /config.json
   redisai:
     image: redisai/redisai:1.0.1
@@ -22,6 +22,12 @@ services:
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
+    ports:
+      - 9200:9200
+    volumes:
+      - type: bind
+        source: /data/iart/elasticsearch/data
+        target: /usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1

@@ -9,12 +9,18 @@ from iart_indexer.database.suggester import Suggester
 
 class ElasticSearchSuggester(Suggester):
     def __init__(self, config=None):
-        self._es = Elasticsearch()
-        self._index = "suggester"
-        self._type = "_doc"
-        if not self._es.indices.exists(index=self._index):
-            self._es.indices.create(
-                index=self._index,
+
+        self.hosts = config.get("host", "localhost")
+        self.port = config.get("port", 9200)
+
+        self.es = Elasticsearch([{"host": self.hosts, "port": self.port}])
+
+        self.index = config.get("suggester", "suggester")
+        self.type = config.get("type", "_doc")
+
+        if not self.es.indices.exists(index=self.index):
+            self.es.indices.create(
+                index=self.index,
                 body={
                     "mappings": {
                         "properties": {
@@ -38,11 +44,11 @@ class ElasticSearchSuggester(Suggester):
         if annotations is not None:
             body.update({"annotations_completion": annotations})
 
-        self._es.index(index=self._index, doc_type=self._type, id=hash_id, body=body)
+        self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=body)
 
     def complete(self, query, size=5):
-        results = self._es.search(
-            index=self._index,
+        results = self.es.search(
+            index=self.index,
             body={
                 "suggest": {
                     "meta_completion": {

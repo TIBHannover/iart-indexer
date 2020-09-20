@@ -17,6 +17,11 @@ def parse_args():
     return args
 
 
+def Suggester():
+    def __init__():
+        pass
+
+
 def build_autocompletion():
     database = ElasticSearchDatabase()
     suggester = ElasticSearchSuggester()

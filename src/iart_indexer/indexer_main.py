@@ -24,7 +24,9 @@ def parse_args():
     parser.add_argument("--image_input", help="")
     parser.add_argument("--batch", default=512, type=int, help="split images in batch")
 
-    parser.add_argument("--task", choices=["list_plugins", "copy_images", "indexing"], help="verbose output")
+    parser.add_argument(
+        "--task", choices=["list_plugins", "copy_images", "indexing", "build_suggester"], help="verbose output"
+    )
 
     parser.add_argument("--path", help="path to image or folder to indexing")
 
@@ -87,6 +89,10 @@ def main():
                         plugins.append(plugin)
 
             client.indexing(paths=args.path, plugins=plugins)
+
+        elif args.task == "build_suggester":
+
+            client.build_suggester()
 
     elif args.mode == "server":
         server = Server(config)

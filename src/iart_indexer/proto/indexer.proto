@@ -77,6 +77,7 @@ service Indexer {
   rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
   rpc indexing(IndexingRequest) returns (IndexingReply) {}
   rpc status(StatusRequest) returns (StatusReply) {}
+  rpc build_suggester(SuggesterRequest) returns (SuggesterReply) {}
   // rpc GetInfo(UpdateRequest) returns (Info) {}
 }
 
@@ -167,6 +168,9 @@ message IndexingReply { string id = 1; }
 message StatusRequest { string id = 1; }
 message StatusReply {
   string status = 1;
-  IndexingResult result = 2;
+  oneof result { IndexingResult indexing = 2; }
   // Tensor video = 3;
 }
+
+message SuggesterRequest {}
+message SuggesterReply { string id = 1; }

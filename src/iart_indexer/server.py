@@ -8,6 +8,7 @@ import grpc
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
+from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
 from iart_indexer.plugins import *
 from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin
 from iart_indexer.utils import image_from_proto, meta_from_proto
@@ -25,8 +26,7 @@ def compute_plugins(args):
         if exist_entry is None:
             meta = meta_from_proto(x.meta)
             database.insert_entry(
-                x.id,
-                {"id": x.id, "meta": meta},
+                x.id, {"id": x.id, "meta": meta},
             )
 
     # if database is not None:
@@ -53,6 +53,24 @@ def compute_plugins(args):
     return indexer_pb2.IndexingResult(
         results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
     )
+
+
+def build_autocompletion(args):
+
+    database = args["database"]
+    suggester = args["suggester"]
+    for x in database.all():
+        meta_values = []
+        if "meta" in x:
+            for key, value in x["meta"].items():
+                if isinstance(value, str):
+                    meta_values.append(value)
+        annotations_values = []
+        if "classifier" in x:
+            for classifier in x["classifier"]:
+                for annotations in classifier["annotations"]:
+                    annotations_values.append(annotations["name"])
+        suggester.update_entry(hash_id=x["id"], meta=meta_values, annotations=annotations_values)
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):
@@ -131,6 +149,27 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         # thread.start()
 
         return indexer_pb2.IndexingReply(id=job_id)
+
+    def build_suggester(self, request, context):
+
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+        suggester = ElasticSearchSuggester(config=self.config.get("elasticsearch", {}))
+
+        variable = {
+            "database": database,
+            "suggester": suggester,
+            "progress": 0,
+            "status": 0,
+            "result": "",
+            "future": None,
+        }
+        future = self.thread_pool.submit(build_autocompletion, variable)
+
+        job_id = uuid.uuid4().hex
+        variable["future"] = future
+        self.futures[job_id] = variable
+
+        return indexer_pb2.SuggesterReply(id=job_id)
 
     # def UpdateStatus(self, request, context):
 
