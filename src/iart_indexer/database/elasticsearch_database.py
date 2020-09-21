@@ -9,7 +9,9 @@ from iart_indexer.database.database import Database
 
 
 class ElasticSearchDatabase(Database):
-    def __init__(self, config: dict = {}):
+    def __init__(self, config: dict = None):
+        if config is None:
+            config = {}
 
         self.hosts = config.get("host", "localhost")
         self.port = config.get("port", 9200)
@@ -238,31 +240,35 @@ class ElasticSearchDatabase(Database):
             features = [features]
 
         for feature in features:
-            pass
-            # must.append({'fuzzy': {'feature.annotations.hash.split_0': {'value': '0000011001100000', 'fuzziness': 0}}})
-            # es.count(index='iart_2',
-            #          body={
-            #              'query': {
-            #                  'bool': {
-            #                      'should': [{
-            #                          'fuzzy': {
-            #                              'feature.annotations.hash.split_0': {
-            #                                  'value': '0000011001100000',
-            #                                  'fuzziness': 0
-            #                              }
-            #                          }
-            #                      }, {
-            #                          'fuzzy': {
-            #                              'feature.annotations.hash.split_1': {
-            #                                  'value': '0000011001100000',
-            #                                  'fuzziness': 0
-            #                              }
-            #                          }
-            #                      }],
-            #                      'minimum_should_match': 4
-            #                  }
-            #              }
-            #          })
+            # must.append({"fuzzy": {"feature.annotations.hash.split_0": {"value": "0000011001100000", "fuzziness": 0}}})
+            self.es.count(
+                index=self.index,
+                body={
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "fuzzy": {
+                                        "feature.annotations.hash.split_0": {
+                                            "value": "0000011001100000",
+                                            "fuzziness": 0,
+                                        }
+                                    }
+                                },
+                                {
+                                    "fuzzy": {
+                                        "feature.annotations.hash.split_1": {
+                                            "value": "0000011001100000",
+                                            "fuzziness": 0,
+                                        }
+                                    }
+                                },
+                            ],
+                            "minimum_should_match": 4,
+                        }
+                    }
+                },
+            )
 
         body = {"query": {"bool": {"should": terms}}}
         if sort is not None:

@@ -8,7 +8,9 @@ from iart_indexer.database.suggester import Suggester
 
 
 class ElasticSearchSuggester(Suggester):
-    def __init__(self, config=None):
+    def __init__(self, config: dict = None):
+        if config is None:
+            config = {}
 
         self.hosts = config.get("host", "localhost")
         self.port = config.get("port", 9200)

@@ -12,7 +12,7 @@ services:
       - elasticsearch
     volumes:
       - type: bind
-        source: /data/iart/models/web/
+        source: /data/1/data/iart/models/web/
         target: /models
       - type: bind
         source: /home/matthias/projects/iart/indexer/config.json
@@ -34,6 +34,10 @@ services:
       - discovery.type=single-node
     ports:
       - 9200:9200
+    volumes:
+      - type: bind
+        source: /data/1/data/iart/elasticsearch/data
+        target: /usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
@@ -41,10 +45,6 @@ services:
       nofile:
         soft: 65530
         hard: 65530
-    volumes:
-      - type: volume
-        source: elasticsearch_data
-        target: /usr/share/elasticsearch/data
 
 networks:
   indexer_net:
