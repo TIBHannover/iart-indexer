@@ -5,6 +5,8 @@ services:
     build: .
     ports:
       - 50051:50051
+    networks:
+      - indexer_net
     links:
       - redisai
       - elasticsearch
@@ -17,8 +19,16 @@ services:
         target: /config.json
   redisai:
     image: redisai/redisai:1.0.1
+    networks:
+      - indexer_net
+    volumes:
+      - type: volume
+        source: redisai_data
+        target: /data
   elasticsearch:
     image: elasticsearch:7.9.1
+    networks:
+      - indexer_net
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
@@ -35,3 +45,17 @@ services:
       nofile:
         soft: 65530
         hard: 65530
+    volumes:
+      - type: volume
+        source: elasticsearch_data
+        target: /usr/share/elasticsearch/data
+
+networks:
+  indexer_net:
+    name: indexer_network
+  
+volumes:
+  elasticsearch_data:
+    name: indexer_elasticsearch_data
+  redisai_data:
+    name: indexer_redisai_data

@@ -44,3 +44,42 @@ If you make changes to the projekt you will need to either include the `--build`
 ```bash
 docker build . -t iart/indexer
 ```
+
+### Import Data
+First make sure that the elasticsearch container runs and is on the correct network.
+(You can do this by simply running `docker-compose up` as described above)
+Then do the following (make sure to replace `/path/to/dump/`):
+
+```bash
+docker run \
+    -it \
+    --rm \
+    --network=indexer_network \
+    --volume=/path/to/dump/:/dump/ \
+    elasticdump/elasticsearch-dump:latest \
+        multielasticdump \
+        --direction dump \
+        --prefix iart \
+        --input=http://elasticsearch:9200 \
+        --output=/dump \
+        --includeType=mapping,data
+```
+
+### Export Data
+First make sure that the elasticsearch container runs and is on the correct network.
+(You can do this by simply running `docker-compose up` as described above)
+Then do the following (make sure to replace `/path/to/dump/`):
+
+```bash
+docker run \
+    -it \
+    --rm \
+    --network=indexer_network \
+    --volume=/path/to/dump/:/dump/ \
+    elasticdump/elasticsearch-dump:latest \
+        multielasticdump \
+        --direction load \
+        --input=/dump \
+        --output=http://elasticsearch:9200 \
+        --includeType=mapping,data
+```
