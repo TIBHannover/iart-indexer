@@ -253,7 +253,7 @@ class ElasticSearchDatabase(Database):
                                 "fuzzy": {
                                     f"feature.annotations.hash.{sub_hash_index}": {
                                         "value": value,
-                                        "fuzziness": int(feature["fuzziness"]) if "fuzziness" in features else 2,
+                                        "fuzziness": int(feature["fuzziness"]) if "fuzziness" in feature else 2,
                                     },
                                 }
                             }
@@ -274,7 +274,7 @@ class ElasticSearchDatabase(Database):
                                                     # "must": {"match": {"feature.plugin": "yuv_histogram_feature"}},
                                                     "should": hash_splits,
                                                     "minimum_should_match": int(feature["minimum_should_match"])
-                                                    if "minimum_should_match" in features
+                                                    if "minimum_should_match" in feature
                                                     else 4,
                                                 },
                                             },
