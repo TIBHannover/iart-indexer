@@ -199,6 +199,9 @@ class ElasticSearchDatabase(Database):
     def search(self, meta=None, features=None, classifiers=None, sort=None, size=5):
         if not self.es.indices.exists(index=self.index):
             return []
+        print("#########################")
+        print(f"{meta} {features} {classifiers} {sort} {size}")
+        print("#########################")
         terms = []
 
         if meta is not None:
@@ -236,39 +239,53 @@ class ElasticSearchDatabase(Database):
                 }
             )
 
-        if not isinstance(features, (list, set)):
-            features = [features]
+        if features is not None:
 
-        for feature in features:
-            # must.append({"fuzzy": {"feature.annotations.hash.split_0": {"value": "0000011001100000", "fuzziness": 0}}})
-            self.es.count(
-                index=self.index,
-                body={
-                    "query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "fuzzy": {
-                                        "feature.annotations.hash.split_0": {
-                                            "value": "0000011001100000",
-                                            "fuzziness": 0,
+            if not isinstance(features, (list, set)):
+                features = [features]
+
+            for feature in features:
+                hash_splits = []
+                for a in feature["annotations"]:
+                    for sub_hash_index, value in a["hash"].items():
+                        hash_splits.append(
+                            {
+                                "fuzzy": {
+                                    f"feature.annotations.hash.{sub_hash_index}": {
+                                        "value": value,
+                                        "fuzziness": int(feature["fuzziness"]) if "fuzziness" in features else 2,
+                                    },
+                                }
+                            }
+                        )
+
+                term = {
+                    "nested": {
+                        "path": "feature",
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"feature.plugin": feature["plugin"]}},
+                                    {
+                                        "nested": {
+                                            "path": "feature.annotations",
+                                            "query": {
+                                                "bool": {
+                                                    # "must": {"match": {"feature.plugin": "yuv_histogram_feature"}},
+                                                    "should": hash_splits,
+                                                    "minimum_should_match": int(feature["minimum_should_match"])
+                                                    if "minimum_should_match" in features
+                                                    else 4,
+                                                },
+                                            },
                                         }
-                                    }
-                                },
-                                {
-                                    "fuzzy": {
-                                        "feature.annotations.hash.split_1": {
-                                            "value": "0000011001100000",
-                                            "fuzziness": 0,
-                                        }
-                                    }
-                                },
-                            ],
-                            "minimum_should_match": 4,
-                        }
+                                    },
+                                ]
+                            },
+                        },
                     }
-                },
-            )
+                }
+                terms.append(term)
 
         body = {"query": {"bool": {"should": terms}}}
         if sort is not None:
