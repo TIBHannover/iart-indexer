@@ -34,10 +34,6 @@ services:
       - discovery.type=single-node
     ports:
       - 9200:9200
-    volumes:
-      - type: bind
-        source: /data/iart/elasticsearch/data
-        target: /usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
