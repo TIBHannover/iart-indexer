@@ -81,6 +81,9 @@ class ElasticSearchDatabase(Database):
                                             "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                         },
                                         "value": {"type": "float"},
+                                        "vec_64": {"type": "dense_vector", "dims": 64},
+                                        "vec_128": {"type": "dense_vector", "dims": 128},
+                                        "vec_256": {"type": "dense_vector", "dims": 256},
                                     },
                                 },
                                 "plugin": {
@@ -119,6 +122,22 @@ class ElasticSearchDatabase(Database):
                                 "year_min": {"type": "long"},
                             }
                         },
+                        "origin": {
+                            "properties": {
+                                "name": {
+                                    "type": "text",
+                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                },
+                                "license": {
+                                    "type": "text",
+                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                },
+                                "link": {
+                                    "type": "text",
+                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                },
+                            }
+                        },
                         "path": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
                     }
                 }
@@ -153,7 +172,14 @@ class ElasticSearchDatabase(Database):
                 binary = anno.feature.binary
                 feature = list(anno.feature.feature)
 
-                annotation_dict["value"] = feature
+                if len(feature) == 64:
+                    annotation_dict["val_64"] = feature
+                elif len(feature) == 128:
+                    annotation_dict["val_128"] = feature
+                elif len(feature) == 256:
+                    annotation_dict["val_256"] = feature
+                else:
+                    annotation_dict["value"] = feature
 
                 hash_splits_list = []
                 for x in range(4):
@@ -172,7 +198,7 @@ class ElasticSearchDatabase(Database):
 
                     annotations_list.append(annotation_dict)
 
-        print(annotations_list)
+        # print(annotations_list)
 
         # exit()
         if plugin_type in entry:

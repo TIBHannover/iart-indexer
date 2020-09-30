@@ -25,8 +25,9 @@ def compute_plugins(args):
         exist_entry = database.get_entry(x.id)
         if exist_entry is None:
             meta = meta_from_proto(x.meta)
+            origin = meta_from_proto(x.origin)
             database.insert_entry(
-                x.id, {"id": x.id, "meta": meta},
+                x.id, {"id": x.id, "meta": meta, "origin": origin},
             )
 
     # if database is not None:
@@ -63,8 +64,19 @@ def build_autocompletion(args):
         meta_values = []
         if "meta" in x:
             for key, value in x["meta"].items():
+                if key in ["artist_hash"]:
+                    continue
                 if isinstance(value, str):
                     meta_values.append(value)
+
+        origin_values = []
+        if "origin" in x:
+            for key, value in x["origin"].items():
+                if key in ["link", "license"]:
+                    continue
+                if isinstance(value, str):
+                    origin_values.append(value)
+
         annotations_values = []
         if "classifier" in x:
             for classifier in x["classifier"]:
@@ -191,7 +203,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 return indexer_pb2.StatusReply(status="running")
 
             result = job_data["future"].result()
-            return indexer_pb2.StatusReply(status="done", result=result)
+            return indexer_pb2.StatusReply(status="done", indexing=result)
 
             # for x in content:
             #     infoReply = GI.info.add()

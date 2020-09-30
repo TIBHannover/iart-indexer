@@ -90,7 +90,7 @@ message RoI {
   float height = 4;
 }
 
-message MetaField {
+message ValueField {
   string key = 1;
 
   oneof value {
@@ -107,7 +107,8 @@ message Image {
     bytes encoded = 3;
   }
   RoI roi = 4;
-  repeated MetaField meta = 5;
+  repeated ValueField meta = 5;
+  repeated ValueField origin = 6;
 }
 
 message PluginConfig {

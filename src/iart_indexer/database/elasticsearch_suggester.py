@@ -26,6 +26,7 @@ class ElasticSearchSuggester(Suggester):
                 body={
                     "mappings": {
                         "properties": {
+                            "origin_completion": {"type": "completion"},
                             "meta_completion": {"type": "completion"},
                             "features_completion": {"type": "completion"},
                             "annotations_completion": {"type": "completion"},
@@ -34,7 +35,7 @@ class ElasticSearchSuggester(Suggester):
                 },
             )
 
-    def update_entry(self, hash_id, meta=None, features=None, annotations=None):
+    def update_entry(self, hash_id, meta=None, features=None, annotations=None, origins=None):
         body = {}
 
         if meta is not None:
@@ -46,6 +47,9 @@ class ElasticSearchSuggester(Suggester):
         if annotations is not None:
             body.update({"annotations_completion": annotations})
 
+        if origins is not None:
+            body.update({"origin_completion": origins})
+
         self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=body)
 
     def complete(self, query, size=5):
@@ -53,6 +57,10 @@ class ElasticSearchSuggester(Suggester):
             index=self.index,
             body={
                 "suggest": {
+                    "origin_completion": {
+                        "prefix": query,
+                        "completion": {"field": "origin_completion", "skip_duplicates": True},
+                    },
                     "meta_completion": {
                         "prefix": query,
                         "completion": {"field": "meta_completion", "skip_duplicates": True},

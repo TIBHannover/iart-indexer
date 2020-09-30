@@ -88,7 +88,7 @@ def main():
                     else:
                         plugins.append(plugin)
 
-            client.indexing(paths=args.path, plugins=plugins)
+            client.indexing(paths=args.path, image_input=args.image_input, plugins=plugins)
 
         elif args.task == "build_suggester":
 

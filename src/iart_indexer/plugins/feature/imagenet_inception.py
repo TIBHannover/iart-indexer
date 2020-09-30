@@ -16,9 +16,9 @@ class ImageNetInceptionFeature(FeaturePlugin):
         "port": 6379,
         "model_name": "imagenet_inception",
         "model_device": "gpu",
-        "model_file": "/nfs/data/iart/models/web/imagenet_inception/byol_wikipedia.pt",
-        "pca_model_name": "/nfs/data/iart/models/web/imagenet_inception/pca_128.onnx",
-        "pca_model_file": "imagenet_inception_pca_128",
+        "model_file": "/nfs/data/iart/models/web/imagenet_inception/imagenet_inception.pb",
+        "pca_model_name": "imagenet_inception_pca_128",
+        "pca_model_file": "/nfs/data/iart/models/web/imagenet_inception/pca_128.onnx",
         "multicrop": True,
         "max_dim": None,
         "min_dim": 244,
@@ -46,7 +46,12 @@ class ImageNetInceptionFeature(FeaturePlugin):
         model = ml2rt.load_model(self.model_file)
 
         con.modelset(
-            self.model_name, backend="torch", device=self.model_device, data=model,
+            self.model_name,
+            backend="TF",
+            device=self.model_device,
+            data=model,
+            inputs=["ExpandDims"],
+            outputs=["pool_3"],
         )
 
         model = ml2rt.load_model(self.pca_model_file)
@@ -78,6 +83,9 @@ class ImageNetInceptionFeature(FeaturePlugin):
             entry_annotation = []
             image = image_from_proto(entry)
             image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
+
+            image = np.expand_dims(image, axis=0) / 256
+            image = image.astype(np.float32)
 
             con.tensorset("image", image)
             result = con.modelrun(self.model_name, "image", "embedding")

@@ -2,6 +2,7 @@ import functools
 import json
 import logging
 import multiprocessing as mp
+from multiprocessing.pool import ThreadPool
 import os
 import re
 import struct
@@ -36,6 +37,7 @@ def list_images(paths, name_as_hash=False):
             "filename": os.path.basename(path),
             "path": os.path.abspath(path),
             "meta": [],
+            "origin": [],
         }
         for path in paths
     ]
@@ -43,11 +45,14 @@ def list_images(paths, name_as_hash=False):
     return entries
 
 
-def list_jsonl(paths):
+def list_jsonl(paths, image_input=None):
     entries = []
     with open(paths, "r") as f:
         for line in f:
             entry = json.loads(line)
+
+            if "path" not in entry:
+                entry["path"] = os.path.join(image_input, entry["id"][0:3], entry["id"][3:6], f"{entry['id']}.jpg")
             entries.append(entry)
 
     return entries
@@ -119,6 +124,81 @@ def split_batch(entries, batch_size=512):
     return [entries[x * batch_size : (x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
 
 
+def indexing_job(args):
+    # try:
+    if True:
+        batch = args.get("batch", [])
+        host = args.get("host", "localhost")
+        port = args.get("port", "50051")
+        plugins = args.get("plugins", None)
+        stub = args.get("stub", None)
+
+        request = indexer_pb2.IndexingRequest()
+        request.update_database = True
+        if plugins is None:
+            # TODO
+            pass
+        else:
+            for plugin in plugins:
+                request_plugin = request.plugins.add()
+                request_plugin.name = plugin
+        for entry in batch:
+            request_image = request.images.add()
+            request_image.id = entry["id"]
+            # {"id": "d09d10a5b6474997ae2580086b2e4666", "meta": {"title": "Altes Rathaus", "year_min": 1267, "yaer_max": 1267, "location": "Aachen", "institution": "Rathaus"}, "path": "/home/matthias/projects/iart/web/media/d0/9d/d09d10a5b6474997ae2580086b2e4666.jpg", "filename": "130.jpg"}
+            # {"id": "8cfc09f13f0b45c8a56dcae17c33ed10", "meta": {"title": "Kirche Sankt Justinus (Mittelschiffarkaden)", "year_min": 925, "yaer_max": 950, "location": "H\u00f6chst (Frankfurt)", "institution": "Kirche Sankt Justinus"}, "path": "/home/matthias/projects/iart/web/media/8c/fc/8cfc09f13f0b45c8a56dcae17c33ed10.jpg", "filename": "136.jpg"}
+
+            for k, v in entry["meta"].items():
+
+                meta_field = request_image.meta.add()
+                meta_field.key = k
+                if isinstance(v, int):
+                    meta_field.int_val = v
+                if isinstance(v, float):
+                    meta_field.float_val = v
+                if isinstance(v, str):
+                    meta_field.string_val = v
+
+            if "origin" in entry:
+
+                for k, v in entry["origin"].items():
+
+                    origin_field = request_image.origin.add()
+                    origin_field.key = k
+                    if isinstance(v, int):
+                        origin_field.int_val = v
+                    if isinstance(v, float):
+                        origin_field.float_val = v
+                    if isinstance(v, str):
+                        origin_field.string_val = v
+
+            request_image.encoded = open(entry["path"], "rb").read()
+        # request_image.path = image.encode()
+        response = stub.indexing(request)
+
+        print("query status")
+        # # TODO timeout
+
+        status_request = indexer_pb2.StatusRequest()
+        status_request.id = response.id
+        for x in range(600):
+
+            status_response = stub.status(status_request)
+            if status_response.status == "done":
+                print("done")
+                break
+            time.sleep(1)
+            print(f"xxx {x} {status_response.status}")
+
+        print("query end")
+        return batch
+    # except KeyboardInterrupt:
+    #     raise
+    # except Exception as e:
+    #     print(e)
+    #     return None
+
+
 class Client:
     def __init__(self, config):
         self.host = config.get("host", "localhost")
@@ -139,7 +219,7 @@ class Client:
 
     def copy_images(self, paths, image_input=None, image_output=None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
-            entries = list_jsonl(paths)
+            entries = list_jsonl(paths, image_input)
         else:
             entries = list_images(paths)
 
@@ -149,15 +229,17 @@ class Client:
 
         return entries
 
-    def indexing(self, paths, batch_size: int = 512, plugins: list = None):
+    def indexing(self, paths, image_input=None, batch_size: int = 4, plugins: list = None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
-            entries = list_jsonl(paths)
+            entries = list_jsonl(paths, image_input)
         else:
             entries = list_images(paths)
 
         logging.info(f"Client: Start indexing {len(entries)} images")
 
         entries_list = split_batch(entries, batch_size)
+
+        count = 0
 
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -168,47 +250,19 @@ class Client:
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
 
-        count = 0
-        for entries_split in entries_list:
-            request = indexer_pb2.IndexingRequest()
-            request.update_database = True
-            if plugins is None:
-                # TODO
-                pass
-            else:
-                for plugin in plugins:
-                    request_plugin = request.plugins.add()
-                    request_plugin.name = plugin
-            for entry in entries_split:
-                request_image = request.images.add()
-                request_image.id = entry["id"]
-                # {"id": "d09d10a5b6474997ae2580086b2e4666", "meta": {"title": "Altes Rathaus", "year_min": 1267, "yaer_max": 1267, "location": "Aachen", "institution": "Rathaus"}, "path": "/home/matthias/projects/iart/web/media/d0/9d/d09d10a5b6474997ae2580086b2e4666.jpg", "filename": "130.jpg"}
-                # {"id": "8cfc09f13f0b45c8a56dcae17c33ed10", "meta": {"title": "Kirche Sankt Justinus (Mittelschiffarkaden)", "year_min": 925, "yaer_max": 950, "location": "H\u00f6chst (Frankfurt)", "institution": "Kirche Sankt Justinus"}, "path": "/home/matthias/projects/iart/web/media/8c/fc/8cfc09f13f0b45c8a56dcae17c33ed10.jpg", "filename": "136.jpg"}
+        with ThreadPool(4) as p:
+            for batch in p.imap(
+                indexing_job,
+                [
+                    {"batch": x, "host": self.host, "port": self.port, "plugins": plugins, "stub": stub}
+                    for x in entries_list
+                ],
+            ):
 
-                for k, v in entry["meta"].items():
-
-                    meta_field = request_image.meta.add()
-                    meta_field.key = k
-                    if isinstance(v, int):
-                        meta_field.int_val = v
-                    if isinstance(v, float):
-                        meta_field.float_val = v
-                    if isinstance(v, str):
-                        meta_field.string_val = v
-
-                request_image.encoded = open(entry["path"], "rb").read()
-            # request_image.path = image.encode()
-            response = stub.indexing(request)
-
-            # TODO timeout
-            while True:
-                status = self.status(response.id)
-                if status == "done":
-                    break
-                print(status)
-                time.sleep(1)
-            count += len(entries_split)
-            logging.info(f"Client: Indexing {count}/{len(entries)} images")
+                if batch is None:
+                    continue
+                count += len(batch)
+                logging.info(f"Client: Indexing {count}/{len(entries)} images")
 
     def status(self, job_id):
 
