@@ -17,43 +17,56 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
 def compute_plugins(args):
-    logging.info("Start computing job")
-    plugin_classes = args["plugin_classes"]
-    images = args["images"]
-    database = args["database"]
-    for x in images:
-        exist_entry = database.get_entry(x.id)
-        if exist_entry is None:
-            meta = meta_from_proto(x.meta)
-            origin = meta_from_proto(x.origin)
-            database.insert_entry(
-                x.id, {"id": x.id, "meta": meta, "origin": origin},
-            )
+    try:
+        logging.info("Start computing job")
+        plugin_classes = args["plugin_classes"]
+        images = args["images"]
+        database = args["database"]
+        existing = {}
+        for x in images:
+            exist_entry = database.get_entry(x.id)
+            if exist_entry is None:
+                meta = meta_from_proto(x.meta)
+                origin = meta_from_proto(x.origin)
+                database.insert_entry(
+                    x.id, {"id": x.id, "meta": meta, "origin": origin},
+                )
+            
+            # else:
+            #     #TODO remove already computed images 
+            #     for c in exist_entry['classifier']:
+            #         existing[c['plugin']] = c['version']
+            #     for f in exist_entry['feature']:
+            #         existing[c['plugin']] = c['version']
 
-    # if database is not None:
-    #     existing_hash = [x["id"] for x in list(database.all())]
-    #     for x in images:
-    #         if x.id not in existing_hash:
 
-    plugin_result_list = {}
-    for plugin_class in plugin_classes:
-        print(f"Plugin start {plugin_class}")
-        plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
-        plugin_results = plugin(images)
-        # # TODO entries_processed also contains the entries zip will be
 
-        print(f"Plugin done {plugin_class}")
-        for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-            if entry.id not in plugin_result_list:
-                plugin_result_list[entry.id] = {"image": entry, "results": []}
-            plugin_result_list[entry.id]["results"].extend(annotations)
-        if database is not None:
-            update_database(database, plugin_results)
-            print(f"Plugin result save {plugin_class}")
+        # if database is not None:
+        #     existing_hash = [x["id"] for x in list(database.all())]
+        #     for x in images:
+        #         if x.id not in existing_hash:
 
-    return indexer_pb2.IndexingResult(
-        results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
-    )
+        plugin_result_list = {}
+        for plugin_class in plugin_classes:
+            logging.info(f"Plugin start {plugin_class}")
+            plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
+            plugin_results = plugin(images)
+            # # TODO entries_processed also contains the entries zip will be
+
+            logging.info(f"Plugin done {plugin_class}")
+            for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
+                if entry.id not in plugin_result_list:
+                    plugin_result_list[entry.id] = {"image": entry, "results": []}
+                plugin_result_list[entry.id]["results"].extend(annotations)
+            if database is not None:
+                update_database(database, plugin_results)
+                logging.info(f"Plugin result save {plugin_class}")
+
+        return indexer_pb2.IndexingResult(
+            results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
+        )
+    except:
+        return None
 
 
 def build_autocompletion(args):
@@ -91,7 +104,11 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         self.feature_manager = feature_manager
         self.classifier_manager = classifier_manager
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=1)
-        self.futures = {}
+        self.futures = []
+
+        self.max_results = config.get('indexer',{}).get('max_results', 100)
+
+        print(self.max_results )
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
@@ -139,6 +156,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         if request.update_database:
             database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
+        job_id = uuid.uuid4().hex
         variable = {
             "plugin_classes": plugin_list,
             "images": request.images,
@@ -147,13 +165,21 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "status": 0,
             "result": "",
             "future": None,
+            "id": job_id,
         }
+
 
         future = self.thread_pool.submit(compute_plugins, variable)
 
-        job_id = uuid.uuid4().hex
         variable["future"] = future
-        self.futures[job_id] = variable
+        self.futures.append(variable)
+
+        self.futures = self.futures[-self.max_results:]
+        logging.info(f'Cache {len(self.futures)} future references')
+
+
+
+
 
         # thread = threading.Thread(target=compute_plugins, args=(variable,))
 
@@ -196,22 +222,26 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
     def status(self, request, context):
 
-        if request.id in self.futures:
-            job_data = self.futures[request.id]
+        futures_lut = {x['id']: i for i,x in enumerate(self.futures)}
+
+        if request.id in futures_lut:
+            job_data = self.futures[futures_lut[request.id]]
             done = job_data["future"].done()
             if not done:
                 return indexer_pb2.StatusReply(status="running")
 
             result = job_data["future"].result()
+            if result is None:
+                return indexer_pb2.StatusReply(status="error")
             return indexer_pb2.StatusReply(status="done", indexing=result)
 
             # for x in content:
             #     infoReply = GI.info.add()
             #     infoReply.dtype = indexer_pb2.DT_FLOAT
             #     infoReply.name = name
-            #     print(x)
+            #     logging.info(x)
             #     infoReply.proto_content = x.tobytes()
-            #     print(len(infoReply.proto_content))
+            #     logging.info(len(infoReply.proto_content))
             #     infoReply.shape.extend(x.shape)
 
         return indexer_pb2.StatusReply(status="error")
