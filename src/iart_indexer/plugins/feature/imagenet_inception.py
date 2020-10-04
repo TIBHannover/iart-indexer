@@ -93,7 +93,7 @@ class ImageNetInceptionFeature(FeaturePlugin):
 
             con.tensorset(f"image_{job_id}", image)
             result = con.modelrun(self.model_name, f"image_{job_id}", f"embedding_{job_id}")
-            embedding = con.tensorget("embedding")[0, ...]
+            embedding = con.tensorget(f"embedding_{job_id}")[0, ...]
 
             embedding = np.squeeze(embedding)
             embedding = np.expand_dims(embedding, axis=0)
