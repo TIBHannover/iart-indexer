@@ -1,4 +1,5 @@
 import math
+import uuid
 
 import ml2rt
 import numpy as np
@@ -6,7 +7,7 @@ import redisai as rai
 
 from iart_indexer import indexer_pb2
 from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
-from iart_indexer.utils import image_from_proto
+from iart_indexer.utils import image_from_proto, image_resize
 
 
 @FeaturePluginManager.export("YUVHistogramFeature")
@@ -16,6 +17,8 @@ class YUVHistogramFeature(FeaturePlugin):
         "port": 6379,
         "model_name": "yuv_histogram",
         "model_file": "/home/matthias/yuv_histogram.pt",
+        "max_dim": 244,
+        "min_dim": 244,
     }
 
     default_version = 0.1
@@ -27,15 +30,15 @@ class YUVHistogramFeature(FeaturePlugin):
         self.model_name = self.config["model_name"]
         self.model_file = self.config["model_file"]
 
+        self.max_dim = self.config["max_dim"]
+        self.min_dim = self.config["min_dim"]
+
     def register_rai(self):
         con = rai.Client(host=self.host, port=self.port)
         model = ml2rt.load_model(self.model_file)
 
         con.modelset(
-            self.model_name,
-            backend="torch",
-            device="cpu",
-            data=model,
+            self.model_name, backend="torch", device="cpu", data=model,
         )
 
     def check_rai(self):
@@ -55,11 +58,18 @@ class YUVHistogramFeature(FeaturePlugin):
         for entry in entries:
             entry_annotation = []
             image = image_from_proto(entry)
+            image = image_resize(image, max_dim=self.max_dim)
+            image = image.astype(np.float32)
 
-            con.tensorset("image", image)
-            result = con.modelrun(self.model_name, "image", "output")
-            output = con.tensorget("output")
+            job_id = uuid.uuid4().hex
+
+            con.tensorset(f"image_{job_id}", image)
+            result = con.modelrun(self.model_name, f"image_{job_id}", f"output_{job_id}")
+            output = con.tensorget(f"output_{job_id}")
             uv_histogram_norm_bin = "".join([str(int(x > 0)) for x in (output / np.mean(output)).tolist()])
+
+            con.delete(f"image_{job_id}")
+            con.delete(f"output_{job_id}")
 
             # hash_splits_list = []
             # for x in range(math.ceil(len(uv_histogram_norm_bin) / 16)):

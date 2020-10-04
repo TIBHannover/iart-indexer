@@ -1,4 +1,6 @@
 import math
+import uuid
+
 
 import ml2rt
 import numpy as np
@@ -39,10 +41,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
         model = ml2rt.load_model(self.model_file)
 
         con.modelset(
-            self.model_name,
-            backend="torch",
-            device=self.model_device,
-            data=model,
+            self.model_name, backend="torch", device=self.model_device, data=model, batch=16,
         )
 
     def check_rai(self):
@@ -65,11 +64,16 @@ class ByolEmbeddingFeature(FeaturePlugin):
             image = image_from_proto(entry)
             image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
 
-            con.tensorset("image", image)
-            result = con.modelrun(self.model_name, "image", "output")
-            output = con.tensorget("output")[0, ...]
+            job_id = uuid.uuid4().hex
+
+            con.tensorset(f"image_{job_id}", image)
+            result = con.modelrun(self.model_name, f"image_{job_id}", f"output_{job_id}")
+            output = con.tensorget(f"output_{job_id}")[0, ...]
             output_bin = (output > 0).astype(np.int32).tolist()
             output_bin_str = "".join([str(x) for x in output_bin])
+
+            con.delete(f"image_{job_id}")
+            con.delete(f"output_{job_id}")
 
             entry_annotation.append(
                 indexer_pb2.PluginResult(

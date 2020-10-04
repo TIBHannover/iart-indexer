@@ -31,13 +31,14 @@ def compute_plugins(args):
                 database.insert_entry(
                     x.id, {"id": x.id, "meta": meta, "origin": origin},
                 )
-            
+            else:
+                existing[x.id] ={}
             # else:
-            #     #TODO remove already computed images 
-            #     for c in exist_entry['classifier']:
-            #         existing[c['plugin']] = c['version']
-            #     for f in exist_entry['feature']:
-            #         existing[c['plugin']] = c['version']
+                #TODO remove already computed images 
+                for c in exist_entry['classifier']:
+                    existing[x.id][c['plugin']] = c['version']
+                for f in exist_entry['feature']:
+                    existing[x.id][f['plugin']] = f['version']
 
 
 
@@ -48,24 +49,49 @@ def compute_plugins(args):
 
         plugin_result_list = {}
         for plugin_class in plugin_classes:
-            logging.info(f"Plugin start {plugin_class}")
+            # logging.info(dir(plugin_class["plugin"]))
+
             plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
-            plugin_results = plugin(images)
+
+            plugin_version = plugin.version
+            plugin_name = plugin.name
+
+
+            logging.info(f"Plugin start {plugin.name}:{plugin.version}")
+
+            images_plugin = []
+            for i in images:
+                add = True
+                if i.id in existing:
+                    for p,v in existing[i.id].items():
+                        # logging.info(f'      {p}:{v}')
+                        if p == plugin_name:
+                            if plugin_version <= v:
+                                add=False
+                # logging.info(f'{add} {plugin_version} {plugin_name} { i.id in existing}')
+                if add:
+                    images_plugin.append(i)
+
+
+
+            # exit()
+            plugin_results = plugin(images_plugin)
             # # TODO entries_processed also contains the entries zip will be
 
-            logging.info(f"Plugin done {plugin_class}")
+            logging.info(f"Plugin done {plugin.name}:{plugin.version}")
             for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
                 if entry.id not in plugin_result_list:
                     plugin_result_list[entry.id] = {"image": entry, "results": []}
                 plugin_result_list[entry.id]["results"].extend(annotations)
             if database is not None:
                 update_database(database, plugin_results)
-                logging.info(f"Plugin result save {plugin_class}")
+                logging.info(f"Plugin result save {plugin.name}:{plugin.version}")
 
         return indexer_pb2.IndexingResult(
             results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
         )
-    except:
+    except Exception as e:
+        print(e)
         return None
 
 
@@ -103,12 +129,11 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         self.config = config
         self.feature_manager = feature_manager
         self.classifier_manager = classifier_manager
-        self.thread_pool = futures.ThreadPoolExecutor(max_workers=1)
+        self.thread_pool = futures.ThreadPoolExecutor(max_workers=4)
         self.futures = []
 
         self.max_results = config.get('indexer',{}).get('max_results', 100)
 
-        print(self.max_results )
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()

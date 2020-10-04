@@ -13,6 +13,38 @@ import PIL
 from iart_indexer import indexer_pb2
 
 
+def image_normalize(image):
+    if len(image.shape) == 2:
+
+        return np.stack([image] * 3, -1)
+
+    if len(image.shape) == 3:
+        if image.shape[-1] == 4:
+            return image[..., 0:3]
+        if image.shape[-1] == 1:
+            return np.concatenate([image] * 3, -1)
+
+    if len(image.shape) == 4:
+        return image_normalize(image[0, ...])
+
+    return image
+
+
+def image_crop(image, size=None):
+
+    image = PIL.Image.fromarray(image)
+    width, height = image.size  # Get dimensions
+
+    left = (width - size[0]) / 2
+    top = (height - size[1]) / 2
+    right = (width + size[0]) / 2
+    bottom = (height + size[1]) / 2
+
+    # Crop the center of the image
+    image = image.crop((left, top, right, bottom))
+    return np.array(image)
+
+
 def image_from_proto(image_proto):
     image_field = image_proto.WhichOneof("image")
     if image_field == "path":
@@ -20,9 +52,9 @@ def image_from_proto(image_proto):
     if image_field == "encoded":
         image = imageio.imread(image_proto.encoded)
 
-    if len(image.shape) == 2:
-        image = np.stack([image] * 3, -1)
-    return image
+    # if len(image.shape) == 2:
+    #     image = np.stack([image] * 3, -1)
+    return image_normalize(image)
 
 
 def image_resize(image, max_dim=None, min_dim=None, size=None):

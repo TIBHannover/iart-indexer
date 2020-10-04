@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import threading
+import uuid
 
 import grpc
 import json
@@ -89,6 +90,7 @@ class KaggleDenseClassifier(ClassifierPlugin):
             data=model,
             inputs=["image"],
             outputs=[self.name_to_tensor[x] for x in self.outputs],
+            batch=16,
         )
 
     def check_rai(self):
@@ -112,11 +114,15 @@ class KaggleDenseClassifier(ClassifierPlugin):
             image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
             image = np.expand_dims(image, 0)
 
-            con.tensorset("image", image)
-            result = con.modelrun(self.model_name, "image", ["genre_probabilities", "style_probabilities"])
+            job_id = uuid.uuid4().hex
 
-            genre_probabilities = con.tensorget("genre_probabilities")
-            style_probabilities = con.tensorget("style_probabilities")
+            con.tensorset(f"image_{job_id}", image)
+            result = con.modelrun(
+                self.model_name, f"image_{job_id}", [f"genre_probabilities_{job_id}", f"style_probabilities_{job_id}"]
+            )
+
+            genre_probabilities = con.tensorget(f"genre_probabilities_{job_id}")
+            style_probabilities = con.tensorget(f"style_probabilities_{job_id}")
 
             concepts = []
 
@@ -134,6 +140,9 @@ class KaggleDenseClassifier(ClassifierPlugin):
             if style_prob > self.threshold:
                 concepts.append(indexer_pb2.Concept(concept=style[0], type="style", prob=style_prob))
 
+            con.delete(f"image_{job_id}")
+            con.delete(f"genre_probabilities_{job_id}")
+            con.delete(f"style_probabilities_{job_id}")
             #     # decode results
             #     artist_name = np.array(results.outputs["artist_name"].string_val)
             #     artist = np.array(results.outputs["artist"].int64_val)
