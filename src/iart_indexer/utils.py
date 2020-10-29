@@ -9,6 +9,7 @@ import uuid
 import imageio
 import numpy as np
 import PIL
+import numbers
 
 from iart_indexer import indexer_pb2
 
@@ -99,6 +100,68 @@ def meta_from_proto(proto):
         if field == "float_val":
             result_dict[m.key] = m.float_val
     return result_dict
+
+
+def meta_to_proto(proto, data):
+
+    for k, v in data.items():
+        meta = proto.add()
+        if isinstance(v, numbers.Integral):
+            meta.int_val = v
+            meta.key = k
+        elif isinstance(v, numbers.Real):
+            meta.float_val = v
+            meta.key = k
+        elif isinstance(v, str):
+            meta.string_val = v
+            meta.key = k
+    return proto
+
+
+def classifier_from_proto(proto):
+    result_list = []
+    for c in proto:
+        result_list.append(
+            {"plugin": c.plugin, "annotations": [{"name": a.concept, "value": a.prob} for a in c.concepts]}
+        )
+    return result_list
+
+
+def classifier_to_proto(proto, data):
+    for c in data:
+        classifier = proto.add()
+        classifier.plugin = c["plugin"]
+        for a in c["annotations"]:
+            concept = classifier.concepts.add()
+            concept.concept = a["name"]
+            concept.type = a["type"]
+            concept.prob = a["value"]
+    return proto
+
+
+def feature_from_proto(proto):
+    result_list = []
+    for f in proto:
+        result_list.append({"plugin": f.plugin, "annotations": [{"feature": list(f.feature), "type": f.type}]})
+    return result_list
+
+
+def feature_to_proto(proto, data):
+    for f in data:
+        feature = proto.add()
+        feature.plugin = f["plugin"]
+        # TODO support list here
+        for a in f["annotations"]:
+            if "val_64" in a:
+                feature.feature.extend(a["val_64"])
+
+            if "val_128" in a:
+                feature.feature.extend(a["val_128"])
+
+            if "val_256" in a:
+                feature.feature.extend(a["val_256"])
+            feature.type = a["type"]
+    return proto
 
 
 def convert_name(name):

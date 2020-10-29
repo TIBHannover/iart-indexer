@@ -30,12 +30,7 @@ message Tensor {
   repeated int32 shape = 2;
 
   enum Inerpretation {
-    DOT = 0;
-    LINE = 1;
-    TRIANGLE = 2;
-    RECTANGLE = 3;
-    PENTAGON = 4;
-    IMAGE = 5;
+    DOT = 0; LINE = 1; TRIANGLE = 2; RECTANGLE = 3; PENTAGON = 4; IMAGE = 5;
   }
 
   string name = 14;
@@ -48,25 +43,25 @@ message Tensor {
   repeated float float_val = 5;
 
   // DT_DOUBLE.
-  repeated double double_val = 6 [ packed = true ];
+  repeated double double_val = 6 [packed = true];
 
   // DT_INT32, DT_INT16, DT_INT8, DT_UINT8.
-  repeated int32 int_val = 7 [ packed = true ];
+  repeated int32 int_val = 7 [packed = true];
 
   // DT_STRING
   repeated bytes string_val = 8;
 
   // DT_COMPLEX64. scomplex_val(2*i) and scomplex_val(2*i+1) are real
   // and imaginary parts of i-th single precision complex.
-  repeated float scomplex_val = 9 [ packed = true ];
+  repeated float scomplex_val = 9 [packed = true];
 
   // DT_INT64
-  repeated int64 int64_val = 10 [ packed = true ];
+  repeated int64 int64_val = 10 [packed = true];
 
   // DT_BOOL
-  repeated bool bool_val = 11 [ packed = true ];
+  repeated bool bool_val = 11 [packed = true];
 
-  repeated int32 half_val = 12 [ packed = true ];
+  repeated int32 half_val = 12 [packed = true];
 }
 
 // python -m grpc_tools.protoc -I../web --python_out=. --grpc_python_out=.
@@ -74,14 +69,20 @@ message Tensor {
 // --grpc_python_out=. ../backend/tunnel.proto create json stringds
 
 service Indexer {
-  rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
-  rpc indexing(IndexingRequest) returns (IndexingReply) {}
-  rpc status(StatusRequest) returns (StatusReply) {}
-  rpc build_suggester(SuggesterRequest) returns (SuggesterReply) {}
+  rpc list_plugins(ListPluginsRequest) returns(ListPluginsReply) {}
+  rpc indexing(IndexingRequest) returns(IndexingReply) {}
+  rpc status(StatusRequest) returns(StatusReply) {}
+  rpc build_suggester(SuggesterRequest) returns(SuggesterReply) {}
+  rpc search(SearchRequest) returns(SearchReply) {}
+  rpc list_search_result(ListSearchResultRequest)
+      returns(ListSearchResultReply) {}
   // rpc GetInfo(UpdateRequest) returns (Info) {}
 }
 
-message PluginRun { string name = 1; }
+message PluginRun {
+  string name = 1;
+  float weight = 2;
+}
 
 message RoI {
   float x = 1;
@@ -124,13 +125,17 @@ message Concept {
   float prob = 3;
 }
 
-message ClassifierResult { repeated Concept concepts = 1; }
+message ClassifierResult {
+  string plugin = 1;
+  repeated Concept concepts = 2;
+}
 
 // TODO maybe move this to feature list
 message FeatureResult {
-  string type = 1;
-  string binary = 2;
-  repeated float feature = 3;
+  string plugin = 1;
+  string type = 2;
+  string binary = 3;
+  repeated float feature = 4;
 }
 
 message PluginResult {
@@ -175,3 +180,40 @@ message StatusReply {
 
 message SuggesterRequest {}
 message SuggesterReply { string id = 1; }
+
+message FeatureSearchTerm {
+  repeated PluginRun plugins = 1;
+
+  Image image = 2;
+}
+
+// Maybe mearch classifier and meta at some point
+message ClassifierSearchTerm { string query = 1; }
+
+message MetaSearchTerm { string query = 1; }
+
+message SearchTerm {
+  oneof term {
+    MetaSearchTerm meta = 1;
+    FeatureSearchTerm feature = 2;
+    ClassifierSearchTerm classifier = 3;
+  }
+}
+
+message SearchRequest {
+  repeated SearchTerm terms = 1;
+  enum Sorting { NONE = 0; FEATURE = 1; CLASSIFIER = 2; }
+  Sorting sorting = 2;
+}
+message SearchReply { string id = 1; }
+
+message SearchResultEntry {
+  string id = 1;
+  repeated ValueField meta = 2;
+  repeated ValueField origin = 3;
+  repeated ClassifierResult classifier = 4;
+  repeated FeatureResult feature = 5;
+}
+
+message ListSearchResultRequest { string id = 1; }
+message ListSearchResultReply { repeated SearchResultEntry entries = 1; }

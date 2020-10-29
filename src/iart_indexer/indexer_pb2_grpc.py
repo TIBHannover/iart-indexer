@@ -38,6 +38,16 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.SuggesterRequest.SerializeToString,
             response_deserializer=indexer__pb2.SuggesterReply.FromString,
         )
+        self.search = channel.unary_unary(
+            "/Indexer/search",
+            request_serializer=indexer__pb2.SearchRequest.SerializeToString,
+            response_deserializer=indexer__pb2.SearchReply.FromString,
+        )
+        self.list_search_result = channel.unary_unary(
+            "/Indexer/list_search_result",
+            request_serializer=indexer__pb2.ListSearchResultRequest.SerializeToString,
+            response_deserializer=indexer__pb2.ListSearchResultReply.FromString,
+        )
 
 
 class IndexerServicer(object):
@@ -71,6 +81,18 @@ class IndexerServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def search(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def list_search_result(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_IndexerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -93,6 +115,16 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.build_suggester,
             request_deserializer=indexer__pb2.SuggesterRequest.FromString,
             response_serializer=indexer__pb2.SuggesterReply.SerializeToString,
+        ),
+        "search": grpc.unary_unary_rpc_method_handler(
+            servicer.search,
+            request_deserializer=indexer__pb2.SearchRequest.FromString,
+            response_serializer=indexer__pb2.SearchReply.SerializeToString,
+        ),
+        "list_search_result": grpc.unary_unary_rpc_method_handler(
+            servicer.list_search_result,
+            request_deserializer=indexer__pb2.ListSearchResultRequest.FromString,
+            response_serializer=indexer__pb2.ListSearchResultReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("Indexer", rpc_method_handlers)
@@ -213,6 +245,64 @@ class Indexer(object):
             "/Indexer/build_suggester",
             indexer__pb2.SuggesterRequest.SerializeToString,
             indexer__pb2.SuggesterReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def search(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/search",
+            indexer__pb2.SearchRequest.SerializeToString,
+            indexer__pb2.SearchReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def list_search_result(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/list_search_result",
+            indexer__pb2.ListSearchResultRequest.SerializeToString,
+            indexer__pb2.ListSearchResultReply.FromString,
             options,
             channel_credentials,
             insecure,

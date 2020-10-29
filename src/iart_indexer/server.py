@@ -4,20 +4,25 @@ import time
 import uuid
 from concurrent import futures
 
+import numpy as np
+
 import grpc
+
+from google.protobuf.json_format import MessageToJson
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
 from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
 from iart_indexer.plugins import *
 from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin
-from iart_indexer.utils import image_from_proto, meta_from_proto
+from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
 def compute_plugins(args):
     try:
+        # if True:
         logging.info("Start computing job")
         plugin_classes = args["plugin_classes"]
         images = args["images"]
@@ -32,15 +37,13 @@ def compute_plugins(args):
                     x.id, {"id": x.id, "meta": meta, "origin": origin},
                 )
             else:
-                existing[x.id] ={}
-            # else:
-                #TODO remove already computed images 
-                for c in exist_entry['classifier']:
-                    existing[x.id][c['plugin']] = c['version']
-                for f in exist_entry['feature']:
-                    existing[x.id][f['plugin']] = f['version']
-
-
+                existing[x.id] = {}
+                # else:
+                # TODO remove already computed images
+                for c in exist_entry["classifier"]:
+                    existing[x.id][c["plugin"]] = c["version"]
+                for f in exist_entry["feature"]:
+                    existing[x.id][f["plugin"]] = f["version"]
 
         # if database is not None:
         #     existing_hash = [x["id"] for x in list(database.all())]
@@ -56,23 +59,20 @@ def compute_plugins(args):
             plugin_version = plugin.version
             plugin_name = plugin.name
 
-
             logging.info(f"Plugin start {plugin.name}:{plugin.version}")
 
             images_plugin = []
             for i in images:
                 add = True
                 if i.id in existing:
-                    for p,v in existing[i.id].items():
+                    for p, v in existing[i.id].items():
                         # logging.info(f'      {p}:{v}')
                         if p == plugin_name:
                             if plugin_version <= v:
-                                add=False
+                                add = False
                 # logging.info(f'{add} {plugin_version} {plugin_name} { i.id in existing}')
                 if add:
                     images_plugin.append(i)
-
-
 
             # exit()
             plugin_results = plugin(images_plugin)
@@ -88,10 +88,211 @@ def compute_plugins(args):
                 logging.info(f"Plugin result save {plugin.name}:{plugin.version}")
 
         return indexer_pb2.IndexingResult(
-            results=[indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()]
+            results=[
+                indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()
+            ]
         )
     except Exception as e:
-        print(e)
+        logging.error(e)
+        return None
+
+
+def search(args):
+    try:
+        # if True:
+        logging.info("Start searching job")
+        query = args["query"]
+        database = args["database"]
+
+        #
+        # if not request.is_ajax():
+        #     return Http404()
+
+        search_terms = []
+        for term in query.terms:
+
+            term_type = term.WhichOneof("term")
+            if term_type == "meta":
+                meta = term.meta
+                search_terms.append(
+                    {
+                        "multi_match": {
+                            "query": meta.query,
+                            "fields": ["meta.title", "meta.author", "meta.location", "meta.institution"],
+                        }
+                    }
+                )
+            if term_type == "classifier":
+                classifier = term.classifier
+
+                search_terms.append(
+                    {
+                        "nested": {
+                            "path": "classifier",
+                            "query": {
+                                "nested": {
+                                    "path": "classifier.annotations",
+                                    "query": {
+                                        "bool": {
+                                            "should": [{"match": {"classifier.annotations.name": classifier.query}}]
+                                        }
+                                    },
+                                }
+                            },
+                        }
+                    }
+                )
+
+            if term_type == "feature":
+                feature = term.feature
+
+                if feature.image.id is not None:
+                    entry = database.get_entry(feature.image.id)
+                    if entry is None:
+                        return
+
+                    query_feature = []
+
+                    for p in feature.plugins:
+                        # TODO add weight
+                        for f in entry["feature"]:
+                            if p.name.lower() == f["plugin"].lower():
+                                print("match")
+
+                                # TODO add parameters for that
+                                if f["plugin"] == "yuv_histogram_feature":
+                                    fuzziness = 1
+                                    minimum_should_match = 4
+
+                                elif f["plugin"] == "byol_embedding_feature":
+                                    fuzziness = 2
+                                    minimum_should_match = 1
+
+                                elif f["plugin"] == "image_net_inception_feature":
+                                    fuzziness = 2
+                                    minimum_should_match = 1
+
+                                else:
+                                    continue
+
+                                query_feature.append(
+                                    {
+                                        "plugin": f["plugin"],
+                                        "annotations": f["annotations"],
+                                        "fuzziness": fuzziness,
+                                        "minimum_should_match": minimum_should_match,
+                                        "weight": p.weight,
+                                    }
+                                )
+
+                # TODO add example search here
+                else:
+                    query_feature = []
+
+                for feature in query_feature:
+                    hash_splits = []
+                    for a in feature["annotations"]:
+                        for sub_hash_index, value in a["hash"].items():
+                            hash_splits.append(
+                                {
+                                    "fuzzy": {
+                                        f"feature.annotations.hash.{sub_hash_index}": {
+                                            "value": value,
+                                            "fuzziness": int(feature["fuzziness"]) if "fuzziness" in feature else 2,
+                                        },
+                                    }
+                                }
+                            )
+
+                    term = {
+                        "nested": {
+                            "path": "feature",
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {"match": {"feature.plugin": feature["plugin"]}},
+                                        {
+                                            "nested": {
+                                                "path": "feature.annotations",
+                                                "query": {
+                                                    "bool": {
+                                                        # "must": {"match": {"feature.plugin": "yuv_histogram_feature"}},
+                                                        "should": hash_splits,
+                                                        "minimum_should_match": int(feature["minimum_should_match"])
+                                                        if "minimum_should_match" in feature
+                                                        else 4,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                    ]
+                                },
+                            },
+                        }
+                    }
+                    search_terms.append(term)
+
+        entries = database.raw_search(terms=search_terms, size=100)
+
+        # TODO not the best way but it works now
+        # TODO move to elasticsearch
+        print(dir(indexer_pb2.SearchRequest))
+        print(dir(indexer_pb2.SearchRequest.Sorting))
+        print(query.sorting)
+        if query.sorting == indexer_pb2.SearchRequest.Sorting.CLASSIFIER:
+            pass
+
+        if query.sorting == indexer_pb2.SearchRequest.Sorting.FEATURE:
+
+            if query_feature is not None:
+                new_entries = []
+                for e in entries:
+                    score = 0
+                    for q_f in query_feature:
+                        for e_f in e["feature"]:
+                            if q_f["plugin"] != e_f["plugin"]:
+                                continue
+                            if "val_64" in e_f["annotations"][0]:
+                                a = e_f["annotations"][0]["val_64"]
+                                b = q_f["annotations"][0]["val_64"]
+                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+                            if "val_128" in e_f["annotations"][0]:
+                                a = e_f["annotations"][0]["val_128"]
+                                b = q_f["annotations"][0]["val_128"]
+                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+                            if "val_256" in e_f["annotations"][0]:
+                                a = e_f["annotations"][0]["val_256"]
+                                b = q_f["annotations"][0]["val_256"]
+                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+                    print(score)
+                    new_entries.append((score, e))
+
+                new_entries = sorted(new_entries, key=lambda x: -x[0])
+                entries = [x[1] for x in new_entries]
+                print("++++++++++++++++++++")
+                print(entries[0])
+
+        result = indexer_pb2.ListSearchResultReply()
+
+        for e in entries:
+            entry = result.entries.add()
+            entry.id = e["id"]
+            if "meta" in e:
+                meta_to_proto(entry.meta, e["meta"])
+            if "origin" in e:
+                meta_to_proto(entry.origin, e["origin"])
+            if "classifier" in e:
+                classifier_to_proto(entry.classifier, e["classifier"])
+            if "feature" in e:
+                feature_to_proto(entry.feature, e["feature"])
+
+        # jsonObj = MessageToJson(result)
+        # logging.info(jsonObj)
+
+        return result
+
+    except Exception as e:
+        logging.error(repr(e))
         return None
 
 
@@ -132,8 +333,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=4)
         self.futures = []
 
-        self.max_results = config.get('indexer',{}).get('max_results', 100)
-
+        self.max_results = config.get("indexer", {}).get("max_results", 100)
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
@@ -193,18 +393,13 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "id": job_id,
         }
 
-
         future = self.thread_pool.submit(compute_plugins, variable)
 
         variable["future"] = future
         self.futures.append(variable)
 
-        self.futures = self.futures[-self.max_results:]
-        logging.info(f'Cache {len(self.futures)} future references')
-
-
-
-
+        self.futures = self.futures[-self.max_results :]
+        logging.info(f"Cache {len(self.futures)} future references")
 
         # thread = threading.Thread(target=compute_plugins, args=(variable,))
 
@@ -234,20 +429,9 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         return indexer_pb2.SuggesterReply(id=job_id)
 
-    # def UpdateStatus(self, request, context):
-
-    #     unique_id = request.unique_id
-    #     if unique_id in self.threads:
-    #         US = indexer_pb2.Status()
-    #         US.status = self.threads[unique_id][1]["progress"]
-    #         US.result.dtype = indexer_pb2.DT_STRING
-    #         US.result.proto_content = codecs.encode(self.threads[unique_id][1]["result"], "utf-8")
-
-    #         return US
-
     def status(self, request, context):
 
-        futures_lut = {x['id']: i for i,x in enumerate(self.futures)}
+        futures_lut = {x["id"]: i for i, x in enumerate(self.futures)}
 
         if request.id in futures_lut:
             job_data = self.futures[futures_lut[request.id]]
@@ -270,6 +454,62 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             #     infoReply.shape.extend(x.shape)
 
         return indexer_pb2.StatusReply(status="error")
+
+    def search(self, request, context):
+
+        jsonObj = MessageToJson(request)
+        logging.info(jsonObj)
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+
+        job_id = uuid.uuid4().hex
+        variable = {
+            "database": database,
+            "query": request,
+            "progress": 0,
+            "status": 0,
+            "result": "",
+            "future": None,
+            "id": job_id,
+        }
+        future = self.thread_pool.submit(search, variable)
+
+        variable["future"] = future
+        self.futures.append(variable)
+
+        return indexer_pb2.SearchReply(id=job_id)
+
+    def list_search_result(self, request, context):
+
+        futures_lut = {x["id"]: i for i, x in enumerate(self.futures)}
+
+        if request.id in futures_lut:
+            job_data = self.futures[futures_lut[request.id]]
+            done = job_data["future"].done()
+            if not done:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("Still running")
+                return indexer_pb2.ListSearchResultReply()
+
+            result = job_data["future"].result()
+            if result is None:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Search error")
+                return indexer_pb2.ListSearchResultReply()
+
+            return result
+
+            # for x in content:
+            #     infoReply = GI.info.add()
+            #     infoReply.dtype = indexer_pb2.DT_FLOAT
+            #     infoReply.name = name
+            #     logging.info(x)
+            #     infoReply.proto_content = x.tobytes()
+            #     logging.info(len(infoReply.proto_content))
+            #     infoReply.shape.extend(x.shape)
+
+        context.set_code(grpc.StatusCode.NOT_FOUND)
+        context.set_details("Job unknown")
+        return indexer_pb2.ListSearchResultReply()
 
 
 def update_database(database, plugin_results):

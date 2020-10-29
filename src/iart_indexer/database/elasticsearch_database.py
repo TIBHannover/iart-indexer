@@ -1,9 +1,11 @@
 import math
+import json
 from datetime import datetime
 
 from elasticsearch import Elasticsearch, exceptions
 
 from iart_indexer.database.database import Database
+
 
 # from elasticsearch_dsl import Search
 
@@ -330,6 +332,37 @@ class ElasticSearchDatabase(Database):
                     )
 
             body.update({"sort": sort_list})
+        try:
+            results = self.es.search(index=self.index, body=body, size=size)
+            for x in results["hits"]["hits"]:
+                yield x["_source"]
+        except exceptions.NotFoundError:
+            return []
+        # self.es.update('')
+
+    def raw_search(self, terms, sort=None, size=5):
+        if not self.es.indices.exists(index=self.index):
+            return []
+
+        body = {"query": {"bool": {"should": terms}}}
+        if sort is not None:
+            sort_list = []
+            if not isinstance(sort, (list, set)):
+                sort = [sort]
+            for x in sort:
+                if x == "classifier":
+                    sort_list.append(
+                        {
+                            "classifier.annotations.value": {
+                                "order": "desc",
+                                "nested": {"path": "classifier", "nested": {"path": "classifier.annotations"}},
+                            }
+                        }
+                    )
+
+            body.update({"sort": sort_list})
+
+        print(json.dumps(body, indent=2))
         try:
             results = self.es.search(index=self.index, body=body, size=size)
             for x in results["hits"]["hits"]:

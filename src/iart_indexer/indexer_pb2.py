@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'P\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rindexer.proto\"\x87\x03\n\x06Tensor\x12\x18\n\x05\x64type\x18\x01 \x01(\x0e\x32\t.DataType\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\x0c\n\x04name\x18\x0e \x01(\t\x12\x15\n\rproto_content\x18\x04 \x01(\x0c\x12$\n\x05inter\x18\r \x01(\x0e\x32\x15.Tensor.Inerpretation\x12\x11\n\tfloat_val\x18\x05 \x03(\x02\x12\x16\n\ndouble_val\x18\x06 \x03(\x01\x42\x02\x10\x01\x12\x13\n\x07int_val\x18\x07 \x03(\x05\x42\x02\x10\x01\x12\x12\n\nstring_val\x18\x08 \x03(\x0c\x12\x18\n\x0cscomplex_val\x18\t \x03(\x02\x42\x02\x10\x01\x12\x15\n\tint64_val\x18\n \x03(\x03\x42\x02\x10\x01\x12\x14\n\x08\x62ool_val\x18\x0b \x03(\x08\x42\x02\x10\x01\x12\x14\n\x08half_val\x18\x0c \x03(\x05\x42\x02\x10\x01\"X\n\rInerpretation\x12\x07\n\x03\x44OT\x10\x00\x12\x08\n\x04LINE\x10\x01\x12\x0c\n\x08TRIANGLE\x10\x02\x12\r\n\tRECTANGLE\x10\x03\x12\x0c\n\x08PENTAGON\x10\x04\x12\t\n\x05IMAGE\x10\x05\"\x19\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\x8a\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x19\n\x04meta\x18\x05 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x06 \x03(\x0b\x32\x0b.ValueFieldB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\".\n\x10\x43lassifierResult\x12\x1a\n\x08\x63oncepts\x18\x01 \x03(\x0b\x32\x08.Concept\">\n\rFeatureResult\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0e\n\x06\x62inary\x18\x02 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x03 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"_\n\x0fIndexingRequest\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x16\n\x06images\x18\x02 \x03(\x0b\x32\x06.Image\x12\x17\n\x0fupdate_database\x18\x03 \x01(\x08\"\x1b\n\rIndexingReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"L\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12#\n\x08indexing\x18\x02 \x01(\x0b\x32\x0f.IndexingResultH\x00\x42\x08\n\x06result\"\x12\n\x10SuggesterRequest\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t*\xd2\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0c\n\x08\x44T_FLOAT\x10\x01\x12\r\n\tDT_DOUBLE\x10\x02\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\r\n\tDT_STRING\x10\x07\x12\x0c\n\x08\x44T_INT64\x10\t\x12\x0b\n\x07\x44T_BOOL\x10\n\x12\r\n\tDT_UINT16\x10\x11\x12\x0b\n\x07\x44T_HALF\x10\x13\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x32\xd6\x01\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12.\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x12\x37\n\x0f\x62uild_suggester\x12\x11.SuggesterRequest\x1a\x0f.SuggesterReply\"\x00\x42\x02P\x01\x62\x06proto3'
+  serialized_pb=b'\n\rindexer.proto\"\x87\x03\n\x06Tensor\x12\x18\n\x05\x64type\x18\x01 \x01(\x0e\x32\t.DataType\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\x0c\n\x04name\x18\x0e \x01(\t\x12\x15\n\rproto_content\x18\x04 \x01(\x0c\x12$\n\x05inter\x18\r \x01(\x0e\x32\x15.Tensor.Inerpretation\x12\x11\n\tfloat_val\x18\x05 \x03(\x02\x12\x16\n\ndouble_val\x18\x06 \x03(\x01\x42\x02\x10\x01\x12\x13\n\x07int_val\x18\x07 \x03(\x05\x42\x02\x10\x01\x12\x12\n\nstring_val\x18\x08 \x03(\x0c\x12\x18\n\x0cscomplex_val\x18\t \x03(\x02\x42\x02\x10\x01\x12\x15\n\tint64_val\x18\n \x03(\x03\x42\x02\x10\x01\x12\x14\n\x08\x62ool_val\x18\x0b \x03(\x08\x42\x02\x10\x01\x12\x14\n\x08half_val\x18\x0c \x03(\x05\x42\x02\x10\x01\"X\n\rInerpretation\x12\x07\n\x03\x44OT\x10\x00\x12\x08\n\x04LINE\x10\x01\x12\x0c\n\x08TRIANGLE\x10\x02\x12\r\n\tRECTANGLE\x10\x03\x12\x0c\n\x08PENTAGON\x10\x04\x12\t\n\x05IMAGE\x10\x05\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\x8a\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x19\n\x04meta\x18\x05 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x06 \x03(\x0b\x32\x0b.ValueFieldB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\">\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x1a\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x08.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"_\n\x0fIndexingRequest\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x16\n\x06images\x18\x02 \x03(\x0b\x32\x06.Image\x12\x17\n\x0fupdate_database\x18\x03 \x01(\x08\"\x1b\n\rIndexingReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"L\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12#\n\x08indexing\x18\x02 \x01(\x0b\x32\x0f.IndexingResultH\x00\x42\x08\n\x06result\"\x12\n\x10SuggesterRequest\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"G\n\x11\x46\x65\x61tureSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x15\n\x05image\x18\x02 \x01(\x0b\x32\x06.Image\"%\n\x14\x43lassifierSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\"\x1f\n\x0eMetaSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\"\x89\x01\n\nSearchTerm\x12\x1f\n\x04meta\x18\x01 \x01(\x0b\x32\x0f.MetaSearchTermH\x00\x12%\n\x07\x66\x65\x61ture\x18\x02 \x01(\x0b\x32\x12.FeatureSearchTermH\x00\x12+\n\nclassifier\x18\x03 \x01(\x0b\x32\x15.ClassifierSearchTermH\x00\x42\x06\n\x04term\"\x86\x01\n\rSearchRequest\x12\x1a\n\x05terms\x18\x01 \x03(\x0b\x32\x0b.SearchTerm\x12\'\n\x07sorting\x18\x02 \x01(\x0e\x32\x16.SearchRequest.Sorting\"0\n\x07Sorting\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07\x46\x45\x41TURE\x10\x01\x12\x0e\n\nCLASSIFIER\x10\x02\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x9f\x01\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"<\n\x15ListSearchResultReply\x12#\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x12.SearchResultEntry*\xd2\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0c\n\x08\x44T_FLOAT\x10\x01\x12\r\n\tDT_DOUBLE\x10\x02\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\r\n\tDT_STRING\x10\x07\x12\x0c\n\x08\x44T_INT64\x10\t\x12\x0b\n\x07\x44T_BOOL\x10\n\x12\r\n\tDT_UINT16\x10\x11\x12\x0b\n\x07\x44T_HALF\x10\x13\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x32\xca\x02\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12.\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x12\x37\n\x0f\x62uild_suggester\x12\x11.SuggesterRequest\x1a\x0f.SuggesterReply\"\x00\x12(\n\x06search\x12\x0e.SearchRequest\x1a\x0c.SearchReply\"\x00\x12H\n\x12list_search_result\x12\x18.ListSearchResultRequest\x1a\x16.ListSearchResultReply\"\x00\x42\x02P\x01\x62\x06proto3'
 )
 
 _DATATYPE = _descriptor.EnumDescriptor(
@@ -103,8 +103,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1681,
-  serialized_end=1891,
+  serialized_start=2441,
+  serialized_end=2651,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -169,6 +169,36 @@ _TENSOR_INERPRETATION = _descriptor.EnumDescriptor(
   serialized_end=409,
 )
 _sym_db.RegisterEnumDescriptor(_TENSOR_INERPRETATION)
+
+_SEARCHREQUEST_SORTING = _descriptor.EnumDescriptor(
+  name='Sorting',
+  full_name='SearchRequest.Sorting',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='NONE', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='FEATURE', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='CLASSIFIER', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=2100,
+  serialized_end=2148,
+)
+_sym_db.RegisterEnumDescriptor(_SEARCHREQUEST_SORTING)
 
 
 _TENSOR = _descriptor.Descriptor(
@@ -303,6 +333,13 @@ _PLUGINRUN = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='weight', full_name='PluginRun.weight', index=1,
+      number=2, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -316,7 +353,7 @@ _PLUGINRUN = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=411,
-  serialized_end=436,
+  serialized_end=452,
 )
 
 
@@ -368,8 +405,8 @@ _ROI = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=438,
-  serialized_end=496,
+  serialized_start=454,
+  serialized_end=512,
 )
 
 
@@ -426,8 +463,8 @@ _VALUEFIELD = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=498,
-  serialized_end=594,
+  serialized_start=514,
+  serialized_end=610,
 )
 
 
@@ -498,8 +535,8 @@ _IMAGE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=597,
-  serialized_end=735,
+  serialized_start=613,
+  serialized_end=751,
 )
 
 
@@ -551,8 +588,8 @@ _PLUGINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=737,
-  serialized_end=811,
+  serialized_start=753,
+  serialized_end=827,
 )
 
 
@@ -597,8 +634,8 @@ _CONCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=813,
-  serialized_end=867,
+  serialized_start=829,
+  serialized_end=883,
 )
 
 
@@ -611,8 +648,15 @@ _CLASSIFIERRESULT = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='concepts', full_name='ClassifierResult.concepts', index=0,
-      number=1, type=11, cpp_type=10, label=3,
+      name='plugin', full_name='ClassifierResult.plugin', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='concepts', full_name='ClassifierResult.concepts', index=1,
+      number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -629,8 +673,8 @@ _CLASSIFIERRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=869,
-  serialized_end=915,
+  serialized_start=885,
+  serialized_end=947,
 )
 
 
@@ -643,22 +687,29 @@ _FEATURERESULT = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='type', full_name='FeatureResult.type', index=0,
+      name='plugin', full_name='FeatureResult.plugin', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='binary', full_name='FeatureResult.binary', index=1,
+      name='type', full_name='FeatureResult.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='feature', full_name='FeatureResult.feature', index=2,
-      number=3, type=2, cpp_type=6, label=3,
+      name='binary', full_name='FeatureResult.binary', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='feature', full_name='FeatureResult.feature', index=3,
+      number=4, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -675,8 +726,8 @@ _FEATURERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=917,
-  serialized_end=979,
+  serialized_start=949,
+  serialized_end=1027,
 )
 
 
@@ -740,8 +791,8 @@ _PLUGINRESULT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=982,
-  serialized_end=1129,
+  serialized_start=1030,
+  serialized_end=1177,
 )
 
 
@@ -779,8 +830,8 @@ _IMAGERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1131,
-  serialized_end=1199,
+  serialized_start=1179,
+  serialized_end=1247,
 )
 
 
@@ -811,8 +862,8 @@ _INDEXINGRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1201,
-  serialized_end=1248,
+  serialized_start=1249,
+  serialized_end=1296,
 )
 
 
@@ -857,8 +908,8 @@ _PLUGININFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1250,
-  serialized_end=1323,
+  serialized_start=1298,
+  serialized_end=1371,
 )
 
 
@@ -882,8 +933,8 @@ _LISTPLUGINSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1325,
-  serialized_end=1345,
+  serialized_start=1373,
+  serialized_end=1393,
 )
 
 
@@ -914,8 +965,8 @@ _LISTPLUGINSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1347,
-  serialized_end=1395,
+  serialized_start=1395,
+  serialized_end=1443,
 )
 
 
@@ -960,8 +1011,8 @@ _INDEXINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1397,
-  serialized_end=1492,
+  serialized_start=1445,
+  serialized_end=1540,
 )
 
 
@@ -992,8 +1043,8 @@ _INDEXINGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1494,
-  serialized_end=1521,
+  serialized_start=1542,
+  serialized_end=1569,
 )
 
 
@@ -1024,8 +1075,8 @@ _STATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1523,
-  serialized_end=1550,
+  serialized_start=1571,
+  serialized_end=1598,
 )
 
 
@@ -1068,8 +1119,8 @@ _STATUSREPLY = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1552,
-  serialized_end=1628,
+  serialized_start=1600,
+  serialized_end=1676,
 )
 
 
@@ -1093,8 +1144,8 @@ _SUGGESTERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1630,
-  serialized_end=1648,
+  serialized_start=1678,
+  serialized_end=1696,
 )
 
 
@@ -1125,8 +1176,358 @@ _SUGGESTERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1650,
-  serialized_end=1678,
+  serialized_start=1698,
+  serialized_end=1726,
+)
+
+
+_FEATURESEARCHTERM = _descriptor.Descriptor(
+  name='FeatureSearchTerm',
+  full_name='FeatureSearchTerm',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='plugins', full_name='FeatureSearchTerm.plugins', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='image', full_name='FeatureSearchTerm.image', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1728,
+  serialized_end=1799,
+)
+
+
+_CLASSIFIERSEARCHTERM = _descriptor.Descriptor(
+  name='ClassifierSearchTerm',
+  full_name='ClassifierSearchTerm',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='query', full_name='ClassifierSearchTerm.query', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1801,
+  serialized_end=1838,
+)
+
+
+_METASEARCHTERM = _descriptor.Descriptor(
+  name='MetaSearchTerm',
+  full_name='MetaSearchTerm',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='query', full_name='MetaSearchTerm.query', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1840,
+  serialized_end=1871,
+)
+
+
+_SEARCHTERM = _descriptor.Descriptor(
+  name='SearchTerm',
+  full_name='SearchTerm',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='meta', full_name='SearchTerm.meta', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='feature', full_name='SearchTerm.feature', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='classifier', full_name='SearchTerm.classifier', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='term', full_name='SearchTerm.term',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=1874,
+  serialized_end=2011,
+)
+
+
+_SEARCHREQUEST = _descriptor.Descriptor(
+  name='SearchRequest',
+  full_name='SearchRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='terms', full_name='SearchRequest.terms', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sorting', full_name='SearchRequest.sorting', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _SEARCHREQUEST_SORTING,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2014,
+  serialized_end=2148,
+)
+
+
+_SEARCHREPLY = _descriptor.Descriptor(
+  name='SearchReply',
+  full_name='SearchReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='SearchReply.id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2150,
+  serialized_end=2175,
+)
+
+
+_SEARCHRESULTENTRY = _descriptor.Descriptor(
+  name='SearchResultEntry',
+  full_name='SearchResultEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='SearchResultEntry.id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='meta', full_name='SearchResultEntry.meta', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='origin', full_name='SearchResultEntry.origin', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='classifier', full_name='SearchResultEntry.classifier', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='feature', full_name='SearchResultEntry.feature', index=4,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2178,
+  serialized_end=2337,
+)
+
+
+_LISTSEARCHRESULTREQUEST = _descriptor.Descriptor(
+  name='ListSearchResultRequest',
+  full_name='ListSearchResultRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='ListSearchResultRequest.id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2339,
+  serialized_end=2376,
+)
+
+
+_LISTSEARCHRESULTREPLY = _descriptor.Descriptor(
+  name='ListSearchResultReply',
+  full_name='ListSearchResultReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='entries', full_name='ListSearchResultReply.entries', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2378,
+  serialized_end=2438,
 )
 
 _TENSOR.fields_by_name['dtype'].enum_type = _DATATYPE
@@ -1170,6 +1571,28 @@ _STATUSREPLY.fields_by_name['indexing'].message_type = _INDEXINGRESULT
 _STATUSREPLY.oneofs_by_name['result'].fields.append(
   _STATUSREPLY.fields_by_name['indexing'])
 _STATUSREPLY.fields_by_name['indexing'].containing_oneof = _STATUSREPLY.oneofs_by_name['result']
+_FEATURESEARCHTERM.fields_by_name['plugins'].message_type = _PLUGINRUN
+_FEATURESEARCHTERM.fields_by_name['image'].message_type = _IMAGE
+_SEARCHTERM.fields_by_name['meta'].message_type = _METASEARCHTERM
+_SEARCHTERM.fields_by_name['feature'].message_type = _FEATURESEARCHTERM
+_SEARCHTERM.fields_by_name['classifier'].message_type = _CLASSIFIERSEARCHTERM
+_SEARCHTERM.oneofs_by_name['term'].fields.append(
+  _SEARCHTERM.fields_by_name['meta'])
+_SEARCHTERM.fields_by_name['meta'].containing_oneof = _SEARCHTERM.oneofs_by_name['term']
+_SEARCHTERM.oneofs_by_name['term'].fields.append(
+  _SEARCHTERM.fields_by_name['feature'])
+_SEARCHTERM.fields_by_name['feature'].containing_oneof = _SEARCHTERM.oneofs_by_name['term']
+_SEARCHTERM.oneofs_by_name['term'].fields.append(
+  _SEARCHTERM.fields_by_name['classifier'])
+_SEARCHTERM.fields_by_name['classifier'].containing_oneof = _SEARCHTERM.oneofs_by_name['term']
+_SEARCHREQUEST.fields_by_name['terms'].message_type = _SEARCHTERM
+_SEARCHREQUEST.fields_by_name['sorting'].enum_type = _SEARCHREQUEST_SORTING
+_SEARCHREQUEST_SORTING.containing_type = _SEARCHREQUEST
+_SEARCHRESULTENTRY.fields_by_name['meta'].message_type = _VALUEFIELD
+_SEARCHRESULTENTRY.fields_by_name['origin'].message_type = _VALUEFIELD
+_SEARCHRESULTENTRY.fields_by_name['classifier'].message_type = _CLASSIFIERRESULT
+_SEARCHRESULTENTRY.fields_by_name['feature'].message_type = _FEATURERESULT
+_LISTSEARCHRESULTREPLY.fields_by_name['entries'].message_type = _SEARCHRESULTENTRY
 DESCRIPTOR.message_types_by_name['Tensor'] = _TENSOR
 DESCRIPTOR.message_types_by_name['PluginRun'] = _PLUGINRUN
 DESCRIPTOR.message_types_by_name['RoI'] = _ROI
@@ -1191,6 +1614,15 @@ DESCRIPTOR.message_types_by_name['StatusRequest'] = _STATUSREQUEST
 DESCRIPTOR.message_types_by_name['StatusReply'] = _STATUSREPLY
 DESCRIPTOR.message_types_by_name['SuggesterRequest'] = _SUGGESTERREQUEST
 DESCRIPTOR.message_types_by_name['SuggesterReply'] = _SUGGESTERREPLY
+DESCRIPTOR.message_types_by_name['FeatureSearchTerm'] = _FEATURESEARCHTERM
+DESCRIPTOR.message_types_by_name['ClassifierSearchTerm'] = _CLASSIFIERSEARCHTERM
+DESCRIPTOR.message_types_by_name['MetaSearchTerm'] = _METASEARCHTERM
+DESCRIPTOR.message_types_by_name['SearchTerm'] = _SEARCHTERM
+DESCRIPTOR.message_types_by_name['SearchRequest'] = _SEARCHREQUEST
+DESCRIPTOR.message_types_by_name['SearchReply'] = _SEARCHREPLY
+DESCRIPTOR.message_types_by_name['SearchResultEntry'] = _SEARCHRESULTENTRY
+DESCRIPTOR.message_types_by_name['ListSearchResultRequest'] = _LISTSEARCHRESULTREQUEST
+DESCRIPTOR.message_types_by_name['ListSearchResultReply'] = _LISTSEARCHRESULTREPLY
 DESCRIPTOR.enum_types_by_name['DataType'] = _DATATYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -1341,6 +1773,69 @@ SuggesterReply = _reflection.GeneratedProtocolMessageType('SuggesterReply', (_me
   })
 _sym_db.RegisterMessage(SuggesterReply)
 
+FeatureSearchTerm = _reflection.GeneratedProtocolMessageType('FeatureSearchTerm', (_message.Message,), {
+  'DESCRIPTOR' : _FEATURESEARCHTERM,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:FeatureSearchTerm)
+  })
+_sym_db.RegisterMessage(FeatureSearchTerm)
+
+ClassifierSearchTerm = _reflection.GeneratedProtocolMessageType('ClassifierSearchTerm', (_message.Message,), {
+  'DESCRIPTOR' : _CLASSIFIERSEARCHTERM,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:ClassifierSearchTerm)
+  })
+_sym_db.RegisterMessage(ClassifierSearchTerm)
+
+MetaSearchTerm = _reflection.GeneratedProtocolMessageType('MetaSearchTerm', (_message.Message,), {
+  'DESCRIPTOR' : _METASEARCHTERM,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:MetaSearchTerm)
+  })
+_sym_db.RegisterMessage(MetaSearchTerm)
+
+SearchTerm = _reflection.GeneratedProtocolMessageType('SearchTerm', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHTERM,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:SearchTerm)
+  })
+_sym_db.RegisterMessage(SearchTerm)
+
+SearchRequest = _reflection.GeneratedProtocolMessageType('SearchRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHREQUEST,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:SearchRequest)
+  })
+_sym_db.RegisterMessage(SearchRequest)
+
+SearchReply = _reflection.GeneratedProtocolMessageType('SearchReply', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHREPLY,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:SearchReply)
+  })
+_sym_db.RegisterMessage(SearchReply)
+
+SearchResultEntry = _reflection.GeneratedProtocolMessageType('SearchResultEntry', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHRESULTENTRY,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:SearchResultEntry)
+  })
+_sym_db.RegisterMessage(SearchResultEntry)
+
+ListSearchResultRequest = _reflection.GeneratedProtocolMessageType('ListSearchResultRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LISTSEARCHRESULTREQUEST,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:ListSearchResultRequest)
+  })
+_sym_db.RegisterMessage(ListSearchResultRequest)
+
+ListSearchResultReply = _reflection.GeneratedProtocolMessageType('ListSearchResultReply', (_message.Message,), {
+  'DESCRIPTOR' : _LISTSEARCHRESULTREPLY,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:ListSearchResultReply)
+  })
+_sym_db.RegisterMessage(ListSearchResultReply)
+
 
 DESCRIPTOR._options = None
 _TENSOR.fields_by_name['double_val']._options = None
@@ -1357,8 +1852,8 @@ _INDEXER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1894,
-  serialized_end=2108,
+  serialized_start=2654,
+  serialized_end=2984,
   methods=[
   _descriptor.MethodDescriptor(
     name='list_plugins',
@@ -1397,6 +1892,26 @@ _INDEXER = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_SUGGESTERREQUEST,
     output_type=_SUGGESTERREPLY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='search',
+    full_name='Indexer.search',
+    index=4,
+    containing_service=None,
+    input_type=_SEARCHREQUEST,
+    output_type=_SEARCHREPLY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='list_search_result',
+    full_name='Indexer.list_search_result',
+    index=5,
+    containing_service=None,
+    input_type=_LISTSEARCHRESULTREQUEST,
+    output_type=_LISTSEARCHRESULTREPLY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

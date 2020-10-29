@@ -229,7 +229,7 @@ class Client:
 
         return entries
 
-    def indexing(self, paths, image_input=None, batch_size: int = 4, plugins: list = None):
+    def indexing(self, paths, image_input=None, batch_size: int = 32, plugins: list = None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
             entries = list_jsonl(paths, image_input)
         else:
@@ -292,5 +292,20 @@ class Client:
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.SuggesterRequest()
         response = stub.build_suggester(request)
+
+        return response.id
+
+    def search(self):
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+        request = indexer_pb2.SearchRequest()
+        response = stub.search(request)
 
         return response.id
