@@ -1,3 +1,0 @@
-[submodule "database"]
-	path = database
-	url = git@git.tib.eu:iart/database.git

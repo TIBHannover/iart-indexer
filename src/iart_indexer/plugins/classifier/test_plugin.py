@@ -1,11 +1,8 @@
-from indexer.plugins import ClassifierPlugin
-from indexer.plugins import export_classifier_plugin
-from indexer.plugins import PluginResult
+from iart_indexer.plugins import ClassifierPlugin, ClassifierPluginManager, PluginResult
 
 
-@export_classifier_plugin('TestClassfier')
+@ClassifierPluginManager.export("TestClassfier")
 class TestClassfierPlugin(ClassifierPlugin):
-
     def __init__(self, **kwargs):
         super(TestClassfierPlugin, self).__init__(**kwargs)
 

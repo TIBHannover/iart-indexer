@@ -1,22 +1,24 @@
-from indexer.utils import convert_name
+from iart_indexer.utils import convert_name
 
 
-class PluginResult():
-
+class PluginResult:
     def __init__(self, plugin, entries, annotations):
         self._plugin = plugin
         self._entries = entries
         self._annotations = annotations
         assert len(self._entries) == len(self._annotations)
 
+    def __repr__(self):
+        return f"{self._plugin} {self._annotations}"
 
-class Plugin():
+
+class Plugin:
 
     default_config = {}
 
     default_version = 0.1
 
-    _type = ''
+    _type = ""
 
     def __init__(self, config=None, name=None):
         self._config = self.default_config
