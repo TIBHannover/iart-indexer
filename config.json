@@ -17,9 +17,9 @@
                 "port": 6379,
                 "model_name": "imagenet_inception",
                 "model_device": "cpu",
-                "model_file": "/models/imagenet_inception/byol_wikipedia.pt",
-                "pca_model_name": "/models/imagenet_inception/pca_128.onnx",
-                "pca_model_file": "imagenet_inception_pca_128",
+                "model_file": "/models/imagenet_inception/imagenet_inception.pb",
+                "pca_model_name": "imagenet_inception_pca_128",
+                "pca_model_file": "/models/imagenet_inception/pca_128.onnx",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244
@@ -51,7 +51,18 @@
         {
             "type": "KaggleDenseClassifier",
             "output": "image_net_inception",
-            "params": {}
+            "params": {
+                "host": "redisai",
+                "port": 6379,
+                "model_name": "kaggle_densenet",
+                "model_device": "cpu",
+                "model_file": "/models/kaggle_painter/kaggle_densenet.pb",
+                "mapping_file": "/models/kaggle_painter/kaggle_mapping.json",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244,
+                "threshold": 0.5
+            }
         }
     ]
 }
