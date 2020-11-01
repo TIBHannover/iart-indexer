@@ -79,7 +79,6 @@ class ElasticSearchSuggester(Suggester):
         )
         return_values = []
         for field, x in results["suggest"].items():
-            print(len(x))
             if len(x) != 1:
                 continue
             options_list = []

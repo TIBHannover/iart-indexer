@@ -164,6 +164,15 @@ def feature_to_proto(proto, data):
     return proto
 
 
+def suggestions_from_proto(proto):
+    result_list = []
+    for g in proto.groups:
+        group_dict = {"group": g.group, "suggestions": list(g.suggestions)}
+
+        result_list.append(group_dict)
+    return result_list
+
+
 def convert_name(name):
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()

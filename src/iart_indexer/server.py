@@ -296,6 +296,22 @@ def search(args):
         return None
 
 
+def suggest(args):
+    try:
+        # if True:
+        logging.info("Start suggesting job")
+        query = args["query"]
+        database = args["database"]
+
+        #
+        # if not request.is_ajax():
+        #     return Http404()
+
+    except Exception as e:
+        logging.error(repr(e))
+        return None
+
+
 def build_autocompletion(args):
 
     database = args["database"]
@@ -413,6 +429,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
         suggester = ElasticSearchSuggester(config=self.config.get("elasticsearch", {}))
 
+        job_id = uuid.uuid4().hex
         variable = {
             "database": database,
             "suggester": suggester,
@@ -420,12 +437,12 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "status": 0,
             "result": "",
             "future": None,
+            "id": job_id,
         }
         future = self.thread_pool.submit(build_autocompletion, variable)
 
-        job_id = uuid.uuid4().hex
         variable["future"] = future
-        self.futures[job_id] = variable
+        self.futures.append(variable)
 
         return indexer_pb2.SuggesterReply(id=job_id)
 
@@ -510,6 +527,27 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         context.set_code(grpc.StatusCode.NOT_FOUND)
         context.set_details("Job unknown")
         return indexer_pb2.ListSearchResultReply()
+
+    def suggest(self, request, context):
+
+        jsonObj = MessageToJson(request)
+        logging.info(jsonObj)
+
+        suggester = ElasticSearchSuggester(config=self.config.get("elasticsearch", {}))
+
+        suggestions = suggester.complete(request.query)
+        logging.info(suggestions)
+
+        result = indexer_pb2.SuggestReply()
+        for group in suggestions:
+            if len(group["options"]) < 1:
+                continue
+            g = result.groups.add()
+            g.group = group["type"]
+            for suggestion in group["options"]:
+                g.suggestions.append(suggestion)
+
+        return result
 
 
 def update_database(database, plugin_results):

@@ -76,7 +76,7 @@ service Indexer {
   rpc search(SearchRequest) returns(SearchReply) {}
   rpc list_search_result(ListSearchResultRequest)
       returns(ListSearchResultReply) {}
-  // rpc GetInfo(UpdateRequest) returns (Info) {}
+  rpc suggest(SuggestRequest) returns(SuggestReply) {}
 }
 
 message PluginRun {
@@ -217,3 +217,11 @@ message SearchResultEntry {
 
 message ListSearchResultRequest { string id = 1; }
 message ListSearchResultReply { repeated SearchResultEntry entries = 1; }
+
+message SuggestGroup {
+  string group = 1;
+  repeated string suggestions = 2;
+}
+
+message SuggestRequest { string query = 1; }
+message SuggestReply { repeated SuggestGroup groups = 1; }
