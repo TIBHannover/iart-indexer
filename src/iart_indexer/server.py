@@ -34,7 +34,8 @@ def compute_plugins(args):
                 meta = meta_from_proto(x.meta)
                 origin = meta_from_proto(x.origin)
                 database.insert_entry(
-                    x.id, {"id": x.id, "meta": meta, "origin": origin},
+                    x.id,
+                    {"id": x.id, "meta": meta, "origin": origin},
                 )
             else:
                 existing[x.id] = {}
@@ -503,7 +504,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             job_data = self.futures[futures_lut[request.id]]
             done = job_data["future"].done()
             if not done:
-                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
                 context.set_details("Still running")
                 return indexer_pb2.ListSearchResultReply()
 
