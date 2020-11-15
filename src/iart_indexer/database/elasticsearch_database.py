@@ -6,6 +6,8 @@ from elasticsearch import Elasticsearch, exceptions
 
 from iart_indexer.database.database import Database
 
+import random
+import uuid
 
 # from elasticsearch_dsl import Search
 
@@ -340,18 +342,18 @@ class ElasticSearchDatabase(Database):
             return []
         # self.es.update('')
 
-    def raw_search(self, terms, sort=None, size=5):
+    def raw_search(self, terms, sorting=None, size=5):
         if not self.es.indices.exists(index=self.index):
             return []
 
         body = {"query": {"bool": {"should": terms}}}
-        if sort is not None:
-            sort_list = []
-            if not isinstance(sort, (list, set)):
-                sort = [sort]
-            for x in sort:
+        if sorting is not None:
+            sorting_list = []
+            if not isinstance(sorting, (list, set)):
+                sorting = [sorting]
+            for x in sorting:
                 if x == "classifier":
-                    sort_list.append(
+                    sorting_list.append(
                         {
                             "classifier.annotations.value": {
                                 "order": "desc",
@@ -360,7 +362,16 @@ class ElasticSearchDatabase(Database):
                         }
                     )
 
-            body.update({"sort": sort_list})
+                if x == "random":
+                    body["query"]["bool"]["should"].append(
+                        {"function_score": {"functions": [{"random_score": {"seed": uuid.uuid4().hex}}]}}
+                    )
+
+                    # sort_list.append(
+                    #     {"query": }
+                    # )
+
+            body.update({"sort": sorting_list})
 
         print(json.dumps(body, indent=2))
         try:

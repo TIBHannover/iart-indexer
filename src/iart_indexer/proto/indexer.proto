@@ -202,7 +202,7 @@ message SearchTerm {
 
 message SearchRequest {
   repeated SearchTerm terms = 1;
-  enum Sorting { NONE = 0; FEATURE = 1; CLASSIFIER = 2; }
+  enum Sorting { NONE = 0; FEATURE = 1; CLASSIFIER = 2; RANDOM = 3; }
   Sorting sorting = 2;
 }
 message SearchReply { string id = 1; }

@@ -233,13 +233,18 @@ def search(args):
                     }
                     search_terms.append(term)
 
-        entries = database.raw_search(terms=search_terms, size=100)
+        sorting = []
+        if query.sorting == indexer_pb2.SearchRequest.Sorting.RANDOM:
+            sorting.append("random")
+
+        entries = database.raw_search(terms=search_terms, sorting=sorting, size=200)
 
         # TODO not the best way but it works now
         # TODO move to elasticsearch
         print(dir(indexer_pb2.SearchRequest))
         print(dir(indexer_pb2.SearchRequest.Sorting))
         print(query.sorting)
+
         if query.sorting == indexer_pb2.SearchRequest.Sorting.CLASSIFIER:
             pass
 

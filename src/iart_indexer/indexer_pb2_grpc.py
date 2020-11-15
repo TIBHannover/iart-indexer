@@ -357,4 +357,3 @@ class Indexer(object):
             timeout,
             metadata,
         )
-
