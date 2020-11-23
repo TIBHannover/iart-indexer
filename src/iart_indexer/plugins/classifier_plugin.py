@@ -3,11 +3,15 @@ import os
 import re
 import sys
 
+from iart_indexer.plugins.manager import PluginManager
 from iart_indexer.plugins.plugin import Plugin
 
 
-class ClassifierPluginManager:
+class ClassifierPluginManager(PluginManager):
     _classifier_plugins = {}
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @classmethod
     def export(cls, name):

@@ -18,6 +18,7 @@ from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+from google.protobuf.json_format import MessageToJson
 
 
 def compute_plugins(args):
@@ -99,8 +100,8 @@ def compute_plugins(args):
 
 
 def search(args):
-    try:
-        # if True:
+    # try:
+    if True:
         logging.info("Start searching job")
         query = args["query"]
         database = args["database"]
@@ -119,7 +120,7 @@ def search(args):
                     {
                         "multi_match": {
                             "query": meta.query,
-                            "fields": ["meta.title", "meta.author", "meta.location", "meta.institution"],
+                            "fields": ["meta.title", "meta.author", "meta.location", "meta.institution", "meta."],
                         }
                     }
                 )
@@ -147,12 +148,13 @@ def search(args):
             if term_type == "feature":
                 feature = term.feature
 
-                if feature.image.id is not None:
-                    entry = database.get_entry(feature.image.id)
-                    if entry is None:
-                        return
+                query_feature = []
 
-                    query_feature = []
+                entry = None
+                if feature.image.id is not None and feature.image.id != "":
+                    entry = database.get_entry(feature.image.id)
+
+                if entry is not None:
 
                     for p in feature.plugins:
                         # TODO add weight
@@ -188,7 +190,76 @@ def search(args):
 
                 # TODO add example search here
                 else:
-                    query_feature = []
+                    logging.info("Feature")
+                    feature_manager = args["feature_manager"]
+                    feature_results = list(
+                        feature_manager.run([feature.image])  # , plugins=[x.name.lower() for x in feature.plugins])
+                    )[0]
+                    for p in feature.plugins:
+                        # feature_results
+                        for f in feature_results["plugins"]:
+                            if p.name.lower() == f._plugin.name.lower():
+                                # print("################")
+                                # # print(f)
+                                # print(f._plugin.name.lower())
+                                # print(f._plugin.type)
+
+                                # TODO add parameters for that
+                                if f._plugin.name == "yuv_histogram_feature":
+                                    fuzziness = 1
+                                    minimum_should_match = 4
+
+                                elif f._plugin.name == "byol_embedding_feature":
+                                    fuzziness = 2
+                                    minimum_should_match = 1
+
+                                elif f._plugin.name == "image_net_inception_feature":
+                                    fuzziness = 2
+                                    minimum_should_match = 1
+
+                                else:
+                                    continue
+
+                                annotations = []
+                                for anno in f._annotations[0]:
+                                    result_type = anno.WhichOneof("result")
+                                    if result_type == "feature":
+                                        annotation_dict = {}
+                                        binary = anno.feature.binary
+                                        feature = list(anno.feature.feature)
+
+                                        if len(feature) == 64:
+                                            annotation_dict["val_64"] = feature
+                                        elif len(feature) == 128:
+                                            annotation_dict["val_128"] = feature
+                                        elif len(feature) == 256:
+                                            annotation_dict["val_256"] = feature
+                                        else:
+                                            annotation_dict["value"] = feature
+
+                                        hash_splits_list = []
+                                        for x in range(4):
+                                            hash_splits_list.append(
+                                                binary[x * len(binary) // 4 : (x + 1) * len(binary) // 4]
+                                            )
+                                        annotation_dict["hash"] = {
+                                            f"split_{i}": x for i, x in enumerate(hash_splits_list)
+                                        }
+                                        annotation_dict["type"] = anno.feature.type
+                                        annotations.append(annotation_dict)
+                                query_feature.append(
+                                    {
+                                        "plugin": f._plugin.name,
+                                        "annotations": annotations,
+                                        "fuzziness": fuzziness,
+                                        "minimum_should_match": minimum_should_match,
+                                        "weight": p.weight,
+                                    }
+                                )
+
+                # print("######################")
+                # print(len(query_feature))
+                # print(query_feature)
 
                 for feature in query_feature:
                     hash_splits = []
@@ -297,9 +368,9 @@ def search(args):
 
         return result
 
-    except Exception as e:
-        logging.error(repr(e))
-        return None
+    # except Exception as e:
+    #     logging.error(repr(e))
+    #     return None
 
 
 def suggest(args):
@@ -486,6 +557,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         job_id = uuid.uuid4().hex
         variable = {
+            "feature_manager": self.feature_manager,
             "database": database,
             "query": request,
             "progress": 0,
@@ -582,10 +654,10 @@ class Server:
             ],
         )
 
-        self.feature_manager = FeaturePluginManager()
+        self.feature_manager = FeaturePluginManager(configs=self.config.get("features", []))
         self.feature_manager.find()
 
-        self.classifier_manager = ClassifierPluginManager()
+        self.classifier_manager = ClassifierPluginManager(configs=self.config.get("classifiers", []))
         self.classifier_manager.find()
 
         indexer_pb2_grpc.add_IndexerServicer_to_server(
