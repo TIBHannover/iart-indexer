@@ -367,10 +367,6 @@ class ElasticSearchDatabase(Database):
                         {"function_score": {"functions": [{"random_score": {"seed": uuid.uuid4().hex}}]}}
                     )
 
-                    # sort_list.append(
-                    #     {"query": }
-                    # )
-
             body.update({"sort": sorting_list})
 
         print(json.dumps(body, indent=2))

@@ -202,7 +202,7 @@ message SearchTerm {
 
 message SearchRequest {
   repeated SearchTerm terms = 1;
-  enum Sorting { NONE = 0; FEATURE = 1; CLASSIFIER = 2; RANDOM = 3; }
+  enum Sorting { NONE = 0; FEATURE = 1; CLASSIFIER = 2; RANDOM = 3; UMAP = 4; }
   Sorting sorting = 2;
 }
 message SearchReply { string id = 1; }
@@ -213,6 +213,7 @@ message SearchResultEntry {
   repeated ValueField origin = 3;
   repeated ClassifierResult classifier = 4;
   repeated FeatureResult feature = 5;
+  repeated float coordinates = 6;
 }
 
 message ListSearchResultRequest { string id = 1; }

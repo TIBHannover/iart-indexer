@@ -104,6 +104,8 @@ def search(args):
     if True:
         logging.info("Start searching job")
         query = args["query"]
+        feature_manager = args["feature_manager"]
+        mapping_manager = args["mapping_manager"]
         database = args["database"]
 
         #
@@ -144,7 +146,6 @@ def search(args):
                         }
                     }
                 )
-
             if term_type == "feature":
                 feature = term.feature
 
@@ -191,7 +192,7 @@ def search(args):
                 # TODO add example search here
                 else:
                     logging.info("Feature")
-                    feature_manager = args["feature_manager"]
+
                     feature_results = list(
                         feature_manager.run([feature.image])  # , plugins=[x.name.lower() for x in feature.plugins])
                     )[0]
@@ -321,33 +322,34 @@ def search(args):
 
         if query.sorting == indexer_pb2.SearchRequest.Sorting.FEATURE:
 
-            if query_feature is not None:
-                new_entries = []
-                for e in entries:
-                    score = 0
-                    for q_f in query_feature:
-                        for e_f in e["feature"]:
-                            if q_f["plugin"] != e_f["plugin"]:
-                                continue
-                            if "val_64" in e_f["annotations"][0]:
-                                a = e_f["annotations"][0]["val_64"]
-                                b = q_f["annotations"][0]["val_64"]
-                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                            if "val_128" in e_f["annotations"][0]:
-                                a = e_f["annotations"][0]["val_128"]
-                                b = q_f["annotations"][0]["val_128"]
-                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                            if "val_256" in e_f["annotations"][0]:
-                                a = e_f["annotations"][0]["val_256"]
-                                b = q_f["annotations"][0]["val_256"]
-                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                    print(score)
-                    new_entries.append((score, e))
+            entries = list(mapping_manager.run(entries, query_feature, ["UMapMapping"]))
+            # if query_feature is not None:
+            #     new_entries = []
+            #     for e in entries:
+            #         score = 0
+            #         for q_f in query_feature:
+            #             for e_f in e["feature"]:
+            #                 if q_f["plugin"] != e_f["plugin"]:
+            #                     continue
+            #                 if "val_64" in e_f["annotations"][0]:
+            #                     a = e_f["annotations"][0]["val_64"]
+            #                     b = q_f["annotations"][0]["val_64"]
+            #                     score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+            #                 if "val_128" in e_f["annotations"][0]:
+            #                     a = e_f["annotations"][0]["val_128"]
+            #                     b = q_f["annotations"][0]["val_128"]
+            #                     score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+            #                 if "val_256" in e_f["annotations"][0]:
+            #                     a = e_f["annotations"][0]["val_256"]
+            #                     b = q_f["annotations"][0]["val_256"]
+            #                     score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+            #         print(score)
+            #         new_entries.append((score, e))
 
-                new_entries = sorted(new_entries, key=lambda x: -x[0])
-                entries = [x[1] for x in new_entries]
-                print("++++++++++++++++++++")
-                print(entries[0])
+            #     new_entries = sorted(new_entries, key=lambda x: -x[0])
+            #     entries = [x[1] for x in new_entries]
+            #     print("++++++++++++++++++++")
+            #     print(entries[0])
 
         result = indexer_pb2.ListSearchResultReply()
 
@@ -419,10 +421,11 @@ def build_autocompletion(args):
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, config, feature_manager, classifier_manager):
+    def __init__(self, config, feature_manager, classifier_manager, mapping_manager):
         self.config = config
         self.feature_manager = feature_manager
         self.classifier_manager = classifier_manager
+        self.mapping_manager = mapping_manager
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=4)
         self.futures = []
 
@@ -558,6 +561,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         job_id = uuid.uuid4().hex
         variable = {
             "feature_manager": self.feature_manager,
+            "mapping_manager": self.mapping_manager,
             "database": database,
             "query": request,
             "progress": 0,
@@ -660,8 +664,11 @@ class Server:
         self.classifier_manager = ClassifierPluginManager(configs=self.config.get("classifiers", []))
         self.classifier_manager.find()
 
+        self.mapping_manager = MappingPluginManager(configs=self.config.get("mappings", []))
+        self.mapping_manager.find()
+
         indexer_pb2_grpc.add_IndexerServicer_to_server(
-            Commune(config, self.feature_manager, self.classifier_manager), self.server
+            Commune(config, self.feature_manager, self.classifier_manager, self.mapping_manager), self.server
         )
         grpc_config = config.get("grpc", {})
         port = grpc_config.get("port", 50051)
