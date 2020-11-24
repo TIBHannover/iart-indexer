@@ -323,34 +323,6 @@ def search(args):
         if query.mapping.lower() == "umap":
             entries = list(mapping_manager.run(entries, query_feature, ["UMapMapping"]))
 
-            # if query_feature is not None:
-            #     new_entries = []
-            #     for e in entries:
-            #         score = 0
-            #         for q_f in query_feature:
-            #             for e_f in e["feature"]:
-            #                 if q_f["plugin"] != e_f["plugin"]:
-            #                     continue
-            #                 if "val_64" in e_f["annotations"][0]:
-            #                     a = e_f["annotations"][0]["val_64"]
-            #                     b = q_f["annotations"][0]["val_64"]
-            #                     score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-            #                 if "val_128" in e_f["annotations"][0]:
-            #                     a = e_f["annotations"][0]["val_128"]
-            #                     b = q_f["annotations"][0]["val_128"]
-            #                     score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-            #                 if "val_256" in e_f["annotations"][0]:
-            #                     a = e_f["annotations"][0]["val_256"]
-            #                     b = q_f["annotations"][0]["val_256"]
-            #                     score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-            #         print(score)
-            #         new_entries.append((score, e))
-
-            #     new_entries = sorted(new_entries, key=lambda x: -x[0])
-            #     entries = [x[1] for x in new_entries]
-            #     print("++++++++++++++++++++")
-            #     print(entries[0])
-
         result = indexer_pb2.ListSearchResultReply()
 
         for e in entries:
@@ -366,9 +338,6 @@ def search(args):
                 feature_to_proto(entry.feature, e["feature"])
             if "coordinates" in e:
                 entry.coordinates.extend(e["coordinates"])
-
-        # jsonObj = MessageToJson(result)
-        # logging.info(jsonObj)
 
         return result
 
@@ -543,16 +512,29 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 return indexer_pb2.StatusReply(status="error")
             return indexer_pb2.StatusReply(status="done", indexing=result)
 
-            # for x in content:
-            #     infoReply = GI.info.add()
-            #     infoReply.dtype = indexer_pb2.DT_FLOAT
-            #     infoReply.name = name
-            #     logging.info(x)
-            #     infoReply.proto_content = x.tobytes()
-            #     logging.info(len(infoReply.proto_content))
-            #     infoReply.shape.extend(x.shape)
-
         return indexer_pb2.StatusReply(status="error")
+
+    def get(self, request, context):
+
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+
+        entry = database.get_entry(request.id)
+        if entry is None:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details("Entry unknown")
+            return indexer_pb2.GetReply()
+
+        result = indexer_pb2.GetReply()
+        result.id = entry["id"]
+        if "meta" in entry:
+            meta_to_proto(result.meta, entry["meta"])
+        if "origin" in entry:
+            meta_to_proto(result.origin, entry["origin"])
+        if "classifier" in entry:
+            classifier_to_proto(result.classifier, entry["classifier"])
+        if "feature" in entry:
+            feature_to_proto(result.feature, entry["feature"])
+        return result
 
     def search(self, request, context):
 
@@ -598,15 +580,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 return indexer_pb2.ListSearchResultReply()
 
             return result
-
-            # for x in content:
-            #     infoReply = GI.info.add()
-            #     infoReply.dtype = indexer_pb2.DT_FLOAT
-            #     infoReply.name = name
-            #     logging.info(x)
-            #     infoReply.proto_content = x.tobytes()
-            #     logging.info(len(infoReply.proto_content))
-            #     infoReply.shape.extend(x.shape)
 
         context.set_code(grpc.StatusCode.NOT_FOUND)
         context.set_details("Job unknown")

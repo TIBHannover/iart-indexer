@@ -38,6 +38,11 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.SuggesterRequest.SerializeToString,
             response_deserializer=indexer__pb2.SuggesterReply.FromString,
         )
+        self.get = channel.unary_unary(
+            "/Indexer/get",
+            request_serializer=indexer__pb2.GetRequest.SerializeToString,
+            response_deserializer=indexer__pb2.GetReply.FromString,
+        )
         self.search = channel.unary_unary(
             "/Indexer/search",
             request_serializer=indexer__pb2.SearchRequest.SerializeToString,
@@ -86,6 +91,12 @@ class IndexerServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def get(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def search(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -126,6 +137,11 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.build_suggester,
             request_deserializer=indexer__pb2.SuggesterRequest.FromString,
             response_serializer=indexer__pb2.SuggesterReply.SerializeToString,
+        ),
+        "get": grpc.unary_unary_rpc_method_handler(
+            servicer.get,
+            request_deserializer=indexer__pb2.GetRequest.FromString,
+            response_serializer=indexer__pb2.GetReply.SerializeToString,
         ),
         "search": grpc.unary_unary_rpc_method_handler(
             servicer.search,
@@ -261,6 +277,35 @@ class Indexer(object):
             "/Indexer/build_suggester",
             indexer__pb2.SuggesterRequest.SerializeToString,
             indexer__pb2.SuggesterReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def get(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/get",
+            indexer__pb2.GetRequest.SerializeToString,
+            indexer__pb2.GetReply.FromString,
             options,
             channel_credentials,
             insecure,

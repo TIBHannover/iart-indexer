@@ -309,3 +309,17 @@ class Client:
         response = stub.search(request)
 
         return response.id
+
+    def get(self, id):
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+        request = indexer_pb2.GetRequest(id=id)
+        response = stub.get(request)
+
+        return response

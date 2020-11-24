@@ -73,6 +73,7 @@ service Indexer {
   rpc indexing(IndexingRequest) returns(IndexingReply) {}
   rpc status(StatusRequest) returns(StatusReply) {}
   rpc build_suggester(SuggesterRequest) returns(SuggesterReply) {}
+  rpc get(GetRequest) returns(GetReply) {}
   rpc search(SearchRequest) returns(SearchReply) {}
   rpc list_search_result(ListSearchResultRequest)
       returns(ListSearchResultReply) {}
@@ -176,6 +177,15 @@ message StatusReply {
   string status = 1;
   oneof result { IndexingResult indexing = 2; }
   // Tensor video = 3;
+}
+
+message GetRequest { string id = 1; }
+message GetReply {
+  string id = 1;
+  repeated ValueField meta = 2;
+  repeated ValueField origin = 3;
+  repeated ClassifierResult classifier = 4;
+  repeated FeatureResult feature = 5;
 }
 
 message SuggesterRequest {}

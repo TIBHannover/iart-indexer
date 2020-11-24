@@ -25,10 +25,11 @@ def parse_args():
     parser.add_argument("--batch", default=512, type=int, help="split images in batch")
 
     parser.add_argument(
-        "--task", choices=["list_plugins", "copy_images", "indexing", "build_suggester"], help="verbose output"
+        "--task", choices=["list_plugins", "copy_images", "indexing", "build_suggester", "get"], help="verbose output"
     )
 
     parser.add_argument("--path", help="path to image or folder to indexing")
+    parser.add_argument("--id", help="id for entry query")
 
     parser.add_argument("--output", help="copy image to new folder with hash id")
     parser.add_argument("--image_output", help="copy image to new folder with hash id")
@@ -93,6 +94,10 @@ def main():
         elif args.task == "build_suggester":
 
             client.build_suggester()
+
+        elif args.task == "get":
+
+            print(client.get(args.id))
 
     elif args.mode == "server":
         server = Server(config)
