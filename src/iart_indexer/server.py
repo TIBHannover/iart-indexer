@@ -306,23 +306,23 @@ def search(args):
                     search_terms.append(term)
 
         sorting = []
-        if query.sorting == indexer_pb2.SearchRequest.Sorting.RANDOM:
+        if query.sorting.lower() == "random":
             sorting.append("random")
 
         entries = database.raw_search(terms=search_terms, sorting=sorting, size=200)
 
         # TODO not the best way but it works now
         # TODO move to elasticsearch
-        print(dir(indexer_pb2.SearchRequest))
-        print(dir(indexer_pb2.SearchRequest.Sorting))
-        print(query.sorting)
 
-        if query.sorting == indexer_pb2.SearchRequest.Sorting.CLASSIFIER:
+        if query.sorting.lower() == "classifier":
             pass
 
-        if query.sorting == indexer_pb2.SearchRequest.Sorting.FEATURE:
+        if query.sorting.lower() == "feature":
+            entries = list(mapping_manager.run(entries, query_feature, ["FeatureCosineMapping"]))
 
+        if query.mapping.lower() == "umap":
             entries = list(mapping_manager.run(entries, query_feature, ["UMapMapping"]))
+
             # if query_feature is not None:
             #     new_entries = []
             #     for e in entries:
@@ -364,6 +364,8 @@ def search(args):
                 classifier_to_proto(entry.classifier, e["classifier"])
             if "feature" in e:
                 feature_to_proto(entry.feature, e["feature"])
+            if "coordinates" in e:
+                entry.coordinates.extend(e["coordinates"])
 
         # jsonObj = MessageToJson(result)
         # logging.info(jsonObj)

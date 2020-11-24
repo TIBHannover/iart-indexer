@@ -183,11 +183,9 @@ message SuggesterReply { string id = 1; }
 
 message FeatureSearchTerm {
   repeated PluginRun plugins = 1;
-
   Image image = 2;
 }
 
-// Maybe mearch classifier and meta at some point
 message ClassifierSearchTerm { string query = 1; }
 
 message MetaSearchTerm { string query = 1; }
@@ -202,9 +200,10 @@ message SearchTerm {
 
 message SearchRequest {
   repeated SearchTerm terms = 1;
-  enum Sorting { NONE = 0; FEATURE = 1; CLASSIFIER = 2; RANDOM = 3; UMAP = 4; }
-  Sorting sorting = 2;
+  string sorting = 2;
+  string mapping = 3;
 }
+
 message SearchReply { string id = 1; }
 
 message SearchResultEntry {
