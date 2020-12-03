@@ -29,15 +29,15 @@ class FeatureCosineMapping(MappingPlugin):
                             continue
                         if "val_64" in e_f["annotations"][0]:
                             a = e_f["annotations"][0]["val_64"]
-                            b = q_f["annotations"][0]["val_64"]
+                            b = q_f["value"]
                             score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
                         if "val_128" in e_f["annotations"][0]:
                             a = e_f["annotations"][0]["val_128"]
-                            b = q_f["annotations"][0]["val_128"]
+                            b = q_f["value"]
                             score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
                         if "val_256" in e_f["annotations"][0]:
                             a = e_f["annotations"][0]["val_256"]
-                            b = q_f["annotations"][0]["val_256"]
+                            b = q_f["value"]
                             score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
 
                 new_entries.append((score, {**e, "coordinates": [score]}))

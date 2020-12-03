@@ -78,6 +78,7 @@ service Indexer {
   rpc list_search_result(ListSearchResultRequest)
       returns(ListSearchResultReply) {}
   rpc suggest(SuggestRequest) returns(SuggestReply) {}
+  rpc build_indexer(IndexerRequest) returns(IndexerReply) {}
 }
 
 message PluginRun {
@@ -198,7 +199,10 @@ message FeatureSearchTerm {
 
 message ClassifierSearchTerm { string query = 1; }
 
-message MetaSearchTerm { string query = 1; }
+message MetaSearchTerm {
+  string query = 1;
+  string field = 2;
+}
 
 message SearchTerm {
   oneof term {
@@ -235,3 +239,6 @@ message SuggestGroup {
 
 message SuggestRequest { string query = 1; }
 message SuggestReply { repeated SuggestGroup groups = 1; }
+
+message IndexerRequest {}
+message IndexerReply {}
