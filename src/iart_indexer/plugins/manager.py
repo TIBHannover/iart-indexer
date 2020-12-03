@@ -17,13 +17,10 @@ class PluginManager:
 
         plugin_list = []
         plugin_name_list = [x.lower() for x in plugins]
-        print(f"MANAGER: {plugin_name_list}")
 
         for plugin_name, plugin_class in self.plugins().items():
-            print(f"MANAGER: {plugin_name.lower()}")
             if plugin_name.lower() not in plugin_name_list:
                 continue
-            print(f"MANAGER: found")
 
             plugin_config = {"params": {}}
             for x in self.configs:
@@ -32,6 +29,5 @@ class PluginManager:
 
             plugin = plugin_class(config=plugin_config["params"])
             plugin_list.append({"plugin": plugin, "plugin_cls": plugin_class, "config": plugin_config})
-            print(f"MANAGER: {plugin_list}")
 
         return plugin_list

@@ -38,6 +38,11 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.SuggesterRequest.SerializeToString,
             response_deserializer=indexer__pb2.SuggesterReply.FromString,
         )
+        self.get = channel.unary_unary(
+            "/Indexer/get",
+            request_serializer=indexer__pb2.GetRequest.SerializeToString,
+            response_deserializer=indexer__pb2.GetReply.FromString,
+        )
         self.search = channel.unary_unary(
             "/Indexer/search",
             request_serializer=indexer__pb2.SearchRequest.SerializeToString,
@@ -52,6 +57,11 @@ class IndexerStub(object):
             "/Indexer/suggest",
             request_serializer=indexer__pb2.SuggestRequest.SerializeToString,
             response_deserializer=indexer__pb2.SuggestReply.FromString,
+        )
+        self.build_indexer = channel.unary_unary(
+            "/Indexer/build_indexer",
+            request_serializer=indexer__pb2.IndexerRequest.SerializeToString,
+            response_deserializer=indexer__pb2.IndexerReply.FromString,
         )
 
 
@@ -86,6 +96,12 @@ class IndexerServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def get(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def search(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -99,6 +115,12 @@ class IndexerServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def suggest(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def build_indexer(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -127,6 +149,11 @@ def add_IndexerServicer_to_server(servicer, server):
             request_deserializer=indexer__pb2.SuggesterRequest.FromString,
             response_serializer=indexer__pb2.SuggesterReply.SerializeToString,
         ),
+        "get": grpc.unary_unary_rpc_method_handler(
+            servicer.get,
+            request_deserializer=indexer__pb2.GetRequest.FromString,
+            response_serializer=indexer__pb2.GetReply.SerializeToString,
+        ),
         "search": grpc.unary_unary_rpc_method_handler(
             servicer.search,
             request_deserializer=indexer__pb2.SearchRequest.FromString,
@@ -141,6 +168,11 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.suggest,
             request_deserializer=indexer__pb2.SuggestRequest.FromString,
             response_serializer=indexer__pb2.SuggestReply.SerializeToString,
+        ),
+        "build_indexer": grpc.unary_unary_rpc_method_handler(
+            servicer.build_indexer,
+            request_deserializer=indexer__pb2.IndexerRequest.FromString,
+            response_serializer=indexer__pb2.IndexerReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("Indexer", rpc_method_handlers)
@@ -272,6 +304,35 @@ class Indexer(object):
         )
 
     @staticmethod
+    def get(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/get",
+            indexer__pb2.GetRequest.SerializeToString,
+            indexer__pb2.GetReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def search(
         request,
         target,
@@ -357,3 +418,33 @@ class Indexer(object):
             timeout,
             metadata,
         )
+
+    @staticmethod
+    def build_indexer(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/build_indexer",
+            indexer__pb2.IndexerRequest.SerializeToString,
+            indexer__pb2.IndexerReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+

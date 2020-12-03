@@ -14,6 +14,43 @@ import numbers
 from iart_indexer import indexer_pb2
 
 
+def get_features_from_db_entry(entry):
+    data_dict = {"id": entry["id"], "feature": []}
+    # TODO
+    for feature in entry["feature"]:
+        for annotation in feature["annotations"]:
+            if "value" in annotation:
+                value = annotation["value"]
+            if "val_64" in annotation:
+                value = annotation["val_64"]
+            if "val_128" in annotation:
+                value = annotation["val_128"]
+            if "val_256" in annotation:
+                value = annotation["val_256"]
+            data_dict["feature"].append({"plugin": feature["plugin"], "type": annotation["type"], "value": value})
+
+    return data_dict
+
+
+# TODO
+def get_features_from_db_plugins(entry):
+    data_dict = {"id": entry["id"], "feature": []}
+    # TODO
+    for feature in entry["feature"]:
+        for annotation in feature["annotations"]:
+            if "value" in annotation:
+                value = annotation["value"]
+            if "val_64" in annotation:
+                value = annotation["val_64"]
+            if "val_128" in annotation:
+                value = annotation["val_128"]
+            if "val_256" in annotation:
+                value = annotation["val_256"]
+            data_dict["feature"].append({"plugin": feature["plugin"], "type": annotation["type"], "value": value})
+
+    return data_dict
+
+
 def image_normalize(image):
     if len(image.shape) == 2:
 

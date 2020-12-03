@@ -2,12 +2,11 @@ import logging
 import threading
 import time
 import uuid
+import traceback
 from concurrent import futures
 
 import numpy as np
-
 import grpc
-
 from google.protobuf.json_format import MessageToJson
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
@@ -15,10 +14,14 @@ from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
 from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
 from iart_indexer.plugins import *
 from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin
+from iart_indexer.plugins import IndexerPluginManager
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
+from iart_indexer.utils import get_features_from_db_entry
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 from google.protobuf.json_format import MessageToJson
+
+from iart_indexer.search import Searcher
 
 
 def compute_plugins(args):
@@ -35,8 +38,7 @@ def compute_plugins(args):
                 meta = meta_from_proto(x.meta)
                 origin = meta_from_proto(x.origin)
                 database.insert_entry(
-                    x.id,
-                    {"id": x.id, "meta": meta, "origin": origin},
+                    x.id, {"id": x.id, "meta": meta, "origin": origin},
                 )
             else:
                 existing[x.id] = {}
@@ -100,277 +102,49 @@ def compute_plugins(args):
 
 
 def search(args):
-    # try:
-    if True:
-        logging.info("Start searching job")
-        query = args["query"]
-        database = args["database"]
+    query = args["query"]
+    feature_plugin_manager = args["feature_manager"]
+    mapping_plugin_manager = args["mapping_manager"]
+    indexer_plugin_manager = args["indexer_manager"]
+    classifier_plugin_manager = None
+    # indexer_plugin_manager = None
+    database = args["database"]
 
-        #
-        # if not request.is_ajax():
-        #     return Http404()
+    searcher = Searcher(
+        database, feature_plugin_manager, classifier_plugin_manager, indexer_plugin_manager, mapping_plugin_manager
+    )
 
-        search_terms = []
-        for term in query.terms:
+    entries = searcher(query)
 
-            term_type = term.WhichOneof("term")
-            if term_type == "meta":
-                meta = term.meta
-                search_terms.append(
-                    {
-                        "multi_match": {
-                            "query": meta.query,
-                            "fields": ["meta.title", "meta.author", "meta.location", "meta.institution", "meta."],
-                        }
-                    }
-                )
-            if term_type == "classifier":
-                classifier = term.classifier
+    #     # TODO not the best way but it works now
+    #     # TODO move to elasticsearch
 
-                search_terms.append(
-                    {
-                        "nested": {
-                            "path": "classifier",
-                            "query": {
-                                "nested": {
-                                    "path": "classifier.annotations",
-                                    "query": {
-                                        "bool": {
-                                            "should": [{"match": {"classifier.annotations.name": classifier.query}}]
-                                        }
-                                    },
-                                }
-                            },
-                        }
-                    }
-                )
+    #     if query.sorting.lower() == "classifier":
+    #         pass
 
-            if term_type == "feature":
-                feature = term.feature
+    #     if query.sorting.lower() == "feature":
+    #         entries = list(mapping_manager.run(entries, query_feature, ["FeatureCosineMapping"]))
 
-                query_feature = []
+    #     if query.mapping.lower() == "umap":
+    #         entries = list(mapping_manager.run(entries, query_feature, ["UMapMapping"]))
 
-                entry = None
-                if feature.image.id is not None and feature.image.id != "":
-                    entry = database.get_entry(feature.image.id)
+    result = indexer_pb2.ListSearchResultReply()
 
-                if entry is not None:
+    for e in entries:
+        entry = result.entries.add()
+        entry.id = e["id"]
+        if "meta" in e:
+            meta_to_proto(entry.meta, e["meta"])
+        if "origin" in e:
+            meta_to_proto(entry.origin, e["origin"])
+        if "classifier" in e:
+            classifier_to_proto(entry.classifier, e["classifier"])
+        if "feature" in e:
+            feature_to_proto(entry.feature, e["feature"])
+        if "coordinates" in e:
+            entry.coordinates.extend(e["coordinates"])
 
-                    for p in feature.plugins:
-                        # TODO add weight
-                        for f in entry["feature"]:
-                            if p.name.lower() == f["plugin"].lower():
-                                print("match")
-
-                                # TODO add parameters for that
-                                if f["plugin"] == "yuv_histogram_feature":
-                                    fuzziness = 1
-                                    minimum_should_match = 4
-
-                                elif f["plugin"] == "byol_embedding_feature":
-                                    fuzziness = 2
-                                    minimum_should_match = 1
-
-                                elif f["plugin"] == "image_net_inception_feature":
-                                    fuzziness = 2
-                                    minimum_should_match = 1
-
-                                else:
-                                    continue
-
-                                query_feature.append(
-                                    {
-                                        "plugin": f["plugin"],
-                                        "annotations": f["annotations"],
-                                        "fuzziness": fuzziness,
-                                        "minimum_should_match": minimum_should_match,
-                                        "weight": p.weight,
-                                    }
-                                )
-
-                # TODO add example search here
-                else:
-                    logging.info("Feature")
-                    feature_manager = args["feature_manager"]
-                    feature_results = list(
-                        feature_manager.run([feature.image])  # , plugins=[x.name.lower() for x in feature.plugins])
-                    )[0]
-                    for p in feature.plugins:
-                        # feature_results
-                        for f in feature_results["plugins"]:
-                            if p.name.lower() == f._plugin.name.lower():
-                                # print("################")
-                                # # print(f)
-                                # print(f._plugin.name.lower())
-                                # print(f._plugin.type)
-
-                                # TODO add parameters for that
-                                if f._plugin.name == "yuv_histogram_feature":
-                                    fuzziness = 1
-                                    minimum_should_match = 4
-
-                                elif f._plugin.name == "byol_embedding_feature":
-                                    fuzziness = 2
-                                    minimum_should_match = 1
-
-                                elif f._plugin.name == "image_net_inception_feature":
-                                    fuzziness = 2
-                                    minimum_should_match = 1
-
-                                else:
-                                    continue
-
-                                annotations = []
-                                for anno in f._annotations[0]:
-                                    result_type = anno.WhichOneof("result")
-                                    if result_type == "feature":
-                                        annotation_dict = {}
-                                        binary = anno.feature.binary
-                                        feature = list(anno.feature.feature)
-
-                                        if len(feature) == 64:
-                                            annotation_dict["val_64"] = feature
-                                        elif len(feature) == 128:
-                                            annotation_dict["val_128"] = feature
-                                        elif len(feature) == 256:
-                                            annotation_dict["val_256"] = feature
-                                        else:
-                                            annotation_dict["value"] = feature
-
-                                        hash_splits_list = []
-                                        for x in range(4):
-                                            hash_splits_list.append(
-                                                binary[x * len(binary) // 4 : (x + 1) * len(binary) // 4]
-                                            )
-                                        annotation_dict["hash"] = {
-                                            f"split_{i}": x for i, x in enumerate(hash_splits_list)
-                                        }
-                                        annotation_dict["type"] = anno.feature.type
-                                        annotations.append(annotation_dict)
-                                query_feature.append(
-                                    {
-                                        "plugin": f._plugin.name,
-                                        "annotations": annotations,
-                                        "fuzziness": fuzziness,
-                                        "minimum_should_match": minimum_should_match,
-                                        "weight": p.weight,
-                                    }
-                                )
-
-                # print("######################")
-                # print(len(query_feature))
-                # print(query_feature)
-
-                for feature in query_feature:
-                    hash_splits = []
-                    for a in feature["annotations"]:
-                        for sub_hash_index, value in a["hash"].items():
-                            hash_splits.append(
-                                {
-                                    "fuzzy": {
-                                        f"feature.annotations.hash.{sub_hash_index}": {
-                                            "value": value,
-                                            "fuzziness": int(feature["fuzziness"]) if "fuzziness" in feature else 2,
-                                        },
-                                    }
-                                }
-                            )
-
-                    term = {
-                        "nested": {
-                            "path": "feature",
-                            "query": {
-                                "bool": {
-                                    "must": [
-                                        {"match": {"feature.plugin": feature["plugin"]}},
-                                        {
-                                            "nested": {
-                                                "path": "feature.annotations",
-                                                "query": {
-                                                    "bool": {
-                                                        # "must": {"match": {"feature.plugin": "yuv_histogram_feature"}},
-                                                        "should": hash_splits,
-                                                        "minimum_should_match": int(feature["minimum_should_match"])
-                                                        if "minimum_should_match" in feature
-                                                        else 4,
-                                                    },
-                                                },
-                                            }
-                                        },
-                                    ]
-                                },
-                            },
-                        }
-                    }
-                    search_terms.append(term)
-
-        sorting = []
-        if query.sorting == indexer_pb2.SearchRequest.Sorting.RANDOM:
-            sorting.append("random")
-
-        entries = database.raw_search(terms=search_terms, sorting=sorting, size=200)
-
-        # TODO not the best way but it works now
-        # TODO move to elasticsearch
-        print(dir(indexer_pb2.SearchRequest))
-        print(dir(indexer_pb2.SearchRequest.Sorting))
-        print(query.sorting)
-
-        if query.sorting == indexer_pb2.SearchRequest.Sorting.CLASSIFIER:
-            pass
-
-        if query.sorting == indexer_pb2.SearchRequest.Sorting.FEATURE:
-
-            if query_feature is not None:
-                new_entries = []
-                for e in entries:
-                    score = 0
-                    for q_f in query_feature:
-                        for e_f in e["feature"]:
-                            if q_f["plugin"] != e_f["plugin"]:
-                                continue
-                            if "val_64" in e_f["annotations"][0]:
-                                a = e_f["annotations"][0]["val_64"]
-                                b = q_f["annotations"][0]["val_64"]
-                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                            if "val_128" in e_f["annotations"][0]:
-                                a = e_f["annotations"][0]["val_128"]
-                                b = q_f["annotations"][0]["val_128"]
-                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                            if "val_256" in e_f["annotations"][0]:
-                                a = e_f["annotations"][0]["val_256"]
-                                b = q_f["annotations"][0]["val_256"]
-                                score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                    print(score)
-                    new_entries.append((score, e))
-
-                new_entries = sorted(new_entries, key=lambda x: -x[0])
-                entries = [x[1] for x in new_entries]
-                print("++++++++++++++++++++")
-                print(entries[0])
-
-        result = indexer_pb2.ListSearchResultReply()
-
-        for e in entries:
-            entry = result.entries.add()
-            entry.id = e["id"]
-            if "meta" in e:
-                meta_to_proto(entry.meta, e["meta"])
-            if "origin" in e:
-                meta_to_proto(entry.origin, e["origin"])
-            if "classifier" in e:
-                classifier_to_proto(entry.classifier, e["classifier"])
-            if "feature" in e:
-                feature_to_proto(entry.feature, e["feature"])
-
-        # jsonObj = MessageToJson(result)
-        # logging.info(jsonObj)
-
-        return result
-
-    # except Exception as e:
-    #     logging.error(repr(e))
-    #     return None
+    return result
 
 
 def suggest(args):
@@ -418,11 +192,33 @@ def build_autocompletion(args):
         suggester.update_entry(hash_id=x["id"], meta=meta_values, annotations=annotations_values)
 
 
+def build_indexer(args):
+    try:
+        database = args["database"]
+        indexer = args["indexer_manager"]
+
+        class EntryReader:
+            def __iter__(self):
+                for entry in database.all():
+                    yield get_features_from_db_entry(entry)
+
+        indexer.indexing(EntryReader())
+    except Exception as e:
+
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        # exc_type below is ignored on 3.5 and later
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        # logging.error(repr(e))
+        return None
+
+
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, config, feature_manager, classifier_manager):
+    def __init__(self, config, feature_manager, classifier_manager, indexer_manager, mapping_manager):
         self.config = config
         self.feature_manager = feature_manager
         self.classifier_manager = classifier_manager
+        self.indexer_manager = indexer_manager
+        self.mapping_manager = mapping_manager
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=4)
         self.futures = []
 
@@ -538,16 +334,29 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 return indexer_pb2.StatusReply(status="error")
             return indexer_pb2.StatusReply(status="done", indexing=result)
 
-            # for x in content:
-            #     infoReply = GI.info.add()
-            #     infoReply.dtype = indexer_pb2.DT_FLOAT
-            #     infoReply.name = name
-            #     logging.info(x)
-            #     infoReply.proto_content = x.tobytes()
-            #     logging.info(len(infoReply.proto_content))
-            #     infoReply.shape.extend(x.shape)
-
         return indexer_pb2.StatusReply(status="error")
+
+    def get(self, request, context):
+
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+
+        entry = database.get_entry(request.id)
+        if entry is None:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details("Entry unknown")
+            return indexer_pb2.GetReply()
+
+        result = indexer_pb2.GetReply()
+        result.id = entry["id"]
+        if "meta" in entry:
+            meta_to_proto(result.meta, entry["meta"])
+        if "origin" in entry:
+            meta_to_proto(result.origin, entry["origin"])
+        if "classifier" in entry:
+            classifier_to_proto(result.classifier, entry["classifier"])
+        if "feature" in entry:
+            feature_to_proto(result.feature, entry["feature"])
+        return result
 
     def search(self, request, context):
 
@@ -558,6 +367,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         job_id = uuid.uuid4().hex
         variable = {
             "feature_manager": self.feature_manager,
+            "mapping_manager": self.mapping_manager,
+            "indexer_manager": self.indexer_manager,
             "database": database,
             "query": request,
             "progress": 0,
@@ -593,15 +404,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
             return result
 
-            # for x in content:
-            #     infoReply = GI.info.add()
-            #     infoReply.dtype = indexer_pb2.DT_FLOAT
-            #     infoReply.name = name
-            #     logging.info(x)
-            #     infoReply.proto_content = x.tobytes()
-            #     logging.info(len(infoReply.proto_content))
-            #     infoReply.shape.extend(x.shape)
-
         context.set_code(grpc.StatusCode.NOT_FOUND)
         context.set_details("Job unknown")
         return indexer_pb2.ListSearchResultReply()
@@ -624,6 +426,32 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             g.group = group["type"]
             for suggestion in group["options"]:
                 g.suggestions.append(suggestion)
+
+        return result
+
+    def build_indexer(self, request, context):
+
+        jsonObj = MessageToJson(request)
+        logging.info(jsonObj)
+
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+
+        job_id = uuid.uuid4().hex
+        variable = {
+            "database": database,
+            "feature_manager": self.feature_manager,
+            "indexer_manager": self.indexer_manager,
+            "progress": 0,
+            "status": 0,
+            "result": "",
+            "future": None,
+            "id": job_id,
+        }
+        future = self.thread_pool.submit(build_indexer, variable)
+
+        variable["future"] = future
+        self.futures.append(variable)
+        result = indexer_pb2.IndexerReply()
 
         return result
 
@@ -660,8 +488,15 @@ class Server:
         self.classifier_manager = ClassifierPluginManager(configs=self.config.get("classifiers", []))
         self.classifier_manager.find()
 
+        self.indexer_manager = IndexerPluginManager(configs=self.config.get("indexes", []))
+        self.indexer_manager.find()
+
+        self.mapping_manager = MappingPluginManager(configs=self.config.get("mappings", []))
+        self.mapping_manager.find()
+
         indexer_pb2_grpc.add_IndexerServicer_to_server(
-            Commune(config, self.feature_manager, self.classifier_manager), self.server
+            Commune(config, self.feature_manager, self.classifier_manager, self.indexer_manager, self.mapping_manager),
+            self.server,
         )
         grpc_config = config.get("grpc", {})
         port = grpc_config.get("port", 50051)

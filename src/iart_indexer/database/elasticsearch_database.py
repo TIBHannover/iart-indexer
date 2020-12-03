@@ -161,6 +161,19 @@ class ElasticSearchDatabase(Database):
         except exceptions.NotFoundError:
             return None
 
+    def get_entries(self, hash_ids):
+        try:
+            body = {"query": {"ids": {"type": "_doc", "values": hash_ids}}}
+            print("#########################")
+            print(body)
+            results = self.es.search(index=self.index, doc_type=self.type, body=body, size=len(hash_ids))
+            print(len(hash_ids))
+            print(len(results["hits"]["hits"]))
+            for x in results["hits"]["hits"]:
+                yield x["_source"]
+        except exceptions.NotFoundError:
+            return None
+
     def update_plugin(self, hash_id, plugin_name, plugin_version, plugin_type, annotations):
         entry = self.get_entry(hash_id=hash_id)
         if entry is None:
@@ -342,38 +355,10 @@ class ElasticSearchDatabase(Database):
             return []
         # self.es.update('')
 
-    def raw_search(self, terms, sorting=None, size=5):
+    def raw_search(self, body, size=5):
         if not self.es.indices.exists(index=self.index):
             return []
 
-        body = {"query": {"bool": {"should": terms}}}
-        if sorting is not None:
-            sorting_list = []
-            if not isinstance(sorting, (list, set)):
-                sorting = [sorting]
-            for x in sorting:
-                if x == "classifier":
-                    sorting_list.append(
-                        {
-                            "classifier.annotations.value": {
-                                "order": "desc",
-                                "nested": {"path": "classifier", "nested": {"path": "classifier.annotations"}},
-                            }
-                        }
-                    )
-
-                if x == "random":
-                    body["query"]["bool"]["should"].append(
-                        {"function_score": {"functions": [{"random_score": {"seed": uuid.uuid4().hex}}]}}
-                    )
-
-                    # sort_list.append(
-                    #     {"query": }
-                    # )
-
-            body.update({"sort": sorting_list})
-
-        print(json.dumps(body, indent=2))
         try:
             results = self.es.search(index=self.index, body=body, size=size)
             for x in results["hits"]["hits"]:

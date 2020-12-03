@@ -73,10 +73,12 @@ service Indexer {
   rpc indexing(IndexingRequest) returns(IndexingReply) {}
   rpc status(StatusRequest) returns(StatusReply) {}
   rpc build_suggester(SuggesterRequest) returns(SuggesterReply) {}
+  rpc get(GetRequest) returns(GetReply) {}
   rpc search(SearchRequest) returns(SearchReply) {}
   rpc list_search_result(ListSearchResultRequest)
       returns(ListSearchResultReply) {}
   rpc suggest(SuggestRequest) returns(SuggestReply) {}
+  rpc build_indexer(IndexerRequest) returns(IndexerReply) {}
 }
 
 message PluginRun {
@@ -178,19 +180,29 @@ message StatusReply {
   // Tensor video = 3;
 }
 
+message GetRequest { string id = 1; }
+message GetReply {
+  string id = 1;
+  repeated ValueField meta = 2;
+  repeated ValueField origin = 3;
+  repeated ClassifierResult classifier = 4;
+  repeated FeatureResult feature = 5;
+}
+
 message SuggesterRequest {}
 message SuggesterReply { string id = 1; }
 
 message FeatureSearchTerm {
   repeated PluginRun plugins = 1;
-
   Image image = 2;
 }
 
-// Maybe mearch classifier and meta at some point
 message ClassifierSearchTerm { string query = 1; }
 
-message MetaSearchTerm { string query = 1; }
+message MetaSearchTerm {
+  string query = 1;
+  string field = 2;
+}
 
 message SearchTerm {
   oneof term {
@@ -202,9 +214,10 @@ message SearchTerm {
 
 message SearchRequest {
   repeated SearchTerm terms = 1;
-  enum Sorting { NONE = 0; FEATURE = 1; CLASSIFIER = 2; RANDOM = 3; }
-  Sorting sorting = 2;
+  string sorting = 2;
+  string mapping = 3;
 }
+
 message SearchReply { string id = 1; }
 
 message SearchResultEntry {
@@ -213,6 +226,7 @@ message SearchResultEntry {
   repeated ValueField origin = 3;
   repeated ClassifierResult classifier = 4;
   repeated FeatureResult feature = 5;
+  repeated float coordinates = 6;
 }
 
 message ListSearchResultRequest { string id = 1; }
@@ -225,3 +239,6 @@ message SuggestGroup {
 
 message SuggestRequest { string query = 1; }
 message SuggestReply { repeated SuggestGroup groups = 1; }
+
+message IndexerRequest {}
+message IndexerReply {}

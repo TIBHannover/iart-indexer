@@ -12,6 +12,9 @@ imageio = "^2.9.0"
 elasticsearch = "^7.9.1"
 grpcio = "^1.32.0"
 grpcio-tools = "^1.32.0"
+umap-learn = "^0.4.6"
+scikit-learn = "^0.23.2"
+faiss-cpu = "^1.6.5"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
