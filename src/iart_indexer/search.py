@@ -94,30 +94,15 @@ class Searcher:
                     logging.info("Feature")
 
                     feature_results = list(
-                        self.feature_manager.run(
+                        self.feature_plugin_manager.run(
                             [feature.image]
                         )  # , plugins=[x.name.lower() for x in feature.plugins])
                     )[0]
+
                     for p in feature.plugins:
                         # feature_results
                         for f in feature_results["plugins"]:
                             if p.name.lower() == f._plugin.name.lower():
-
-                                # TODO add parameters for that
-                                if f._plugin.name == "yuv_histogram_feature":
-                                    fuzziness = 1
-                                    minimum_should_match = 4
-
-                                elif f._plugin.name == "byol_embedding_feature":
-                                    fuzziness = 2
-                                    minimum_should_match = 1
-
-                                elif f._plugin.name == "image_net_inception_feature":
-                                    fuzziness = 2
-                                    minimum_should_match = 1
-
-                                else:
-                                    continue
 
                                 annotations = []
                                 for anno in f._annotations[0]:
@@ -127,13 +112,14 @@ class Searcher:
                                         binary = anno.feature.binary
                                         feature = list(anno.feature.feature)
 
-                                        annotation_dict["value"] = feature
-
-                                        annotation_dict["type"] = anno.feature.type
-                                        annotations.append(annotation_dict)
-                                query_feature.append(
-                                    {"plugin": f._plugin.name, "annotations": annotations, "weight": p.weight,}
-                                )
+                                        feature_search.append(
+                                            {
+                                                "plugin": f._plugin.name,
+                                                "type": anno.feature.type,
+                                                "value": feature,
+                                                "weight": p.weight,
+                                            }
+                                        )
 
         return text_search, classifier_search, feature_search, query.sorting
 
@@ -201,7 +187,7 @@ class Searcher:
         if elastic_sorting is not None:
             body.update({"sort": elastic_sorting})
 
-        print(json.dumps(body, indent=2))
+        # print(json.dumps(body, indent=2))
         entries = self.database.raw_search(body, size=size)
         return entries
 
