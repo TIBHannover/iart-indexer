@@ -39,7 +39,6 @@ class UMapMapping(MappingPlugin):
         entries = list(entries)
         for e in entries:
             for e_f in e["feature"]:
-                print(e_f["plugin"])
                 if ref_feature != e_f["plugin"]:
                     continue
                 if "val_64" in e_f["annotations"][0]:
@@ -50,21 +49,8 @@ class UMapMapping(MappingPlugin):
                     a = e_f["annotations"][0]["val_256"]
                 features.append(a)
         features = np.asarray(features)
-        print(features[:2, :10])
         embedding = self.reducer.fit_transform(features)
         normalize_embeddings = self.scaler.fit_transform(embedding)
         new_entries = [{**e, "coordinates": normalize_embeddings[i, :].tolist()} for i, e in enumerate(entries)]
-        # new_entries.append((score, {**e, "coordinates": [score]}))
-        print(embedding.shape)
-        print(embedding)
-        print(normalize_embeddings)
-        print(new_entries)
-
-        # new_entries.append((score, {**e, "coordinates": [score]}))
-
-        #
-        #
-        # new_entries = sorted(new_entries, key=lambda x: -x[0])
-        # entries = [x[1] for x in new_entries]
 
         return new_entries

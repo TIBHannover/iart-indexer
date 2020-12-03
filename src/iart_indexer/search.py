@@ -229,6 +229,9 @@ class Searcher:
         if query.sorting.lower() == "feature":
             entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["FeatureCosineMapping"]))
 
+        if query.mapping.lower() == "umap":
+            entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["UMapMapping"]))
+
         return list(entries)[:100]
         # # try:
         # if True:
