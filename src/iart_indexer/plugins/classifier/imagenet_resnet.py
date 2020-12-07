@@ -80,7 +80,7 @@ class ImageNetResnetClassifier(ClassifierPlugin):
             entry_annotation = []
             image = image_from_proto(entry)
             image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
-            image = np.expand_dims(image, 0)
+            # image = np.expand_dims(image, 0)
 
             job_id = uuid.uuid4().hex
 
@@ -97,7 +97,7 @@ class ImageNetResnetClassifier(ClassifierPlugin):
             result_list = np.argwhere(probabilities[0] > self.threshold)
             for x in result_list:
                 index = x[0]
-                prob = result[0, index]
+                prob = probabilities[0, index]
                 name = self.concept_lookup[index]
                 concepts.append(indexer_pb2.Concept(concept=name, type="style", prob=prob))
 
