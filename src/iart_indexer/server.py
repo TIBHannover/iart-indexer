@@ -97,8 +97,10 @@ def compute_plugins(args):
             ]
         )
     except Exception as e:
-        logging.error(e)
-        return None
+
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        
 
 
 def search(args):
@@ -160,7 +162,6 @@ def suggest(args):
 
     except Exception as e:
         logging.error(repr(e))
-        return None
 
 
 def build_autocompletion(args):
@@ -203,13 +204,12 @@ def build_indexer(args):
                     yield get_features_from_db_entry(entry)
 
         indexer.indexing(EntryReader())
+
     except Exception as e:
 
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        # exc_type below is ignored on 3.5 and later
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-        # logging.error(repr(e))
-        return None
+        
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):

@@ -63,6 +63,22 @@
                 "min_dim": 244,
                 "threshold": 0.5
             }
+        },
+        {
+            "type": "ImageNetResnetClassifier",
+            "output": "image_net_resnet_inception",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "imagenet_resnet",
+                "model_device": "cpu",
+                "model_file": "/nfs/data/iart/models/web/imagenet_resnet/imagenet_resnet.pt",
+                "mapping_file": "/nfs/data/iart/models/web/imagenet_resnet/imagenet_mapping.json",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244,
+                "threshold": 0.3
+            }
         }
     ]
 }
