@@ -22,6 +22,8 @@ from iart_indexer.utils import image_from_proto, image_resize
 class FaissIndexer(IndexerPlugin):
     default_config = {
         "indexer_dir": "",
+        "train_size": 8 * 65536,
+        # "indexing_size": 105536,
     }
 
     default_version = 0.1
@@ -30,14 +32,17 @@ class FaissIndexer(IndexerPlugin):
         super(FaissIndexer, self).__init__(**kwargs)
 
         self.indexer_dir = self.config["indexer_dir"]
+        self.train_size = self.config["train_size"]
+        # self.indexing_size = self.config["indexing_size"]
 
         self.indexer_data = {}
         if self.indexer_dir is not None and os.path.isfile(os.path.join(self.indexer_dir, "data.pkl")):
             with open(os.path.join(self.indexer_dir, "data.pkl"), "rb") as f:
                 self.indexer_data = pickle.load(f)
 
-    def indexing(self, entries):
+        os.makedirs(self.indexer_dir, exist_ok=True)
 
+    def train(self, entries):
         data = {}
         for i, entry in enumerate(entries):
             id = entry["id"]
@@ -52,10 +57,14 @@ class FaissIndexer(IndexerPlugin):
                 if id not in data[index_name]["entries"]:
                     data[index_name]["entries"][id] = len(data[index_name]["entries"])
 
-            if i % 1000 == 0 and i > 0:
+            if i % 10000 == 0 and i > 0:
                 logging.info(f"FaissIndexer: Read {i}")
+
+            if i > self.train_size:
+                break
                 # break
 
+        logging.info(f"FaissIndexer: Start training")
         indexer_data = {}
         for index_name, index_data in data.items():
             d = index_data["d"]
@@ -64,12 +73,57 @@ class FaissIndexer(IndexerPlugin):
 
             train_data = np.asarray(index_data["data"]).astype("float32")
             index.train(train_data)
-            index.add(train_data)
+            # index.add(train_data)
 
-            faiss.write_index(index, os.path.join(self.indexer_dir, index_data["id"] + ".index"))
+            # faiss.write_index(index, os.path.join(self.indexer_dir, index_data["id"] + ".index"))
+            indexer_data[index_name] = {
+                "index": index,
+                "entries": {},
+                "data": [],
+                "id": uuid.uuid4().hex,
+                # "rev_entries": {v: k for k, v in index_data["entries"].items()},
+                "d": index_data["d"],
+                # "id": index_data["id"],
+            }
+        return indexer_data
+
+    def indexing(self, entries):
+        indexer_data = self.train(entries)
+        # indexer_data = {}
+        for i, entry in enumerate(entries):
+            id = entry["id"]
+
+            for feature in entry["feature"]:
+                index_name = feature["plugin"] + "." + feature["type"]
+                # print(dir(indexer_data[index_name]))
+                indexer_data[index_name]["data"].append(feature["value"])
+
+                if id not in indexer_data[index_name]["entries"]:
+                    indexer_data[index_name]["entries"][id] = len(indexer_data[index_name]["entries"])
+
+            if i % 10000 == 0 and i > 0:
+                logging.info(f"FaissIndexer: Read {i} ")
+
+                for index_name, index_data in indexer_data.items():
+                    logging.info(f"{len(indexer_data[index_name]['data'])}")
+                    train_data = np.asarray(index_data["data"]).astype("float32")
+                    # index_data["index"].train(train_data)
+                    index_data["index"].add(train_data)
+
+                    indexer_data[index_name]["data"] = []
+            # if i > self.indexing_size:
+            #     break
+
+            # break
+
+        output_indexer_data = {}
+        for index_name, index_data in indexer_data.items():
+            d = index_data["d"]
+
+            faiss.write_index(index_data["index"], os.path.join(self.indexer_dir, index_data["id"] + ".index"))
             indexer_data[index_name] = {
                 "entries": index_data["entries"],
-                "index": {v: k for k, v in index_data["entries"].items()},
+                "rev_entries": {v: k for k, v in index_data["entries"].items()},
                 "d": index_data["d"],
                 "id": index_data["id"],
             }
@@ -90,6 +144,6 @@ class FaissIndexer(IndexerPlugin):
             index = faiss.read_index(os.path.join(self.indexer_dir, index_data["id"] + ".index"))
             q_result = index.search(np.asarray([q["value"]]).astype("float32"), k=size)
 
-            result.extend([index_data["index"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
+            result.extend([index_data["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
 
         return result
