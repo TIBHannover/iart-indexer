@@ -25,7 +25,7 @@ class ImageNetInceptionFeature(FeaturePlugin):
         "min_dim": 244,
     }
 
-    default_version = 0.1
+    default_version = 0.11
 
     def __init__(self, **kwargs):
         super(ImageNetInceptionFeature, self).__init__(**kwargs)
@@ -59,7 +59,10 @@ class ImageNetInceptionFeature(FeaturePlugin):
         model = ml2rt.load_model(self.pca_model_file)
 
         con.modelset(
-            self.pca_model_name, backend="onnx", device="cpu", data=model,
+            self.pca_model_name,
+            backend="onnx",
+            device="cpu",
+            data=model,
         )
 
     def check_rai(self):
