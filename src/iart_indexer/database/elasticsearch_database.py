@@ -3,6 +3,8 @@ import json
 from datetime import datetime
 
 from elasticsearch import Elasticsearch, exceptions
+from elasticsearch.helpers import bulk
+
 
 from iart_indexer.database.database import Database
 
@@ -85,9 +87,6 @@ class ElasticSearchDatabase(Database):
                                             "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                         },
                                         "value": {"type": "float"},
-                                        "vec_64": {"type": "dense_vector", "dims": 64},
-                                        "vec_128": {"type": "dense_vector", "dims": 128},
-                                        "vec_256": {"type": "dense_vector", "dims": 256},
                                     },
                                 },
                                 "plugin": {
@@ -148,6 +147,13 @@ class ElasticSearchDatabase(Database):
             }
 
             self.es.indices.create(index=self.index, body=request_body)
+
+    def bulk_insert(self, generator):
+        def add_fields(generator):
+            for x in generator:
+                yield {"_id": x["id"], "_index": self.index, **x}
+
+        bulk(client=self.es, actions=add_fields(generator))
 
     def insert_entry(self, hash_id, doc):
         self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=doc)

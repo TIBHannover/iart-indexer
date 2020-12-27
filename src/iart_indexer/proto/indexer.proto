@@ -71,6 +71,7 @@ message Tensor {
 service Indexer {
   rpc list_plugins(ListPluginsRequest) returns(ListPluginsReply) {}
   rpc indexing(IndexingRequest) returns(IndexingReply) {}
+  rpc bulk_indexing(IndexingRequest) returns(IndexingReply) {}
   rpc status(StatusRequest) returns(StatusReply) {}
   rpc build_suggester(SuggesterRequest) returns(SuggesterReply) {}
   rpc get(GetRequest) returns(GetReply) {}

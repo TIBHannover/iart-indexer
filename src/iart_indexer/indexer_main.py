@@ -21,12 +21,12 @@ def parse_args():
     parser.add_argument("--host", help="")
     parser.add_argument("--port", type=int, help="")
     parser.add_argument("--plugins", nargs="+", help="")
-    parser.add_argument("--image_input", help="")
+    parser.add_argument("--image_paths", help="")
     parser.add_argument("--batch", default=512, type=int, help="split images in batch")
 
     parser.add_argument(
         "--task",
-        choices=["list_plugins", "copy_images", "indexing", "build_suggester", "get", "build_indexer"],
+        choices=["list_plugins", "copy_images", "indexing", "bulk_indexing", "build_suggester", "get", "build_indexer"],
         help="verbose output",
     )
 
@@ -54,7 +54,7 @@ def main():
     if args.verbose:
         level = logging.INFO
 
-    logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%d-%m-%Y %H:%M:%S", level=level)
+    logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt="%d-%m-%Y %H:%M:%S", level=level)
 
     if args.config is not None:
         config = read_config(args.config)
@@ -73,7 +73,7 @@ def main():
         if args.task == "list_plugins":
             print(available_plugins)
         elif args.task == "copy_images":
-            entries = client.copy_images(paths=args.path, image_input=args.image_input, image_output=args.image_output)
+            entries = client.copy_images(paths=args.path, image_paths=args.image_paths, image_output=args.image_output)
             if args.output is not None:
                 with open(args.output, "w") as f:
                     for line in entries:
@@ -91,7 +91,22 @@ def main():
                     else:
                         plugins.append(plugin)
 
-            client.indexing(paths=args.path, image_input=args.image_input, plugins=plugins)
+            client.indexing(paths=args.path, image_paths=args.image_paths, plugins=plugins)
+
+        elif args.task == "bulk_indexing":
+            plugins = []
+            plugins_selected = None
+            if args.plugins:
+                plugins_selected = [x.lower() for x in args.plugins]
+            for t, plugin_list in available_plugins.items():
+                for plugin in plugin_list:
+                    if plugins_selected is not None:
+                        if plugin.lower() in plugins_selected:
+                            plugins.append(plugin)
+                    else:
+                        plugins.append(plugin)
+
+            client.bulk_indexing(paths=args.path, image_paths=args.image_paths, plugins=plugins)
 
         elif args.task == "build_suggester":
             client.build_suggester()

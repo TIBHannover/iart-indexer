@@ -2,6 +2,7 @@ import importlib
 import os
 import re
 import sys
+import logging
 
 from iart_indexer.plugins.manager import PluginManager
 from iart_indexer.plugins.plugin import Plugin
@@ -34,6 +35,26 @@ class ClassifierPluginManager(PluginManager):
                 function_dir = dir(a)
                 if "register" in function_dir:
                     a.register(self)
+
+    def run(self, images, plugins=None, configs=None, batchsize=128):
+
+        plugin_list = self.init_plugins(plugins, configs)
+
+        # TODO use batch size
+        for image in images:
+            plugin_result_list = {"id": image.id, "image": image, "plugins": []}
+            for plugin in plugin_list:
+                plugin = plugin["plugin"]
+
+                plugin_version = plugin.version
+                plugin_name = plugin.name
+
+                logging.info(f"Plugin start {plugin.name}:{plugin.version}")
+
+                plugin_results = plugin([image])
+                plugin_result_list["plugins"].append(plugin_results)
+
+            yield plugin_result_list
 
 
 class ClassifierPlugin(Plugin):

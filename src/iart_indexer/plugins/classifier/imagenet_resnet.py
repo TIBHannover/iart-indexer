@@ -51,8 +51,6 @@ class ImageNetResnetClassifier(ClassifierPlugin):
         with open(self.mapping_file, "r") as f:
             self.concept_lookup = json.load(f)
 
-
-
     def register_rai(self):
         con = rai.Client(host=self.host, port=self.port)
         model = ml2rt.load_model(self.model_file)
@@ -85,12 +83,9 @@ class ImageNetResnetClassifier(ClassifierPlugin):
             job_id = uuid.uuid4().hex
 
             con.tensorset(f"image_{job_id}", image)
-            result = con.modelrun(
-                self.model_name, f"image_{job_id}", f"probabilities_{job_id}"
-            )
+            result = con.modelrun(self.model_name, f"image_{job_id}", f"probabilities_{job_id}")
 
             probabilities = con.tensorget(f"probabilities_{job_id}")
-
 
             concepts = []
 
@@ -99,11 +94,10 @@ class ImageNetResnetClassifier(ClassifierPlugin):
                 index = x[0]
                 prob = probabilities[0, index]
                 name = self.concept_lookup[index]
-                concepts.append(indexer_pb2.Concept(concept=name, type="style", prob=prob))
+                concepts.append(indexer_pb2.Concept(concept=name, type="concept", prob=prob))
 
             con.delete(f"image_{job_id}")
             con.delete(f"probabilities_{job_id}")
-
 
             entry_annotation.append(
                 indexer_pb2.PluginResult(

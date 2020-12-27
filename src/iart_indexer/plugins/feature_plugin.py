@@ -37,9 +37,7 @@ class FeaturePluginManager(PluginManager):
                     a.register(self)
 
     def run(self, images, plugins=None, configs=None, batchsize=128):
-        print(plugins)
         plugin_list = self.init_plugins(plugins, configs)
-        print(plugin_list)
 
         # TODO use batch size
         for image in images:

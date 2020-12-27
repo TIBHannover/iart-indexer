@@ -45,14 +45,17 @@ def list_images(paths, name_as_hash=False):
     return entries
 
 
-def list_jsonl(paths, image_input=None):
+def list_jsonl(paths, image_paths=None):
     entries = []
     with open(paths, "r") as f:
         for line in f:
             entry = json.loads(line)
 
             if "path" not in entry:
-                entry["path"] = os.path.join(image_input, entry["id"][0:3], entry["id"][3:6], f"{entry['id']}.jpg")
+                entry["path"] = os.path.join(image_paths, entry["id"][0:3], entry["id"][3:6], f"{entry['id']}.jpg")
+            else:
+                if not os.path.isabs(entry["path"]):
+                    entry["path"] = os.path.join(image_paths, entry["path"])
             entries.append(entry)
 
     return entries
@@ -88,9 +91,9 @@ def copy_image_hash(image_path, image_output, hash_value=None, resolutions=[{"mi
         return None
 
 
-def copy_image(entry, image_output, image_input=None, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]):
-    if image_input is not None:
-        path = os.path.join(image_input, os.path.basename(entry["path"]))
+def copy_image(entry, image_output, image_paths=None, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]):
+    if image_paths is not None:
+        path = os.path.join(image_paths, os.path.basename(entry["path"]))
 
     else:
         path = entry["path"]
@@ -103,12 +106,12 @@ def copy_image(entry, image_output, image_input=None, resolutions=[{"min_dim": 2
 
 
 def copy_images(
-    entries, image_output, image_input=None, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]
+    entries, image_output, image_paths=None, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]
 ):
     entires_result = []
     with mp.Pool(8) as p:
         for entry in p.imap(
-            functools.partial(copy_image, image_output=image_output, image_input=image_input, resolutions=resolutions),
+            functools.partial(copy_image, image_output=image_output, image_paths=image_paths, resolutions=resolutions),
             entries,
         ):
             if entry is not None:
@@ -122,6 +125,77 @@ def split_batch(entries, batch_size=512):
         return [entries]
 
     return [entries[x * batch_size : (x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
+
+
+def bulk_indexing_job(args):
+    # try:
+    if True:
+        batch = args.get("batch", [])
+        host = args.get("host", "localhost")
+        port = args.get("port", "50051")
+        plugins = args.get("plugins", None)
+        stub = args.get("stub", None)
+
+        request = indexer_pb2.IndexingRequest()
+        request.update_database = True
+        if plugins is None:
+            # TODO
+            pass
+        else:
+            for plugin in plugins:
+                request_plugin = request.plugins.add()
+                request_plugin.name = plugin
+        for entry in batch:
+            request_image = request.images.add()
+            request_image.id = entry["id"]
+            # {"id": "d09d10a5b6474997ae2580086b2e4666", "meta": {"title": "Altes Rathaus", "year_min": 1267, "yaer_max": 1267, "location": "Aachen", "institution": "Rathaus"}, "path": "/home/matthias/projects/iart/web/media/d0/9d/d09d10a5b6474997ae2580086b2e4666.jpg", "filename": "130.jpg"}
+            # {"id": "8cfc09f13f0b45c8a56dcae17c33ed10", "meta": {"title": "Kirche Sankt Justinus (Mittelschiffarkaden)", "year_min": 925, "yaer_max": 950, "location": "H\u00f6chst (Frankfurt)", "institution": "Kirche Sankt Justinus"}, "path": "/home/matthias/projects/iart/web/media/8c/fc/8cfc09f13f0b45c8a56dcae17c33ed10.jpg", "filename": "136.jpg"}
+
+            for k, v in entry["meta"].items():
+
+                meta_field = request_image.meta.add()
+                meta_field.key = k
+                if isinstance(v, int):
+                    meta_field.int_val = v
+                if isinstance(v, float):
+                    meta_field.float_val = v
+                if isinstance(v, str):
+                    meta_field.string_val = v
+
+            if "origin" in entry:
+
+                for k, v in entry["origin"].items():
+
+                    origin_field = request_image.origin.add()
+                    origin_field.key = k
+                    if isinstance(v, int):
+                        origin_field.int_val = v
+                    if isinstance(v, float):
+                        origin_field.float_val = v
+                    if isinstance(v, str):
+                        origin_field.string_val = v
+
+            request_image.encoded = open(entry["path"], "rb").read()
+        # request_image.path = image.encode()
+        response = stub.bulk_indexing(request)
+
+        # # TODO timeout
+
+        status_request = indexer_pb2.StatusRequest()
+        status_request.id = response.id
+        for x in range(600):
+
+            status_response = stub.status(status_request)
+            if status_response.status == "done":
+                break
+            time.sleep(1)
+
+        return batch
+    # except KeyboardInterrupt:
+    #     raise
+    # except Exception as e:
+    #     print(e)
+    #     return None
 
 
 def indexing_job(args):
@@ -176,21 +250,14 @@ def indexing_job(args):
         # request_image.path = image.encode()
         response = stub.indexing(request)
 
-        print("query status")
-        # # TODO timeout
-
         status_request = indexer_pb2.StatusRequest()
         status_request.id = response.id
         for x in range(600):
 
             status_response = stub.status(status_request)
             if status_response.status == "done":
-                print("done")
                 break
             time.sleep(1)
-            print(f"xxx {x} {status_response.status}")
-
-        print("query end")
         return batch
     # except KeyboardInterrupt:
     #     raise
@@ -217,21 +284,21 @@ class Client:
 
         return result
 
-    def copy_images(self, paths, image_input=None, image_output=None):
+    def copy_images(self, paths, image_paths=None, image_output=None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
-            entries = list_jsonl(paths, image_input)
+            entries = list_jsonl(paths, image_paths)
         else:
             entries = list_images(paths)
 
         logging.info(f"Client: Copying {len(entries)} images to {image_output}")
         if image_output:
-            entries = copy_images(entries, image_input=image_input, image_output=image_output)
+            entries = copy_images(entries, image_paths=image_paths, image_output=image_output)
 
         return entries
 
-    def indexing(self, paths, image_input=None, batch_size: int = 32, plugins: list = None):
+    def indexing(self, paths, image_paths=None, batch_size: int = 32, plugins: list = None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
-            entries = list_jsonl(paths, image_input)
+            entries = list_jsonl(paths, image_paths)
         else:
             entries = list_images(paths)
 
@@ -262,7 +329,46 @@ class Client:
                 if batch is None:
                     continue
                 count += len(batch)
-                logging.info(f"Client: Indexing {count}/{len(entries)} images")
+                logging.info(f"Client: Indexing {count}/{len(entries)} images ")
+
+    def bulk_indexing(self, paths, image_paths=None, batch_size: int = 32, plugins: list = None):
+        if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
+            entries = list_jsonl(paths, image_paths)
+        else:
+            entries = list_images(paths)
+
+        logging.info(f"Client: Start indexing {len(entries)} images")
+
+        entries_list = split_batch(entries, batch_size)
+
+        count = 0
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+
+        start_time = time.time()
+        with ThreadPool(12) as p:
+            for batch in p.imap(
+                bulk_indexing_job,
+                [
+                    {"batch": x, "host": self.host, "port": self.port, "plugins": plugins, "stub": stub}
+                    for x in entries_list
+                ],
+            ):
+
+                if batch is None:
+                    continue
+                count += len(batch)
+                delta_time = time.time() - start_time
+                logging.info(
+                    f"Client: Indexing {count}/{len(entries)} images; Time {delta_time}s; Speed {count/delta_time}; Left {(len(entries)-count)*delta_time/count}"
+                )
 
     def status(self, job_id):
 

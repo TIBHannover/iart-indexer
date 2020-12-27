@@ -19,88 +19,184 @@ from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto,
 from iart_indexer.utils import get_features_from_db_entry
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
-from google.protobuf.json_format import MessageToJson
-
 from iart_indexer.search import Searcher
 
+# def update_plugin(self, hash_id, plugin_name, plugin_version, plugin_type, annotations):
+#     entry = self.get_entry(hash_id=hash_id)
+#     if entry is None:
+#         # TODO logging
+#         return
 
-def compute_plugins(args):
+#     # convert protobuf to dict
+#     annotations_list = []
+#     for anno in annotations:
+#         result_type = anno.WhichOneof("result")
+#         if result_type == "feature":
+#             annotation_dict = {}
+#             binary = anno.feature.binary
+#             feature = list(anno.feature.feature)
+
+#             if len(feature) == 64:
+#                 annotation_dict["val_64"] = feature
+#             elif len(feature) == 128:
+#                 annotation_dict["val_128"] = feature
+#             elif len(feature) == 256:
+#                 annotation_dict["val_256"] = feature
+#             else:
+#                 annotation_dict["value"] = feature
+
+#             hash_splits_list = []
+#             for x in range(4):
+#                 hash_splits_list.append(binary[x * len(binary) // 4 : (x + 1) * len(binary) // 4])
+#             annotation_dict["hash"] = {f"split_{i}": x for i, x in enumerate(hash_splits_list)}
+#             annotation_dict["type"] = anno.feature.type
+
+#             annotations_list.append(annotation_dict)
+
+#         if result_type == "classifier":
+#             for concept in anno.classifier.concepts:
+#                 annotation_dict = {}
+#                 annotation_dict["name"] = concept.concept
+#                 annotation_dict["type"] = concept.type
+#                 annotation_dict["value"] = concept.prob
+
+#                 annotations_list.append(annotation_dict)
+
+#     # print(annotations_list)
+
+#     # exit()
+#     if plugin_type in entry:
+#         founded = False
+#         for i, plugin in enumerate(entry[plugin_type]):
+#             if plugin["plugin"] == plugin_name:
+#                 founded = True
+#                 if plugin["version"] < plugin_version:
+#                     entry[plugin_type][i] = {
+#                         "plugin": plugin_name,
+#                         "version": plugin_version,
+#                         "annotations": annotations_list,
+#                     }
+#         if not founded:
+#             entry[plugin_type].append(
+#                 {"plugin": plugin_name, "version": plugin_version, "annotations": annotations_list}
+#             )
+#     else:
+#         entry.update(
+#             {plugin_type: [{"plugin": plugin_name, "version": plugin_version, "annotations": annotations_list}]}
+#         )
+#     self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=entry)
+
+
+def indexing(args):
     try:
         # if True:
-        logging.info("Start computing job")
-        plugin_classes = args["plugin_classes"]
+        logging.info("Start indexing job")
+        feature_plugin_manager = args["feature_manager"]
+        classifier_plugin_manager = args["classifier_manager"]
         images = args["images"]
         database = args["database"]
-        existing = {}
-        for x in images:
-            exist_entry = database.get_entry(x.id)
-            if exist_entry is None:
-                meta = meta_from_proto(x.meta)
-                origin = meta_from_proto(x.origin)
-                database.insert_entry(
-                    x.id, {"id": x.id, "meta": meta, "origin": origin},
-                )
-            else:
-                existing[x.id] = {}
-                # else:
-                # TODO remove already computed images
-                for c in exist_entry["classifier"]:
-                    existing[x.id][c["plugin"]] = c["version"]
-                for f in exist_entry["feature"]:
-                    existing[x.id][f["plugin"]] = f["version"]
 
-        # if database is not None:
-        #     existing_hash = [x["id"] for x in list(database.all())]
-        #     for x in images:
-        #         if x.id not in existing_hash:
+        def prepare_doc():
+            plugin_result_list = {}
+            for img in images:
+                meta = meta_from_proto(img.meta)
+                origin = meta_from_proto(img.origin)
+                doc = {"id": img.id, "meta": meta, "origin": origin}
+                feature = list(feature_plugin_manager.run([img]))[0]
+                print("###########")
 
-        plugin_result_list = {}
-        for plugin_class in plugin_classes:
-            # logging.info(dir(plugin_class["plugin"]))
+                # for f in feature["plugins"]:
 
-            plugin = plugin_class["plugin"](config=plugin_class["config"]["params"])
+                #     annotations = []
 
-            plugin_version = plugin.version
-            plugin_name = plugin.name
+                #     for anno in f._annotations:
+                #         for result in anno.classifier:
+                #             annotations.append({"name": result.name, "type": result.type, "value": result.value})
 
-            logging.info(f"Plugin start {plugin.name}:{plugin.version}")
+                #     classifier_result = {"plugin": f.plugin, "version": f.version, "annotations": annotations}
 
-            images_plugin = []
-            for i in images:
-                add = True
-                if i.id in existing:
-                    for p, v in existing[i.id].items():
-                        # logging.info(f'      {p}:{v}')
-                        if p == plugin_name:
-                            if plugin_version <= v:
-                                add = False
-                # logging.info(f'{add} {plugin_version} {plugin_name} { i.id in existing}')
-                if add:
-                    images_plugin.append(i)
+                #     print("++")
+                #     print(f)
+                #     print()
 
-            # exit()
-            plugin_results = plugin(images_plugin)
-            # # TODO entries_processed also contains the entries zip will be
+                annotations = []
+                for f in feature["plugins"]:
 
-            logging.info(f"Plugin done {plugin.name}:{plugin.version}")
-            for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-                if entry.id not in plugin_result_list:
-                    plugin_result_list[entry.id] = {"image": entry, "results": []}
-                plugin_result_list[entry.id]["results"].extend(annotations)
-            if database is not None:
-                update_database(database, plugin_results)
-                logging.info(f"Plugin result save {plugin.name}:{plugin.version}")
+                    for anno in f._annotations:
 
-        return indexer_pb2.IndexingResult(
-            results=[
-                indexer_pb2.ImageResult(image=x["image"], results=x["results"]) for x in plugin_result_list.values()
-            ]
-        )
+                        for result in anno:
+                            plugin_annotations = []
+
+                            binary_vec = result.feature.binary
+                            feature_vec = list(result.feature.feature)
+
+                            hash_splits_list = []
+                            for x in range(4):
+                                hash_splits_list.append(
+                                    binary_vec[x * len(binary_vec) // 4 : (x + 1) * len(binary_vec) // 4]
+                                )
+
+                            plugin_annotations.append(
+                                {
+                                    "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
+                                    "type": result.feature.type,
+                                    "value": feature_vec,
+                                }
+                            )
+
+                            feature_result = {
+                                "plugin": result.plugin,
+                                "version": result.version,
+                                "annotations": plugin_annotations,
+                            }
+                            annotations.append(feature_result)
+
+                if len(annotations) > 0:
+                    doc["feature"] = annotations
+
+                classifaction = list(classifier_plugin_manager.run([img]))[0]
+                # self._plugin = plugin
+                # self._entries = entries
+                # self._annotations = annotations
+                # plugin
+                # type
+                # version
+                # classifier
+                annotations = []
+                for c in classifaction["plugins"]:
+
+                    for anno in c._annotations:
+
+                        for result in anno:
+                            plugin_annotations = []
+                            for concept in result.classifier.concepts:
+                                plugin_annotations.append(
+                                    {"name": concept.concept, "type": concept.type, "value": concept.prob}
+                                )
+
+                            classifier_result = {
+                                "plugin": result.plugin,
+                                "version": result.version,
+                                "annotations": plugin_annotations,
+                            }
+                            annotations.append(classifier_result)
+
+                if len(annotations) > 0:
+                    doc["classifier"] = annotations
+
+                # exit()
+                # print(feature)
+                # print(classifaction)
+                # print(img)
+                yield doc
+
+        database.bulk_insert(prepare_doc())
+
+        return indexer_pb2.IndexingResult(results=[])
     except Exception as e:
 
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-        
 
 
 def search(args):
@@ -117,18 +213,6 @@ def search(args):
     )
 
     entries = searcher(query)
-
-    #     # TODO not the best way but it works now
-    #     # TODO move to elasticsearch
-
-    #     if query.sorting.lower() == "classifier":
-    #         pass
-
-    #     if query.sorting.lower() == "feature":
-    #         entries = list(mapping_manager.run(entries, query_feature, ["FeatureCosineMapping"]))
-
-    #     if query.mapping.lower() == "umap":
-    #         entries = list(mapping_manager.run(entries, query_feature, ["UMapMapping"]))
 
     result = indexer_pb2.ListSearchResultReply()
 
@@ -209,7 +293,6 @@ def build_indexer(args):
 
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-        
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):
@@ -237,13 +320,57 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             pluginInfo.name = plugin_name
             pluginInfo.type = "classifier"
 
-            # for setting in self.pluginManager.settings(pluginName):
-            #     settingReply = pluginInfo.settings.add()
-            #     settingReply.name = setting["name"]
-            #     settingReply.default = setting["default"]
-            #     settingReply.type = setting["type"]
-
         return reply
+
+    def bulk_indexing(self, request, context):
+        plugin_list = []
+        plugin_name_list = [x.name.lower() for x in request.plugins]
+        for plugin_name, plugin_class in self.feature_manager.plugins().items():
+            if plugin_name.lower() not in plugin_name_list:
+                continue
+
+            plugin_config = {"params": {}}
+            for x in self.config["features"]:
+                if x["type"].lower() == plugin_name.lower():
+                    plugin_config.update(x)
+            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
+
+        for plugin_name, plugin_class in self.classifier_manager.plugins().items():
+            if plugin_name.lower() not in plugin_name_list:
+                continue
+            plugin_config = {"params": {}}
+            for x in self.config["classifiers"]:
+                if x["type"].lower() == plugin_name.lower():
+                    plugin_config.update(x)
+            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
+        database = None
+        if request.update_database:
+            database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+
+        job_id = uuid.uuid4().hex
+
+        variable = {
+            "bulk": True,
+            "feature_manager": self.feature_manager,
+            "classifier_manager": self.classifier_manager,
+            "images": request.images,
+            "database": database,
+            "progress": 0,
+            "status": 0,
+            "result": "",
+            "future": None,
+            "id": job_id,
+        }
+
+        future = self.thread_pool.submit(indexing, variable)
+
+        variable["future"] = future
+        self.futures.append(variable)
+
+        self.futures = self.futures[-self.max_results :]
+        logging.info(f"Cache {len(self.futures)} future references")
+
+        return indexer_pb2.IndexingReply(id=job_id)
 
     def indexing(self, request, context):
         plugin_list = []
