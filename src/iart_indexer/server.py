@@ -21,71 +21,6 @@ from iart_indexer.utils import get_features_from_db_entry
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 from iart_indexer.search import Searcher
 
-# def update_plugin(self, hash_id, plugin_name, plugin_version, plugin_type, annotations):
-#     entry = self.get_entry(hash_id=hash_id)
-#     if entry is None:
-#         # TODO logging
-#         return
-
-#     # convert protobuf to dict
-#     annotations_list = []
-#     for anno in annotations:
-#         result_type = anno.WhichOneof("result")
-#         if result_type == "feature":
-#             annotation_dict = {}
-#             binary = anno.feature.binary
-#             feature = list(anno.feature.feature)
-
-#             if len(feature) == 64:
-#                 annotation_dict["val_64"] = feature
-#             elif len(feature) == 128:
-#                 annotation_dict["val_128"] = feature
-#             elif len(feature) == 256:
-#                 annotation_dict["val_256"] = feature
-#             else:
-#                 annotation_dict["value"] = feature
-
-#             hash_splits_list = []
-#             for x in range(4):
-#                 hash_splits_list.append(binary[x * len(binary) // 4 : (x + 1) * len(binary) // 4])
-#             annotation_dict["hash"] = {f"split_{i}": x for i, x in enumerate(hash_splits_list)}
-#             annotation_dict["type"] = anno.feature.type
-
-#             annotations_list.append(annotation_dict)
-
-#         if result_type == "classifier":
-#             for concept in anno.classifier.concepts:
-#                 annotation_dict = {}
-#                 annotation_dict["name"] = concept.concept
-#                 annotation_dict["type"] = concept.type
-#                 annotation_dict["value"] = concept.prob
-
-#                 annotations_list.append(annotation_dict)
-
-#     # print(annotations_list)
-
-#     # exit()
-#     if plugin_type in entry:
-#         founded = False
-#         for i, plugin in enumerate(entry[plugin_type]):
-#             if plugin["plugin"] == plugin_name:
-#                 founded = True
-#                 if plugin["version"] < plugin_version:
-#                     entry[plugin_type][i] = {
-#                         "plugin": plugin_name,
-#                         "version": plugin_version,
-#                         "annotations": annotations_list,
-#                     }
-#         if not founded:
-#             entry[plugin_type].append(
-#                 {"plugin": plugin_name, "version": plugin_version, "annotations": annotations_list}
-#             )
-#     else:
-#         entry.update(
-#             {plugin_type: [{"plugin": plugin_name, "version": plugin_version, "annotations": annotations_list}]}
-#         )
-#     self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=entry)
-
 
 def indexing(args):
     try:
@@ -96,105 +31,88 @@ def indexing(args):
         images = args["images"]
         database = args["database"]
 
+        def chunks(lst, n):
+            """Yield successive n-sized chunks from lst."""
+            for i in range(0, len(lst), n):
+                yield lst[i : i + n]
+
         def prepare_doc():
             plugin_result_list = {}
-            for img in images:
-                meta = meta_from_proto(img.meta)
-                origin = meta_from_proto(img.origin)
-                doc = {"id": img.id, "meta": meta, "origin": origin}
-                feature = list(feature_plugin_manager.run([img]))[0]
-                print("###########")
+            for images_chunk in chunks(images, 32):
+                feature_chunk = list(feature_plugin_manager.run(images_chunk))
 
-                # for f in feature["plugins"]:
+                classification_chunk = list(classifier_plugin_manager.run(images_chunk))
 
-                #     annotations = []
+                for img, feature, classification in zip(images_chunk, feature_chunk, classification_chunk):
 
-                #     for anno in f._annotations:
-                #         for result in anno.classifier:
-                #             annotations.append({"name": result.name, "type": result.type, "value": result.value})
+                    meta = meta_from_proto(img.meta)
+                    origin = meta_from_proto(img.origin)
+                    doc = {"id": img.id, "meta": meta, "origin": origin}
 
-                #     classifier_result = {"plugin": f.plugin, "version": f.version, "annotations": annotations}
+                    annotations = []
+                    for f in feature["plugins"]:
 
-                #     print("++")
-                #     print(f)
-                #     print()
+                        for anno in f._annotations:
 
-                annotations = []
-                for f in feature["plugins"]:
+                            for result in anno:
+                                plugin_annotations = []
 
-                    for anno in f._annotations:
+                                binary_vec = result.feature.binary
+                                feature_vec = list(result.feature.feature)
 
-                        for result in anno:
-                            plugin_annotations = []
+                                hash_splits_list = []
+                                for x in range(4):
+                                    hash_splits_list.append(
+                                        binary_vec[x * len(binary_vec) // 4 : (x + 1) * len(binary_vec) // 4]
+                                    )
 
-                            binary_vec = result.feature.binary
-                            feature_vec = list(result.feature.feature)
-
-                            hash_splits_list = []
-                            for x in range(4):
-                                hash_splits_list.append(
-                                    binary_vec[x * len(binary_vec) // 4 : (x + 1) * len(binary_vec) // 4]
-                                )
-
-                            plugin_annotations.append(
-                                {
-                                    "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
-                                    "type": result.feature.type,
-                                    "value": feature_vec,
-                                }
-                            )
-
-                            feature_result = {
-                                "plugin": result.plugin,
-                                "version": result.version,
-                                "annotations": plugin_annotations,
-                            }
-                            annotations.append(feature_result)
-
-                if len(annotations) > 0:
-                    doc["feature"] = annotations
-
-                classifaction = list(classifier_plugin_manager.run([img]))[0]
-                # self._plugin = plugin
-                # self._entries = entries
-                # self._annotations = annotations
-                # plugin
-                # type
-                # version
-                # classifier
-                annotations = []
-                for c in classifaction["plugins"]:
-
-                    for anno in c._annotations:
-
-                        for result in anno:
-                            plugin_annotations = []
-                            for concept in result.classifier.concepts:
                                 plugin_annotations.append(
-                                    {"name": concept.concept, "type": concept.type, "value": concept.prob}
+                                    {
+                                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
+                                        "type": result.feature.type,
+                                        "value": feature_vec,
+                                    }
                                 )
 
-                            classifier_result = {
-                                "plugin": result.plugin,
-                                "version": result.version,
-                                "annotations": plugin_annotations,
-                            }
-                            annotations.append(classifier_result)
+                                feature_result = {
+                                    "plugin": result.plugin,
+                                    "version": result.version,
+                                    "annotations": plugin_annotations,
+                                }
+                                annotations.append(feature_result)
 
-                if len(annotations) > 0:
-                    doc["classifier"] = annotations
+                    if len(annotations) > 0:
+                        doc["feature"] = annotations
 
-                # exit()
-                # print(feature)
-                # print(classifaction)
-                # print(img)
-                yield doc
+                    annotations = []
+                    for c in classification["plugins"]:
+
+                        for anno in c._annotations:
+
+                            for result in anno:
+                                plugin_annotations = []
+                                for concept in result.classifier.concepts:
+                                    plugin_annotations.append(
+                                        {"name": concept.concept, "type": concept.type, "value": concept.prob}
+                                    )
+
+                                classifier_result = {
+                                    "plugin": result.plugin,
+                                    "version": result.version,
+                                    "annotations": plugin_annotations,
+                                }
+                                annotations.append(classifier_result)
+
+                    if len(annotations) > 0:
+                        doc["classifier"] = annotations
+
+                    yield doc
 
         database.bulk_insert(prepare_doc())
 
         return indexer_pb2.IndexingResult(results=[])
-    except Exception as e:
 
+    except Exception as e:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 
@@ -302,7 +220,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         self.classifier_manager = classifier_manager
         self.indexer_manager = indexer_manager
         self.mapping_manager = mapping_manager
-        self.thread_pool = futures.ThreadPoolExecutor(max_workers=4)
+        self.thread_pool = futures.ThreadPoolExecutor(max_workers=8)
         self.futures = []
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)

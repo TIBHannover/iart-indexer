@@ -72,8 +72,12 @@ class KaggleDenseClassifier(ClassifierPlugin):
             [(token, index) for token, index in self.mapping["styles"].items()], key=lambda x: x[1]
         )
 
+        self.con = rai.Client(host=self.host, port=self.port)
+
+        if not self.check_rai():
+            self.register_rai()
+
     def register_rai(self):
-        con = rai.Client(host=self.host, port=self.port)
         model = ml2rt.load_model(self.model_file)
 
         outputs = [
@@ -83,7 +87,7 @@ class KaggleDenseClassifier(ClassifierPlugin):
             # "style_name"
         ]
 
-        con.modelset(
+        self.con.modelset(
             self.model_name,
             backend="TF",
             device=self.model_device,
@@ -94,18 +98,13 @@ class KaggleDenseClassifier(ClassifierPlugin):
         )
 
     def check_rai(self):
-        con = rai.Client(host=self.host, port=self.port)
-        result = con.modelscan()
+        result = self.con.modelscan()
         if self.model_name in [x[0] for x in result]:
             return True
         return False
 
     def call(self, entries):
 
-        if not self.check_rai():
-            self.register_rai()
-
-        con = rai.Client(host=self.host, port=self.port)
         result_entries = []
         result_annotations = []
         for entry in entries:
@@ -116,13 +115,13 @@ class KaggleDenseClassifier(ClassifierPlugin):
 
             job_id = uuid.uuid4().hex
 
-            con.tensorset(f"image_{job_id}", image)
-            result = con.modelrun(
+            self.con.tensorset(f"image_{job_id}", image)
+            result = self.con.modelrun(
                 self.model_name, f"image_{job_id}", [f"genre_probabilities_{job_id}", f"style_probabilities_{job_id}"]
             )
 
-            genre_probabilities = con.tensorget(f"genre_probabilities_{job_id}")
-            style_probabilities = con.tensorget(f"style_probabilities_{job_id}")
+            genre_probabilities = self.con.tensorget(f"genre_probabilities_{job_id}")
+            style_probabilities = self.con.tensorget(f"style_probabilities_{job_id}")
 
             concepts = []
 
@@ -140,9 +139,9 @@ class KaggleDenseClassifier(ClassifierPlugin):
             if style_prob > self.threshold:
                 concepts.append(indexer_pb2.Concept(concept=style[0], type="style", prob=style_prob))
 
-            con.delete(f"image_{job_id}")
-            con.delete(f"genre_probabilities_{job_id}")
-            con.delete(f"style_probabilities_{job_id}")
+            self.con.delete(f"image_{job_id}")
+            self.con.delete(f"genre_probabilities_{job_id}")
+            self.con.delete(f"style_probabilities_{job_id}")
             #     # decode results
             #     artist_name = np.array(results.outputs["artist_name"].string_val)
             #     artist = np.array(results.outputs["artist"].int64_val)

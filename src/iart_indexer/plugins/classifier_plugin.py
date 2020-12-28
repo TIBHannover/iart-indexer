@@ -49,7 +49,7 @@ class ClassifierPluginManager(PluginManager):
                 plugin_version = plugin.version
                 plugin_name = plugin.name
 
-                logging.info(f"Plugin start {plugin.name}:{plugin.version}")
+                # logging.info(f"Plugin start {plugin.name}:{plugin.version}")
 
                 plugin_results = plugin([image])
                 plugin_result_list["plugins"].append(plugin_results)

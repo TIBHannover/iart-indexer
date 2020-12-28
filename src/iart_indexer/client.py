@@ -331,7 +331,7 @@ class Client:
                 count += len(batch)
                 logging.info(f"Client: Indexing {count}/{len(entries)} images ")
 
-    def bulk_indexing(self, paths, image_paths=None, batch_size: int = 32, plugins: list = None):
+    def bulk_indexing(self, paths, image_paths=None, batch_size: int = 256, plugins: list = None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
             entries = list_jsonl(paths, image_paths)
         else:

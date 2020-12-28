@@ -33,26 +33,25 @@ class YUVHistogramFeature(FeaturePlugin):
         self.max_dim = self.config["max_dim"]
         self.min_dim = self.config["min_dim"]
 
+        self.con = rai.Client(host=self.host, port=self.port)
+
+        if not self.check_rai():
+            self.register_rai()
+
     def register_rai(self):
-        con = rai.Client(host=self.host, port=self.port)
         model = ml2rt.load_model(self.model_file)
 
-        con.modelset(
-            self.model_name, backend="torch", device="cpu", data=model,
+        self.con.modelset(
+            self.model_name, backend="torch", device="gpu", data=model,
         )
 
     def check_rai(self):
-        con = rai.Client(host=self.host, port=self.port)
-        result = con.modelscan()
+        result = self.con.modelscan()
         if self.model_name in [x[0] for x in result]:
             return True
         return False
 
     def call(self, entries):
-        if not self.check_rai():
-            self.register_rai()
-
-        con = rai.Client(host=self.host, port=self.port)
         result_entries = []
         result_annotations = []
         for entry in entries:
@@ -63,13 +62,13 @@ class YUVHistogramFeature(FeaturePlugin):
 
             job_id = uuid.uuid4().hex
 
-            con.tensorset(f"image_{job_id}", image)
-            result = con.modelrun(self.model_name, f"image_{job_id}", f"output_{job_id}")
-            output = con.tensorget(f"output_{job_id}")
+            self.con.tensorset(f"image_{job_id}", image)
+            result = self.con.modelrun(self.model_name, f"image_{job_id}", f"output_{job_id}")
+            output = self.con.tensorget(f"output_{job_id}")
             uv_histogram_norm_bin = "".join([str(int(x > 0)) for x in (output / np.mean(output)).tolist()])
 
-            con.delete(f"image_{job_id}")
-            con.delete(f"output_{job_id}")
+            self.con.delete(f"image_{job_id}")
+            self.con.delete(f"output_{job_id}")
 
             # hash_splits_list = []
             # for x in range(math.ceil(len(uv_histogram_norm_bin) / 16)):

@@ -49,7 +49,7 @@ class FeaturePluginManager(PluginManager):
                 plugin_version = plugin.version
                 plugin_name = plugin.name
 
-                logging.info(f"Plugin start {plugin.name}:{plugin.version}")
+                # logging.info(f"Plugin start {plugin.name}:{plugin.version}")
 
                 # exit()
                 plugin_results = plugin([image])
