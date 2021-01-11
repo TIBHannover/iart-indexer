@@ -37,8 +37,15 @@ class FaissIndexer(IndexerPlugin):
 
         self.indexer_data = {}
         if self.indexer_dir is not None and os.path.isfile(os.path.join(self.indexer_dir, "data.pkl")):
+            logging.info(f"FaissIndexer: Found index")
             with open(os.path.join(self.indexer_dir, "data.pkl"), "rb") as f:
                 self.indexer_data = pickle.load(f)
+
+            for key, index_data in self.indexer_data.items():
+                logging.info(f"FaissIndexer: Restore index {key}")
+                self.indexer_data[key]["index"] = faiss.read_index(
+                    os.path.join(self.indexer_dir, index_data["id"] + ".index")
+                )
 
         os.makedirs(self.indexer_dir, exist_ok=True)
 
@@ -59,7 +66,6 @@ class FaissIndexer(IndexerPlugin):
 
             if i % 10000 == 0 and i > 0:
                 logging.info(f"FaissIndexer: Read {i}")
-
             if i > self.train_size:
                 break
                 # break
@@ -131,6 +137,16 @@ class FaissIndexer(IndexerPlugin):
         with open(os.path.join(self.indexer_dir, "data.pkl"), "wb") as f:
             pickle.dump(indexer_data, f)
 
+        # TODO check multithreading
+        if self.indexer_dir is not None and os.path.isfile(os.path.join(self.indexer_dir, "data.pkl")):
+            with open(os.path.join(self.indexer_dir, "data.pkl"), "rb") as f:
+                self.indexer_data = pickle.load(f)
+
+        for key, index_data in self.indexer_data.items():
+            self.indexer_data[key]["index"] = faiss.read_index(
+                os.path.join(self.indexer_dir, index_data["id"] + ".index")
+            )
+
     def search(self, queries, size=100):
         result = []
         for q in queries:
@@ -141,7 +157,7 @@ class FaissIndexer(IndexerPlugin):
 
             # TODO load it ones
             index_data = self.indexer_data[index_name]
-            index = faiss.read_index(os.path.join(self.indexer_dir, index_data["id"] + ".index"))
+            index = index_data["index"]
             q_result = index.search(np.asarray([q["value"]]).astype("float32"), k=size)
 
             result.extend([index_data["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])

@@ -1,4 +1,5 @@
 import logging
+from multiprocessing.pool import Pool
 import threading
 import time
 import uuid
@@ -16,32 +17,57 @@ from iart_indexer.plugins import *
 from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin
 from iart_indexer.plugins import IndexerPluginManager
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
-from iart_indexer.utils import get_features_from_db_entry
+from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 from iart_indexer.search import Searcher
 
+from iart_indexer.plugins.cache import Cache
+
+import msgpack
+
+import imageio
+from iart_indexer.utils import image_normalize
+
 
 def indexing(args):
-    try:
-        # if True:
+    # try:
+    if True:
         logging.info("Start indexing job")
         feature_plugin_manager = args["feature_manager"]
         classifier_plugin_manager = args["classifier_manager"]
         images = args["images"]
         database = args["database"]
+        cache = args["cache"]
+        existing_predictions = {}
+        filter_feature_plugins = []
+        filter_classifier_plugins = []
+
+        with cache as cache:
+            for image in images:
+                cache_data = cache[image.id]
+                existing_predictions[image.id] = cache_data
+
+                plugins = []
+                for c in cache_data["classifier"]:
+                    plugins.append({"plugin": c["plugin"], "version": c["version"]})
+                filter_classifier_plugins.append(plugins)
+
+                plugins = []
+                for c in cache_data["feature"]:
+                    plugins.append({"plugin": c["plugin"], "version": c["version"]})
+                filter_feature_plugins.append(plugins)
 
         def chunks(lst, n):
-            """Yield successive n-sized chunks from lst."""
             for i in range(0, len(lst), n):
                 yield lst[i : i + n]
 
         def prepare_doc():
-            plugin_result_list = {}
             for images_chunk in chunks(images, 32):
-                feature_chunk = list(feature_plugin_manager.run(images_chunk))
 
-                classification_chunk = list(classifier_plugin_manager.run(images_chunk))
+                feature_chunk = list(feature_plugin_manager.run(images_chunk, filter_feature_plugins))
+
+                classification_chunk = list(classifier_plugin_manager.run(images_chunk, filter_classifier_plugins))
 
                 for img, feature, classification in zip(images_chunk, feature_chunk, classification_chunk):
 
@@ -106,15 +132,63 @@ def indexing(args):
                     if len(annotations) > 0:
                         doc["classifier"] = annotations
 
+                    # copy predictions from cache
+                    for exist_c in existing_predictions[img.id]["classifier"]:
+                        if "classifier" not in doc:
+                            doc["classifier"] = []
+
+                        founded = False
+                        for computed_c in doc["classifier"]:
+                            if computed_c["plugin"] == exist_c["plugin"] and version.parse(
+                                str(computed_c["version"])
+                            ) > version.parse(str(exist_c["version"])):
+                                founded = True
+
+                        if not founded:
+                            doc["classifier"].append(exist_c)
+
+                    for exist_f in existing_predictions[img.id]["feature"]:
+                        if "feature" not in doc:
+                            doc["feature"] = []
+                        exist_f_version = version.parse(str(exist_f["version"]))
+
+                        founded = False
+                        for computed_f in doc["feature"]:
+                            computed_f_version = version.parse(str(computed_f["version"]))
+                            if computed_f["plugin"] == exist_f["plugin"] and computed_f_version >= exist_f_version:
+                                founded = True
+                        if not founded:
+                            # TODO build hash
+                            output = np.asarray(exist_f["value"])
+                            output_bin = (output > 0).astype(np.int32).tolist()
+                            output_hash = "".join([str(x) for x in output_bin])
+                            hash_splits_list = []
+                            for x in range(4):
+                                hash_splits_list.append(
+                                    output_hash[x * len(output_hash) // 4 : (x + 1) * len(output_hash) // 4]
+                                )
+                            exist_f = {
+                                "plugin": exist_f["plugin"],
+                                "version": exist_f["version"],
+                                "annotations": [
+                                    {
+                                        "type": exist_f["type"],
+                                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
+                                        "value": exist_f["value"],
+                                    }
+                                ],
+                            }
+                            doc["feature"].append(exist_f)
+
                     yield doc
 
         database.bulk_insert(prepare_doc())
 
         return indexer_pb2.IndexingResult(results=[])
 
-    except Exception as e:
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+    # except Exception as e:
+    #     exc_type, exc_value, exc_traceback = sys.exc_info()
+    #     traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 
 
 def search(args):
@@ -213,14 +287,171 @@ def build_indexer(args):
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 
 
+def build_feature_cache(args):
+    try:
+        database = args["database"]
+        cache = args["cache"]
+        with cache as cache:
+
+            class EntryReader:
+                def __iter__(self):
+                    for entry in database.all():
+                        try:
+                            features = get_features_from_db_entry(entry)
+                            classifiers = get_classifier_from_db_entry(entry)
+                            yield {**features, **classifiers}
+                        except Exception as e:
+
+                            exc_type, exc_value, exc_traceback = sys.exc_info()
+                            traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+
+                            # print(entry)
+                            # print(features)
+                            # print(classifiers)
+                            # exit()
+
+            for entry in EntryReader():
+                cache.write(entry)
+
+    except Exception as e:
+
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+
+
+def indexing_job(entry):
+
+    image = imageio.imread(entry["image_data"])
+    image = image_normalize(image)
+
+    plugins = []
+    for c in entry["cache"]["classifier"]:
+        plugins.append({"plugin": c["plugin"], "version": c["version"]})
+
+    classifications = list(indexing_job.classifier_manager.run([image], [plugins]))[0]
+
+    plugins = []
+    for c in entry["cache"]["feature"]:
+        plugins.append({"plugin": c["plugin"], "version": c["version"]})
+    features = list(indexing_job.feature_manager.run([image], [plugins]))[0]
+
+    doc = {"id": entry["id"], "meta": entry["meta"], "origin": entry["origin"]}
+    annotations = []
+    for f in features["plugins"]:
+
+        for anno in f._annotations:
+
+            for result in anno:
+                plugin_annotations = []
+
+                binary_vec = result.feature.binary
+                feature_vec = list(result.feature.feature)
+
+                hash_splits_list = []
+                for x in range(4):
+                    hash_splits_list.append(binary_vec[x * len(binary_vec) // 4 : (x + 1) * len(binary_vec) // 4])
+
+                plugin_annotations.append(
+                    {
+                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
+                        "type": result.feature.type,
+                        "value": feature_vec,
+                    }
+                )
+
+                feature_result = {
+                    "plugin": result.plugin,
+                    "version": result.version,
+                    "annotations": plugin_annotations,
+                }
+                annotations.append(feature_result)
+
+    if len(annotations) > 0:
+        doc["feature"] = annotations
+
+    annotations = []
+    for c in classifications["plugins"]:
+
+        for anno in c._annotations:
+
+            for result in anno:
+                plugin_annotations = []
+                for concept in result.classifier.concepts:
+                    plugin_annotations.append({"name": concept.concept, "type": concept.type, "value": concept.prob})
+
+                classifier_result = {
+                    "plugin": result.plugin,
+                    "version": result.version,
+                    "annotations": plugin_annotations,
+                }
+                annotations.append(classifier_result)
+
+    if len(annotations) > 0:
+        doc["classifier"] = annotations
+
+    # copy predictions from cache
+    for exist_c in entry["cache"]["classifier"]:
+        if "classifier" not in doc:
+            doc["classifier"] = []
+
+        founded = False
+        for computed_c in doc["classifier"]:
+            if computed_c["plugin"] == exist_c["plugin"] and version.parse(str(computed_c["version"])) > version.parse(
+                str(exist_c["version"])
+            ):
+                founded = True
+
+        if not founded:
+            doc["classifier"].append(exist_c)
+
+    for exist_f in entry["cache"]["feature"]:
+        if "feature" not in doc:
+            doc["feature"] = []
+        exist_f_version = version.parse(str(exist_f["version"]))
+
+        founded = False
+        for computed_f in doc["feature"]:
+            computed_f_version = version.parse(str(computed_f["version"]))
+            if computed_f["plugin"] == exist_f["plugin"] and computed_f_version >= exist_f_version:
+                founded = True
+        if not founded:
+            # TODO build hash
+            output = np.asarray(exist_f["value"])
+            output_bin = (output > 0).astype(np.int32).tolist()
+            output_hash = "".join([str(x) for x in output_bin])
+            hash_splits_list = []
+            for x in range(4):
+                hash_splits_list.append(output_hash[x * len(output_hash) // 4 : (x + 1) * len(output_hash) // 4])
+            exist_f = {
+                "plugin": exist_f["plugin"],
+                "version": exist_f["version"],
+                "annotations": [
+                    {
+                        "type": exist_f["type"],
+                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
+                        "value": exist_f["value"],
+                    }
+                ],
+            }
+            doc["feature"].append(exist_f)
+    # print(f"FEATURE: {features}")
+    # exit()
+    # feature_chunk = list(feature_plugin_manager.run([image], filter_feature_plugins))
+
+    # classification_chunk = list(classifier_plugin_manager.run(images_chunk, filter_classifier_plugins))
+
+    return doc
+
+
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, config, feature_manager, classifier_manager, indexer_manager, mapping_manager):
+    def __init__(self, config, feature_manager, classifier_manager, indexer_manager, mapping_manager, cache):
         self.config = config
         self.feature_manager = feature_manager
         self.classifier_manager = classifier_manager
         self.indexer_manager = indexer_manager
         self.mapping_manager = mapping_manager
-        self.thread_pool = futures.ThreadPoolExecutor(max_workers=8)
+        self.cache = cache
+        self.thread_pool = futures.ThreadPoolExecutor(max_workers=16)
         self.futures = []
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
@@ -271,6 +502,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "bulk": True,
             "feature_manager": self.feature_manager,
             "classifier_manager": self.classifier_manager,
+            "cache": self.cache,
             "images": request.images,
             "database": database,
             "progress": 0,
@@ -290,57 +522,57 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         return indexer_pb2.IndexingReply(id=job_id)
 
-    def indexing(self, request, context):
-        plugin_list = []
-        plugin_name_list = [x.name.lower() for x in request.plugins]
-        for plugin_name, plugin_class in self.feature_manager.plugins().items():
-            if plugin_name.lower() not in plugin_name_list:
-                continue
+    def indexing(self, request_iterator, context):
 
-            plugin_config = {"params": {}}
-            for x in self.config["features"]:
-                if x["type"].lower() == plugin_name.lower():
-                    plugin_config.update(x)
-            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
-        for plugin_name, plugin_class in self.classifier_manager.plugins().items():
-            if plugin_name.lower() not in plugin_name_list:
-                continue
-            plugin_config = {"params": {}}
-            for x in self.config["classifiers"]:
-                if x["type"].lower() == plugin_name.lower():
-                    plugin_config.update(x)
-            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
-        database = None
-        if request.update_database:
-            database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+        def filter_and_translate(request_iterator):
 
-        job_id = uuid.uuid4().hex
-        variable = {
-            "plugin_classes": plugin_list,
-            "images": request.images,
-            "database": database,
-            "progress": 0,
-            "status": 0,
-            "result": "",
-            "future": None,
-            "id": job_id,
-        }
+            with Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="r") as cache:
+                for x in request_iterator:
+                    cache_data = cache[x.image.id]
 
-        future = self.thread_pool.submit(compute_plugins, variable)
+                    meta = meta_from_proto(x.image.meta)
+                    origin = meta_from_proto(x.image.origin)
+                    yield {
+                        "id": x.image.id,
+                        "image_data": x.image.encoded,
+                        "meta": meta,
+                        "origin": origin,
+                        "cache": cache_data,
+                    }
 
-        variable["future"] = future
-        self.futures.append(variable)
+        def init_worker(function, config):
+            function.feature_manager = FeaturePluginManager(configs=config.get("features", []))
+            function.feature_manager.find()
 
-        self.futures = self.futures[-self.max_results :]
-        logging.info(f"Cache {len(self.futures)} future references")
+            function.classifier_manager = ClassifierPluginManager(configs=config.get("classifiers", []))
+            function.classifier_manager.find()
 
-        # thread = threading.Thread(target=compute_plugins, args=(variable,))
+        with Pool(16, initializer=init_worker, initargs=[indexing_job, self.config]) as p:
+            db_bulk_cache = []
+            for i, entry in enumerate(p.imap(indexing_job, filter_and_translate(request_iterator))):
+                if entry is None:
+                    yield indexer_pb2.IndexingReply(status="error")
+                    continue
 
-        # self.threads[job_id] = (thread, variable)
-        # thread.start()
+                db_bulk_cache.append(entry)
 
-        return indexer_pb2.IndexingReply(id=job_id)
+                if len(db_bulk_cache) > 1000:
+                    logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
+                    database.bulk_insert(db_bulk_cache)
+                    db_bulk_cache = []
+                # print(entry)
+                # print()
+                # print(database.get_entry(entry["id"]))
+                # exit()
+
+                yield indexer_pb2.IndexingReply(status="ok")
+
+            if len(db_bulk_cache) > 1:
+                logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
+                database.bulk_insert(db_bulk_cache)
+                db_bulk_cache = []
 
     def build_suggester(self, request, context):
 
@@ -475,10 +707,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def build_indexer(self, request, context):
-
-        jsonObj = MessageToJson(request)
-        logging.info(jsonObj)
-
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
         job_id = uuid.uuid4().hex
@@ -496,8 +724,34 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         variable["future"] = future
         self.futures.append(variable)
-        result = indexer_pb2.IndexerReply()
+        result = indexer_pb2.BuildIndexerReply()
 
+        return result
+
+    def build_feature_cache(self, request, context):
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+        job_id = uuid.uuid4().hex
+        variable = {
+            "database": database,
+            "cache": Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="a"),
+            "progress": 0,
+            "status": 0,
+            "result": "",
+            "future": None,
+            "id": job_id,
+        }
+        future = self.thread_pool.submit(build_feature_cache, variable)
+
+        variable["future"] = future
+        self.futures.append(variable)
+        result = indexer_pb2.BuildFeatureCacheReply()
+
+        return result
+
+    def dump(self, request, context):
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+        for entry in database.all():
+            yield indexer_pb2.DumpReply(entry=msgpack.packb(entry))
         return result
 
 
@@ -539,8 +793,17 @@ class Server:
         self.mapping_manager = MappingPluginManager(configs=self.config.get("mappings", []))
         self.mapping_manager.find()
 
+        self.cache = Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="r")
+
         indexer_pb2_grpc.add_IndexerServicer_to_server(
-            Commune(config, self.feature_manager, self.classifier_manager, self.indexer_manager, self.mapping_manager),
+            Commune(
+                config,
+                self.feature_manager,
+                self.classifier_manager,
+                self.indexer_manager,
+                self.mapping_manager,
+                self.cache,
+            ),
             self.server,
         )
         grpc_config = config.get("grpc", {})

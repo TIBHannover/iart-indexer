@@ -42,7 +42,7 @@ class YUVHistogramFeature(FeaturePlugin):
         model = ml2rt.load_model(self.model_file)
 
         self.con.modelset(
-            self.model_name, backend="torch", device="gpu", data=model,
+            self.model_name, backend="torch", device="cpu", data=model,
         )
 
     def check_rai(self):
@@ -56,7 +56,8 @@ class YUVHistogramFeature(FeaturePlugin):
         result_annotations = []
         for entry in entries:
             entry_annotation = []
-            image = image_from_proto(entry)
+            # image = image_from_proto(entry)
+            image = entry
             image = image_resize(image, max_dim=self.max_dim)
             image = image.astype(np.float32)
 

@@ -4,8 +4,12 @@ import re
 import sys
 import logging
 
+# from typing import Union
+
 from iart_indexer.plugins.manager import PluginManager
 from iart_indexer.plugins.plugin import Plugin
+
+from packaging import version
 
 
 class FeaturePluginManager(PluginManager):
@@ -36,20 +40,36 @@ class FeaturePluginManager(PluginManager):
                 if "register" in function_dir:
                     a.register(self)
 
-    def run(self, images, plugins=None, configs=None, batchsize=128):
+    def run(self, images, filter_plugins=None, plugins=None, configs=None, batchsize=128):
+
         plugin_list = self.init_plugins(plugins, configs)
 
+        # print(f"PLUGINS: {plugin_list}")
+        if filter_plugins is None:
+            filter_plugins = [[]] * len(images)
         # TODO use batch size
-        for image in images:
-            plugin_result_list = {"id": image.id, "image": image, "plugins": []}
+        # print(f"LEN1 {len(images)} ")
+        # print(f"LEN2 {len(filter_plugins)} ")
+        # print(f"{filter_plugins}")
+        for (image, filters) in zip(images, filter_plugins):
+            # print("IMAGE")
+            plugin_result_list = {"image": image, "plugins": []}
             for plugin in plugin_list:
+                # print(f"PLUGIN: {plugin}")
                 # logging.info(dir(plugin_class["plugin"]))
                 plugin = plugin["plugin"]
+                plugin_version = version.parse(str(plugin.version))
 
-                plugin_version = plugin.version
-                plugin_name = plugin.name
+                founded = False
+                for f in filters:
+                    f_version = version.parse(str(f["version"]))
+                    if f["plugin"] == plugin.name and f_version >= plugin_version:
+                        founded = True
 
-                # logging.info(f"Plugin start {plugin.name}:{plugin.version}")
+                if founded:
+                    continue
+
+                logging.info(f"Plugin start {plugin.name}:{plugin.version}")
 
                 # exit()
                 plugin_results = plugin([image])

@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import uuid
+import time
 
 import imageio
 
@@ -22,14 +23,28 @@ def parse_args():
     parser.add_argument("--port", type=int, help="")
     parser.add_argument("--plugins", nargs="+", help="")
     parser.add_argument("--image_paths", help="")
+    parser.add_argument("--query", help="")
     parser.add_argument("--batch", default=512, type=int, help="split images in batch")
 
     parser.add_argument(
         "--task",
-        choices=["list_plugins", "copy_images", "indexing", "bulk_indexing", "build_suggester", "get", "build_indexer"],
+        choices=[
+            "list_plugins",
+            "copy_images",
+            "indexing",
+            "bulk_indexing",
+            "build_suggester",
+            "get",
+            "build_indexer",
+            "search",
+            "build_feature_cache",
+            "load",
+            "dump",
+        ],
         help="verbose output",
     )
 
+    parser.add_argument("--dump_path", help="path to image or folder to indexing")
     parser.add_argument("--path", help="path to image or folder to indexing")
     parser.add_argument("--id", help="id for entry query")
 
@@ -114,8 +129,33 @@ def main():
         elif args.task == "get":
             print(client.get(args.id))
 
+        elif args.task == "search":
+            try:
+                query = json.loads(args.query)
+            except:
+                query = {"queries": [{"type": "meta", "query": args.query}]}
+            time_start = time.time()
+            client.search(query)
+            time_stop = time.time()
+            print(time_stop - time_start)
+
         elif args.task == "build_indexer":
             client.build_indexer()
+
+        elif args.task == "build_feature_cache":
+            client.build_feature_cache()
+
+        elif args.task == "build_indexer":
+            client.build_indexer()
+
+        elif args.task == "build_feature_cache":
+            client.build_feature_cache()
+
+        elif args.task == "dump":
+            client.dump(args.dump_path)
+
+        elif args.task == "load":
+            client.load(args.dump_path)
 
     elif args.mode == "server":
         server = Server(config)

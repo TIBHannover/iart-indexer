@@ -30,7 +30,12 @@ message Tensor {
   repeated int32 shape = 2;
 
   enum Inerpretation {
-    DOT = 0; LINE = 1; TRIANGLE = 2; RECTANGLE = 3; PENTAGON = 4; IMAGE = 5;
+    DOT = 0;
+    LINE = 1;
+    TRIANGLE = 2;
+    RECTANGLE = 3;
+    PENTAGON = 4;
+    IMAGE = 5;
   }
 
   string name = 14;
@@ -43,25 +48,25 @@ message Tensor {
   repeated float float_val = 5;
 
   // DT_DOUBLE.
-  repeated double double_val = 6 [packed = true];
+  repeated double double_val = 6 [ packed = true ];
 
   // DT_INT32, DT_INT16, DT_INT8, DT_UINT8.
-  repeated int32 int_val = 7 [packed = true];
+  repeated int32 int_val = 7 [ packed = true ];
 
   // DT_STRING
   repeated bytes string_val = 8;
 
   // DT_COMPLEX64. scomplex_val(2*i) and scomplex_val(2*i+1) are real
   // and imaginary parts of i-th single precision complex.
-  repeated float scomplex_val = 9 [packed = true];
+  repeated float scomplex_val = 9 [ packed = true ];
 
   // DT_INT64
-  repeated int64 int64_val = 10 [packed = true];
+  repeated int64 int64_val = 10 [ packed = true ];
 
   // DT_BOOL
-  repeated bool bool_val = 11 [packed = true];
+  repeated bool bool_val = 11 [ packed = true ];
 
-  repeated int32 half_val = 12 [packed = true];
+  repeated int32 half_val = 12 [ packed = true ];
 }
 
 // python -m grpc_tools.protoc -I../web --python_out=. --grpc_python_out=.
@@ -69,17 +74,22 @@ message Tensor {
 // --grpc_python_out=. ../backend/tunnel.proto create json stringds
 
 service Indexer {
-  rpc list_plugins(ListPluginsRequest) returns(ListPluginsReply) {}
-  rpc indexing(IndexingRequest) returns(IndexingReply) {}
-  rpc bulk_indexing(IndexingRequest) returns(IndexingReply) {}
-  rpc status(StatusRequest) returns(StatusReply) {}
-  rpc build_suggester(SuggesterRequest) returns(SuggesterReply) {}
-  rpc get(GetRequest) returns(GetReply) {}
-  rpc search(SearchRequest) returns(SearchReply) {}
+  rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
+  rpc bulk_indexing(BulkIndexingRequest) returns (BulkIndexingReply) {}
+  rpc status(StatusRequest) returns (StatusReply) {}
+  rpc build_suggester(SuggesterRequest) returns (SuggesterReply) {}
+  rpc get(GetRequest) returns (GetReply) {}
+  rpc search(SearchRequest) returns (SearchReply) {}
   rpc list_search_result(ListSearchResultRequest)
-      returns(ListSearchResultReply) {}
-  rpc suggest(SuggestRequest) returns(SuggestReply) {}
-  rpc build_indexer(IndexerRequest) returns(IndexerReply) {}
+      returns (ListSearchResultReply) {}
+  rpc suggest(SuggestRequest) returns (SuggestReply) {}
+  rpc build_indexer(BuildIndexerRequest) returns (BuildIndexerReply) {}
+  rpc build_feature_cache(BuildFeatureCacheRequest)
+      returns (BuildFeatureCacheReply) {}
+
+  rpc indexing(stream IndexingRequest) returns (stream IndexingReply) {}
+  rpc dump(DumpRequest) returns (stream DumpReply) {}
+  rpc load(stream LoadRequest) returns (LoadReply) {}
 }
 
 message PluginRun {
@@ -167,12 +177,12 @@ message PluginInfo {
 message ListPluginsRequest {}
 message ListPluginsReply { repeated PluginInfo plugins = 1; }
 
-message IndexingRequest {
+message BulkIndexingRequest {
   repeated PluginRun plugins = 1;
   repeated Image images = 2;
   bool update_database = 3;
 }
-message IndexingReply { string id = 1; }
+message BulkIndexingReply { string id = 1; }
 
 message StatusRequest { string id = 1; }
 message StatusReply {
@@ -241,5 +251,21 @@ message SuggestGroup {
 message SuggestRequest { string query = 1; }
 message SuggestReply { repeated SuggestGroup groups = 1; }
 
-message IndexerRequest {}
-message IndexerReply {}
+message BuildIndexerRequest {}
+message BuildIndexerReply {}
+
+message BuildFeatureCacheRequest {}
+message BuildFeatureCacheReply {}
+
+message DumpRequest {}
+message DumpReply { bytes entry = 1; }
+message LoadRequest { bytes entry = 1; }
+message LoadReply {}
+
+message IndexingRequest {
+  // PluginRun plugins = 1;
+  Image image = 1;
+  // bool update_database = 3;
+}
+
+message IndexingReply { string status = 1; }

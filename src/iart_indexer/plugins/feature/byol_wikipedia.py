@@ -60,7 +60,8 @@ class ByolEmbeddingFeature(FeaturePlugin):
         result_annotations = []
         for entry in entries:
             entry_annotation = []
-            image = image_from_proto(entry)
+            # image = image_from_proto(entry)
+            image = entry
             image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
 
             job_id = uuid.uuid4().hex

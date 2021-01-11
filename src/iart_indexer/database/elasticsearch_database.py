@@ -22,7 +22,7 @@ class ElasticSearchDatabase(Database):
         self.hosts = config.get("host", "localhost")
         self.port = config.get("port", 9200)
 
-        self.es = Elasticsearch([{"host": self.hosts, "port": self.port}])
+        self.es = Elasticsearch([{"host": self.hosts, "port": self.port}], timeout=30)
 
         self.index = config.get("index", "iart")
         self.type = config.get("type", "_doc")
@@ -41,12 +41,13 @@ class ElasticSearchDatabase(Database):
                                         "name": {
                                             "type": "text",
                                             "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                            "copy_to": ["classifier_text", "all_text"],
                                         },
                                         "type": {
                                             "type": "text",
                                             "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                         },
-                                        "value": {"type": "float"},
+                                        "value": {"type": "float", "index": False},
                                     },
                                 },
                                 "plugin": {
@@ -56,6 +57,7 @@ class ElasticSearchDatabase(Database):
                                 "version": {"type": "float"},
                             },
                         },
+                        "classifier_text": {"type": "text"},
                         "feature": {
                             "type": "nested",
                             "properties": {
@@ -86,7 +88,7 @@ class ElasticSearchDatabase(Database):
                                             "type": "text",
                                             "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                         },
-                                        "value": {"type": "float"},
+                                        "value": {"type": "float", "index": False},
                                     },
                                 },
                                 "plugin": {
@@ -108,28 +110,34 @@ class ElasticSearchDatabase(Database):
                                 "artist_name": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                    "copy_to": ["meta_text", "all_text"],
                                 },
                                 "institution": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                    "copy_to": ["meta_text", "all_text"],
                                 },
                                 "location": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                    "copy_to": ["meta_text", "all_text"],
                                 },
                                 "title": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                    "copy_to": ["meta_text", "all_text"],
                                 },
-                                "yaer_max": {"type": "long"},
-                                "year_min": {"type": "long"},
+                                "yaer_max": {"type": "long", "copy_to": ["meta_text", "all_text"],},
+                                "year_min": {"type": "long", "copy_to": ["meta_text", "all_text"],},
                             }
                         },
+                        "meta_text": {"type": "text"},
                         "origin": {
                             "properties": {
                                 "name": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                    "copy_to": ["origin_text", "all_text"],
                                 },
                                 "license": {
                                     "type": "text",
@@ -141,6 +149,8 @@ class ElasticSearchDatabase(Database):
                                 },
                             }
                         },
+                        "origin_text": {"type": "text"},
+                        "all_text": {"type": "text"},
                         "path": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
                     }
                 }

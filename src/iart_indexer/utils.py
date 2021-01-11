@@ -17,6 +17,8 @@ from iart_indexer import indexer_pb2
 def get_features_from_db_entry(entry):
     data_dict = {"id": entry["id"], "feature": []}
     # TODO
+    if "feature" not in entry:
+        return data_dict
     for feature in entry["feature"]:
         for annotation in feature["annotations"]:
             if "value" in annotation:
@@ -27,8 +29,18 @@ def get_features_from_db_entry(entry):
                 value = annotation["val_128"]
             if "val_256" in annotation:
                 value = annotation["val_256"]
-            data_dict["feature"].append({"plugin": feature["plugin"], "type": annotation["type"], "value": value})
+            data_dict["feature"].append(
+                {"plugin": feature["plugin"], "type": annotation["type"], "version": feature["version"], "value": value}
+            )
 
+    return data_dict
+
+
+def get_classifier_from_db_entry(entry):
+
+    if "classifier" not in entry:
+        return {"id": entry["id"], "classifier": []}
+    data_dict = {"id": entry["id"], "classifier": entry["classifier"]}
     return data_dict
 
 
@@ -36,6 +48,8 @@ def get_features_from_db_entry(entry):
 def get_features_from_db_plugins(entry):
     data_dict = {"id": entry["id"], "feature": []}
     # TODO
+    if "feature" not in entry:
+        return data_dict
     for feature in entry["feature"]:
         for annotation in feature["annotations"]:
             if "value" in annotation:

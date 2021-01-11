@@ -22,15 +22,10 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.ListPluginsRequest.SerializeToString,
             response_deserializer=indexer__pb2.ListPluginsReply.FromString,
         )
-        self.indexing = channel.unary_unary(
-            "/Indexer/indexing",
-            request_serializer=indexer__pb2.IndexingRequest.SerializeToString,
-            response_deserializer=indexer__pb2.IndexingReply.FromString,
-        )
         self.bulk_indexing = channel.unary_unary(
             "/Indexer/bulk_indexing",
-            request_serializer=indexer__pb2.IndexingRequest.SerializeToString,
-            response_deserializer=indexer__pb2.IndexingReply.FromString,
+            request_serializer=indexer__pb2.BulkIndexingRequest.SerializeToString,
+            response_deserializer=indexer__pb2.BulkIndexingReply.FromString,
         )
         self.status = channel.unary_unary(
             "/Indexer/status",
@@ -64,8 +59,28 @@ class IndexerStub(object):
         )
         self.build_indexer = channel.unary_unary(
             "/Indexer/build_indexer",
-            request_serializer=indexer__pb2.IndexerRequest.SerializeToString,
-            response_deserializer=indexer__pb2.IndexerReply.FromString,
+            request_serializer=indexer__pb2.BuildIndexerRequest.SerializeToString,
+            response_deserializer=indexer__pb2.BuildIndexerReply.FromString,
+        )
+        self.build_feature_cache = channel.unary_unary(
+            "/Indexer/build_feature_cache",
+            request_serializer=indexer__pb2.BuildFeatureCacheRequest.SerializeToString,
+            response_deserializer=indexer__pb2.BuildFeatureCacheReply.FromString,
+        )
+        self.indexing = channel.stream_stream(
+            "/Indexer/indexing",
+            request_serializer=indexer__pb2.IndexingRequest.SerializeToString,
+            response_deserializer=indexer__pb2.IndexingReply.FromString,
+        )
+        self.dump = channel.unary_stream(
+            "/Indexer/dump",
+            request_serializer=indexer__pb2.DumpRequest.SerializeToString,
+            response_deserializer=indexer__pb2.DumpReply.FromString,
+        )
+        self.load = channel.stream_unary(
+            "/Indexer/load",
+            request_serializer=indexer__pb2.LoadRequest.SerializeToString,
+            response_deserializer=indexer__pb2.LoadReply.FromString,
         )
 
 
@@ -77,12 +92,6 @@ class IndexerServicer(object):
     """
 
     def list_plugins(self, request, context):
-        """Missing associated documentation comment in .proto file"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def indexing(self, request, context):
         """Missing associated documentation comment in .proto file"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -136,6 +145,30 @@ class IndexerServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def build_feature_cache(self, request, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def indexing(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def dump(self, request, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def load(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_IndexerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -144,15 +177,10 @@ def add_IndexerServicer_to_server(servicer, server):
             request_deserializer=indexer__pb2.ListPluginsRequest.FromString,
             response_serializer=indexer__pb2.ListPluginsReply.SerializeToString,
         ),
-        "indexing": grpc.unary_unary_rpc_method_handler(
-            servicer.indexing,
-            request_deserializer=indexer__pb2.IndexingRequest.FromString,
-            response_serializer=indexer__pb2.IndexingReply.SerializeToString,
-        ),
         "bulk_indexing": grpc.unary_unary_rpc_method_handler(
             servicer.bulk_indexing,
-            request_deserializer=indexer__pb2.IndexingRequest.FromString,
-            response_serializer=indexer__pb2.IndexingReply.SerializeToString,
+            request_deserializer=indexer__pb2.BulkIndexingRequest.FromString,
+            response_serializer=indexer__pb2.BulkIndexingReply.SerializeToString,
         ),
         "status": grpc.unary_unary_rpc_method_handler(
             servicer.status,
@@ -186,8 +214,28 @@ def add_IndexerServicer_to_server(servicer, server):
         ),
         "build_indexer": grpc.unary_unary_rpc_method_handler(
             servicer.build_indexer,
-            request_deserializer=indexer__pb2.IndexerRequest.FromString,
-            response_serializer=indexer__pb2.IndexerReply.SerializeToString,
+            request_deserializer=indexer__pb2.BuildIndexerRequest.FromString,
+            response_serializer=indexer__pb2.BuildIndexerReply.SerializeToString,
+        ),
+        "build_feature_cache": grpc.unary_unary_rpc_method_handler(
+            servicer.build_feature_cache,
+            request_deserializer=indexer__pb2.BuildFeatureCacheRequest.FromString,
+            response_serializer=indexer__pb2.BuildFeatureCacheReply.SerializeToString,
+        ),
+        "indexing": grpc.stream_stream_rpc_method_handler(
+            servicer.indexing,
+            request_deserializer=indexer__pb2.IndexingRequest.FromString,
+            response_serializer=indexer__pb2.IndexingReply.SerializeToString,
+        ),
+        "dump": grpc.unary_stream_rpc_method_handler(
+            servicer.dump,
+            request_deserializer=indexer__pb2.DumpRequest.FromString,
+            response_serializer=indexer__pb2.DumpReply.SerializeToString,
+        ),
+        "load": grpc.stream_unary_rpc_method_handler(
+            servicer.load,
+            request_deserializer=indexer__pb2.LoadRequest.FromString,
+            response_serializer=indexer__pb2.LoadReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("Indexer", rpc_method_handlers)
@@ -230,33 +278,6 @@ class Indexer(object):
         )
 
     @staticmethod
-    def indexing(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/Indexer/indexing",
-            indexer__pb2.IndexingRequest.SerializeToString,
-            indexer__pb2.IndexingReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
     def bulk_indexing(
         request,
         target,
@@ -272,8 +293,8 @@ class Indexer(object):
             request,
             target,
             "/Indexer/bulk_indexing",
-            indexer__pb2.IndexingRequest.SerializeToString,
-            indexer__pb2.IndexingReply.FromString,
+            indexer__pb2.BulkIndexingRequest.SerializeToString,
+            indexer__pb2.BulkIndexingReply.FromString,
             options,
             channel_credentials,
             call_credentials,
@@ -461,8 +482,116 @@ class Indexer(object):
             request,
             target,
             "/Indexer/build_indexer",
-            indexer__pb2.IndexerRequest.SerializeToString,
-            indexer__pb2.IndexerReply.FromString,
+            indexer__pb2.BuildIndexerRequest.SerializeToString,
+            indexer__pb2.BuildIndexerReply.FromString,
+            options,
+            channel_credentials,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def build_feature_cache(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/build_feature_cache",
+            indexer__pb2.BuildFeatureCacheRequest.SerializeToString,
+            indexer__pb2.BuildFeatureCacheReply.FromString,
+            options,
+            channel_credentials,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def indexing(
+        request_iterator,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            "/Indexer/indexing",
+            indexer__pb2.IndexingRequest.SerializeToString,
+            indexer__pb2.IndexingReply.FromString,
+            options,
+            channel_credentials,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def dump(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            "/Indexer/dump",
+            indexer__pb2.DumpRequest.SerializeToString,
+            indexer__pb2.DumpReply.FromString,
+            options,
+            channel_credentials,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def load(
+        request_iterator,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.stream_unary(
+            request_iterator,
+            target,
+            "/Indexer/load",
+            indexer__pb2.LoadRequest.SerializeToString,
+            indexer__pb2.LoadReply.FromString,
             options,
             channel_credentials,
             call_credentials,

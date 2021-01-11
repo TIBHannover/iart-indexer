@@ -11,6 +11,7 @@ import uuid
 
 import grpc
 import imageio
+import random
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.utils import image_resize
@@ -198,74 +199,6 @@ def bulk_indexing_job(args):
     #     return None
 
 
-def indexing_job(args):
-    # try:
-    if True:
-        batch = args.get("batch", [])
-        host = args.get("host", "localhost")
-        port = args.get("port", "50051")
-        plugins = args.get("plugins", None)
-        stub = args.get("stub", None)
-
-        request = indexer_pb2.IndexingRequest()
-        request.update_database = True
-        if plugins is None:
-            # TODO
-            pass
-        else:
-            for plugin in plugins:
-                request_plugin = request.plugins.add()
-                request_plugin.name = plugin
-        for entry in batch:
-            request_image = request.images.add()
-            request_image.id = entry["id"]
-            # {"id": "d09d10a5b6474997ae2580086b2e4666", "meta": {"title": "Altes Rathaus", "year_min": 1267, "yaer_max": 1267, "location": "Aachen", "institution": "Rathaus"}, "path": "/home/matthias/projects/iart/web/media/d0/9d/d09d10a5b6474997ae2580086b2e4666.jpg", "filename": "130.jpg"}
-            # {"id": "8cfc09f13f0b45c8a56dcae17c33ed10", "meta": {"title": "Kirche Sankt Justinus (Mittelschiffarkaden)", "year_min": 925, "yaer_max": 950, "location": "H\u00f6chst (Frankfurt)", "institution": "Kirche Sankt Justinus"}, "path": "/home/matthias/projects/iart/web/media/8c/fc/8cfc09f13f0b45c8a56dcae17c33ed10.jpg", "filename": "136.jpg"}
-
-            for k, v in entry["meta"].items():
-
-                meta_field = request_image.meta.add()
-                meta_field.key = k
-                if isinstance(v, int):
-                    meta_field.int_val = v
-                if isinstance(v, float):
-                    meta_field.float_val = v
-                if isinstance(v, str):
-                    meta_field.string_val = v
-
-            if "origin" in entry:
-
-                for k, v in entry["origin"].items():
-
-                    origin_field = request_image.origin.add()
-                    origin_field.key = k
-                    if isinstance(v, int):
-                        origin_field.int_val = v
-                    if isinstance(v, float):
-                        origin_field.float_val = v
-                    if isinstance(v, str):
-                        origin_field.string_val = v
-
-            request_image.encoded = open(entry["path"], "rb").read()
-        # request_image.path = image.encode()
-        response = stub.indexing(request)
-
-        status_request = indexer_pb2.StatusRequest()
-        status_request.id = response.id
-        for x in range(600):
-
-            status_response = stub.status(status_request)
-            if status_response.status == "done":
-                break
-            time.sleep(1)
-        return batch
-    # except KeyboardInterrupt:
-    #     raise
-    # except Exception as e:
-    #     print(e)
-    #     return None
-
-
 class Client:
     def __init__(self, config):
         self.host = config.get("host", "localhost")
@@ -296,7 +229,7 @@ class Client:
 
         return entries
 
-    def indexing(self, paths, image_paths=None, batch_size: int = 32, plugins: list = None):
+    def indexing(self, paths, image_paths=None, plugins: list = None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
             entries = list_jsonl(paths, image_paths)
         else:
@@ -304,9 +237,40 @@ class Client:
 
         logging.info(f"Client: Start indexing {len(entries)} images")
 
-        entries_list = split_batch(entries, batch_size)
+        def entry_generator(entries):
 
-        count = 0
+            for entry in entries:
+                request = indexer_pb2.IndexingRequest()
+                request_image = request.image
+                request_image.id = entry["id"]
+
+                for k, v in entry["meta"].items():
+
+                    meta_field = request_image.meta.add()
+                    meta_field.key = k
+                    if isinstance(v, int):
+                        meta_field.int_val = v
+                    if isinstance(v, float):
+                        meta_field.float_val = v
+                    if isinstance(v, str):
+                        meta_field.string_val = v
+
+                if "origin" in entry:
+
+                    for k, v in entry["origin"].items():
+
+                        origin_field = request_image.origin.add()
+                        origin_field.key = k
+                        if isinstance(v, int):
+                            origin_field.int_val = v
+                        if isinstance(v, float):
+                            origin_field.float_val = v
+                        if isinstance(v, str):
+                            origin_field.string_val = v
+
+                request_image.encoded = open(entry["path"], "rb").read()
+                yield request
+            # request_image.path = image.encode()
 
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -317,21 +281,20 @@ class Client:
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
 
-        with ThreadPool(4) as p:
-            for batch in p.imap(
-                indexing_job,
-                [
-                    {"batch": x, "host": self.host, "port": self.port, "plugins": plugins, "stub": stub}
-                    for x in entries_list
-                ],
-            ):
+        time_start = time.time()
+        for i, entry in enumerate(stub.indexing(entry_generator(entries))):
+            # for i, entry in enumerate(entry_generator(entries)):
+            if i % 1000 == 0:
+                speed = i / (time.time() - time_start)
+                logging.info(f"Client: Indexing {i}/{len(entries)} speed:{speed}")
+            # print(entry)
 
-                if batch is None:
-                    continue
-                count += len(batch)
-                logging.info(f"Client: Indexing {count}/{len(entries)} images ")
+            # if batch is None:
+            #     continue
+            # count += len(batch)
+            # logging.info(f"Client: Indexing {count}/{len(entries)} images ")
 
-    def bulk_indexing(self, paths, image_paths=None, batch_size: int = 256, plugins: list = None):
+    def bulk_indexing(self, paths, image_paths=None, batch_size: int = 128, plugins: list = None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
             entries = list_jsonl(paths, image_paths)
         else:
@@ -340,6 +303,7 @@ class Client:
         logging.info(f"Client: Start indexing {len(entries)} images")
 
         entries_list = split_batch(entries, batch_size)
+        random.shuffle(entries_list)
 
         count = 0
 
@@ -401,7 +365,7 @@ class Client:
 
         return response.id
 
-    def search(self):
+    def search(self, query):
 
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -412,9 +376,73 @@ class Client:
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.SearchRequest()
+
+        print("BUILD QUERY")
+        for q in query["queries"]:
+            print(q)
+
+            if "type" in q and q["type"] is not None:
+                type_req = q["type"]
+                if not isinstance(type_req, str):
+                    return JsonResponse({"status": "error"})
+
+                term = request.terms.add()
+                if type_req.lower() == "meta":
+                    term = request.terms.add()
+                    term.meta.query = q["query"]
+                if type_req.lower() == "annotations":
+                    term = request.terms.add()
+                    term.classifier.query = q["query"]
+                    request.sorting = "classifier"
+
+            elif "query" in q and q["query"] is not None:
+                term = request.terms.add()
+                term.meta.query = q["query"]
+
+                term = request.terms.add()
+                term.classifier.query = q["query"]
+
+            if "reference" in q and q["reference"] is not None:
+                request.sorting = "feature"
+
+                term = request.terms.add()
+                # TODO use a database for this case
+                if os.path.exists(q["reference"]):
+                    term.feature.image.encoded = open(q["reference"], "rb").read()
+                else:
+                    term.feature.image.id = q["reference"]
+
+                if "features" in q:
+                    plugins = q["features"]
+                    if not isinstance(q["features"], (list, set)):
+                        plugins = [q["features"]]
+                    for p in plugins:
+                        for k, v in p.items():
+                            plugins = term.feature.plugins.add()
+                            plugins.name = k.lower()
+                            plugins.weight = v
+
+        if "sorting" in query and query["sorting"] == "random":
+            request.sorting = "random"
+
+        if "mapping" in query and query["mapping"] == "umap":
+            request.mapping = "umap"
+
         response = stub.search(request)
 
-        return response.id
+        status_request = indexer_pb2.ListSearchResultRequest(id=response.id)
+        for x in range(600):
+            try:
+                response = stub.list_search_result(status_request)
+                return response
+            except grpc.RpcError as e:
+
+                # search is still running
+                if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
+                    pass  # {"status": "running"}
+
+            time.sleep(0.01)
+        return {"error"}
 
     def get(self, id):
         channel = grpc.insecure_channel(
@@ -440,7 +468,57 @@ class Client:
             ],
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
-        request = indexer_pb2.IndexerRequest()
+        request = indexer_pb2.BuildIndexerRequest()
         response = stub.build_indexer(request)
+
+        return response
+
+    def build_indexer(self):
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+        request = indexer_pb2.BuildIndexerRequest()
+        response = stub.build_indexer(request)
+
+        return response
+
+    def build_feature_cache(self):
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+        request = indexer_pb2.BuildFeatureCacheRequest()
+        response = stub.build_feature_cache(request)
+
+        return response
+
+    def dump(self, output_path):
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+        request = indexer_pb2.DumpRequest()
+        with open(output_path, "wb") as f:
+            for i, x in enumerate(stub.dump(request)):
+
+                f.write(x.entry)
+                if i % 1000 == 0:
+                    print(i)
 
         return response

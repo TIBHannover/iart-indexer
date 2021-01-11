@@ -25,7 +25,7 @@ class ImageNetInceptionFeature(FeaturePlugin):
         "min_dim": 244,
     }
 
-    default_version = 0.11
+    default_version = 1.0
 
     def __init__(self, **kwargs):
         super(ImageNetInceptionFeature, self).__init__(**kwargs)
@@ -81,7 +81,8 @@ class ImageNetInceptionFeature(FeaturePlugin):
         result_annotations = []
         for entry in entries:
             entry_annotation = []
-            image = image_from_proto(entry)
+            # image = image_from_proto(entry)
+            image = entry
             image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
 
             image = np.expand_dims(image, axis=0) / 256

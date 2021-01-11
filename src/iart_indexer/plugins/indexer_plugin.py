@@ -13,6 +13,8 @@ class IndexerPluginManager(PluginManager):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.find()
+        self.plugin_list = self.init_plugins()
 
     @classmethod
     def export(cls, name):
@@ -47,9 +49,8 @@ class IndexerPluginManager(PluginManager):
             # print(x)
 
     def search(self, queries, size=100):
-        plugin_list = self.init_plugins()
         result_list = []
-        for plugin in plugin_list:
+        for plugin in self.plugin_list:
             plugin = plugin["plugin"]
             entries = plugin.search(queries, size=size)
             result_list.extend(entries)
