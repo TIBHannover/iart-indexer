@@ -551,23 +551,35 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         with Pool(16, initializer=init_worker, initargs=[indexing_job, self.config]) as p:
             db_bulk_cache = []
+            logging.info(f"Indexing: start indexing")
             for i, entry in enumerate(p.imap(indexing_job, filter_and_translate(request_iterator))):
                 if entry is None:
-                    yield indexer_pb2.IndexingReply(status="error")
+                    yield indexer_pb2.IndexingReply(status="error", id = entry['id'])
                     continue
 
                 db_bulk_cache.append(entry)
-
+                
                 if len(db_bulk_cache) > 1000:
+                
                     logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
-                    database.bulk_insert(db_bulk_cache)
-                    db_bulk_cache = []
+                    try_count = 20
+                    while try_count > 0:
+                        try:
+                            database.bulk_insert(db_bulk_cache)
+                            db_bulk_cache = []
+                            try_count= 0
+                        except KeyboardInterrupt:
+                            raise
+                        except:
+                            logging.error(f"Indexing: database error (try count: {try_count})")
+                            time.sleep(1)
+                            try_count-=1
                 # print(entry)
                 # print()
                 # print(database.get_entry(entry["id"]))
                 # exit()
 
-                yield indexer_pb2.IndexingReply(status="ok")
+                yield indexer_pb2.IndexingReply(status="ok", id = entry['id'])
 
             if len(db_bulk_cache) > 1:
                 logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
@@ -752,7 +764,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
         for entry in database.all():
             yield indexer_pb2.DumpReply(entry=msgpack.packb(entry))
-        return result
 
 
 def update_database(database, plugin_results):

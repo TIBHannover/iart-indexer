@@ -268,4 +268,4 @@ message IndexingRequest {
   // bool update_database = 3;
 }
 
-message IndexingReply { string status = 1; }
+message IndexingReply { string status = 1; string id = 2; }

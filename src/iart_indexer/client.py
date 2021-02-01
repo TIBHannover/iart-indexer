@@ -5,6 +5,7 @@ import multiprocessing as mp
 from multiprocessing.pool import ThreadPool
 import os
 import re
+import sys
 import struct
 import time
 import uuid
@@ -57,7 +58,11 @@ def list_jsonl(paths, image_paths=None):
             else:
                 if not os.path.isabs(entry["path"]):
                     entry["path"] = os.path.join(image_paths, entry["path"])
-            entries.append(entry)
+                if not os.path.exists(entry["path"]):
+                    entry["path"] = os.path.join(image_paths, entry["id"][0:2], entry["id"][2:4], f"{entry['id']}.jpg")
+
+            if os.path.exists(entry["path"]):
+                entries.append(entry)
 
     return entries
 
@@ -237,11 +242,15 @@ class Client:
 
         logging.info(f"Client: Start indexing {len(entries)} images")
 
-        def entry_generator(entries):
+        def entry_generator(entries, blacklist):
 
             for entry in entries:
+                if blacklist is not None and entry["id"] in blacklist:
+                    continue
+
                 request = indexer_pb2.IndexingRequest()
                 request_image = request.image
+
                 request_image.id = entry["id"]
 
                 for k, v in entry["meta"].items():
@@ -277,22 +286,38 @@ class Client:
             options=[
                 ("grpc.max_send_message_length", 50 * 1024 * 1024),
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+                ("grpc.keepalive_time_ms", 2 ** 31 - 1),
             ],
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
 
         time_start = time.time()
-        for i, entry in enumerate(stub.indexing(entry_generator(entries))):
-            # for i, entry in enumerate(entry_generator(entries)):
-            if i % 1000 == 0:
-                speed = i / (time.time() - time_start)
-                logging.info(f"Client: Indexing {i}/{len(entries)} speed:{speed}")
-            # print(entry)
+        # gen_iter = entry_generator(entries)
+        count = 0
 
-            # if batch is None:
-            #     continue
-            # count += len(batch)
-            # logging.info(f"Client: Indexing {count}/{len(entries)} images ")
+        blacklist = set()
+        try_count = 20
+        while try_count > 0:
+            try:
+                gen_iter = entry_generator(entries, blacklist)
+                # print('#####')
+                # for x in gen_iter:
+                #     print(x.image.id)
+                #     blacklist.add(x.image.id)
+                #     raise
+                for i, entry in enumerate(stub.indexing(gen_iter)):
+                    # for i, entry in enumerate(entry_generator(entries)):
+                    blacklist.add(entry.id)
+                    count += 1
+                    if count % 1000 == 0:
+                        speed = count / (time.time() - time_start)
+                        logging.info(f"Client: Indexing {count}/{len(entries)} speed:{speed}")
+                try_count = 0
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                logging.error(e)
+                try_count -= 1
 
     def bulk_indexing(self, paths, image_paths=None, batch_size: int = 128, plugins: list = None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
@@ -521,4 +546,4 @@ class Client:
                 if i % 1000 == 0:
                     print(i)
 
-        return response
+        # return response
