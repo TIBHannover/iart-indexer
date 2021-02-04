@@ -174,11 +174,11 @@ def meta_from_proto(proto):
     for m in proto:
         field = m.WhichOneof("value")
         if field == "string_val":
-            result_list.append({'name': m.key, 'value_str':m.string_val})
+            result_list.append({"name": m.key, "value_str": m.string_val})
         if field == "int_val":
-            result_list.append({'name': m.key, 'value_int':m.int_val, 'value_str':str(m.int_val)})
+            result_list.append({"name": m.key, "value_int": m.int_val, "value_str": str(m.int_val)})
         if field == "float_val":
-            result_list.append({'name': m.key, 'value_float':m.float_val, 'value_str':str(m.float_val)})
+            result_list.append({"name": m.key, "value_float": m.float_val, "value_str": str(m.float_val)})
     return result_list
 
 
@@ -186,15 +186,15 @@ def meta_to_proto(proto, data):
 
     for d in data:
         meta = proto.add()
-        if d['value_int'] is not None:
-            meta.int_val = d['value_int']
-            meta.key = d['name']
-        elif d['value_float'] is not None:
-            meta.float_val = d['value_float']
-            meta.key = d['name']
-        elif d['value_str'] is not None:
-            meta.string_val = d['value_str']
-            meta.key = d['name']
+        if "value_int" in d and d["value_int"] is not None:
+            meta.int_val = d["value_int"]
+            meta.key = d["name"]
+        elif "value_float" in d and d["value_float"] is not None:
+            meta.float_val = d["value_float"]
+            meta.key = d["name"]
+        elif "value_str" in d and d["value_str"] is not None:
+            meta.string_val = d["value_str"]
+            meta.key = d["name"]
     return proto
 
 

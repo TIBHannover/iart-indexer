@@ -89,7 +89,7 @@ service Indexer {
 
   rpc indexing(stream IndexingRequest) returns (stream IndexingReply) {}
   rpc dump(DumpRequest) returns (stream DumpReply) {}
-  rpc load(stream LoadRequest) returns (LoadReply) {}
+  rpc load(stream LoadRequest) returns (stream LoadReply) {}
 }
 
 message PluginRun {
@@ -260,7 +260,7 @@ message BuildFeatureCacheReply {}
 message DumpRequest {}
 message DumpReply { bytes entry = 1; }
 message LoadRequest { bytes entry = 1; }
-message LoadReply {}
+message LoadReply {string status = 1; string id = 2; }
 
 message IndexingRequest {
   // PluginRun plugins = 1;

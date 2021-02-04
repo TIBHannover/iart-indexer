@@ -64,7 +64,6 @@ class ElasticSearchDatabase(Database):
                                 "annotations": {
                                     "type": "nested",
                                     "properties": {
-
                                         "hash": {
                                             "properties": {
                                                 "split_0": {
@@ -105,21 +104,17 @@ class ElasticSearchDatabase(Database):
                         "meta": {
                             "type": "nested",
                             "properties": {
-                                "name":{
+                                "name": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                 },
-                                "value_str":{
+                                "value_str": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                     "copy_to": ["meta_text", "all_text"],
                                 },
-                                "value_int": {
-                                    "type": "long"
-                                },
-                                "value_has": {
-                                    "type": "long"
-                                }
+                                "value_int": {"type": "long"},
+                                "value_has": {"type": "long"}
                                 # "artist_hash": {
                                 #     "type": "text",
                                 #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
@@ -146,22 +141,20 @@ class ElasticSearchDatabase(Database):
                                 # },
                                 # "yaer_max": {"type": "long", "copy_to": ["meta_text", "all_text"],},
                                 # "year_min": {"type": "long", "copy_to": ["meta_text", "all_text"],},
-                            }
-                        },                        
+                            },
+                        },
                         "meta_": {
                             "type": "nested",
                             "properties": {
-                                "name":{
+                                "name": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                 },
-                                "value_str":{
+                                "value_str": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                 },
-                                "value_int": {
-                                    "type": "long"
-                                }
+                                "value_int": {"type": "long"}
                                 # "artist_hash": {
                                 #     "type": "text",
                                 #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
@@ -188,7 +181,7 @@ class ElasticSearchDatabase(Database):
                                 # },
                                 # "yaer_max": {"type": "long", "copy_to": ["meta_text", "all_text"],},
                                 # "year_min": {"type": "long", "copy_to": ["meta_text", "all_text"],},
-                            }
+                            },
                         },
                         "meta_text": {"type": "text"},
                         "origin": {
