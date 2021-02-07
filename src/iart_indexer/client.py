@@ -51,7 +51,7 @@ def list_images(paths, name_as_hash=False):
 def list_jsonl(paths, image_paths=None):
     entries = []
     with open(paths, "r") as f:
-        for line in f:
+        for i, line in enumerate(f):
             entry = json.loads(line)
 
             if "path" not in entry:
@@ -64,6 +64,10 @@ def list_jsonl(paths, image_paths=None):
 
             if os.path.exists(entry["path"]):
                 entries.append(entry)
+                # print(entries)
+                # break
+
+            logging.info(f"{len(entries)}")
 
     return entries
 
@@ -99,11 +103,7 @@ def copy_image_hash(image_path, image_output, hash_value=None, resolutions=[{"mi
 
 
 def copy_image(entry, image_output, image_paths=None, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]):
-    if image_paths is not None:
-        path = os.path.join(image_paths, os.path.basename(entry["path"]))
-
-    else:
-        path = entry["path"]
+    path = entry["path"]
     copy_result = copy_image_hash(path, image_output, entry["id"], resolutions)
     if copy_result is not None:
         hash_value, path = copy_result
@@ -154,6 +154,7 @@ class Client:
 
     def copy_images(self, paths, image_paths=None, image_output=None):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
+            logging.info("Read json file")
             entries = list_jsonl(paths, image_paths)
         else:
             entries = list_images(paths)
@@ -287,7 +288,7 @@ class Client:
 
         return response.status
 
-    def build_suggester(self):
+    def build_suggester(self, field_name=None):
 
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -297,7 +298,21 @@ class Client:
             ],
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
+
         request = indexer_pb2.SuggesterRequest()
+        if field_name is None:
+            field_name = [
+                "meta.title",
+                "meta.artist_name",
+                "meta.location",
+                "meta.institution",
+                "meta.object_type",
+                "meta.medium",
+                "origin.name",
+                "classifier.*",
+            ]
+
+        request.field_names.extend(field_name)
         response = stub.build_suggester(request)
 
         return response.id

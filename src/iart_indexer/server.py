@@ -3,6 +3,7 @@ from multiprocessing.pool import Pool
 import threading
 import time
 import uuid
+import re
 import traceback
 from concurrent import futures
 
@@ -28,6 +29,11 @@ import msgpack
 
 import imageio
 from iart_indexer.utils import image_normalize
+
+import spacy
+
+sp_en = spacy.load("en_core_web_sm")
+sp_de = spacy.load("de_core_news_sm")
 
 
 def indexing(args):
@@ -243,33 +249,88 @@ def suggest(args):
         logging.error(repr(e))
 
 
+def split_tokens(text):
+    return re.findall("[\w]+", text)
+
+
+def filter_autocompletion(autocompletion_string):
+    result_list = [autocompletion_string]
+    tokens = split_tokens(autocompletion_string)
+    stop_en = sp_en.Defaults.stop_words
+    stop_de = sp_de.Defaults.stop_words
+
+    result_list.extend([x for x in tokens if x not in stop_en and x not in stop_de])
+
+    return result_list
+
+
 def build_autocompletion(args):
 
-    database = args["database"]
-    suggester = args["suggester"]
-    for x in database.all():
-        meta_values = []
-        if "meta" in x:
-            for key, value in x["meta"].items():
-                if key in ["artist_hash"]:
-                    continue
-                if isinstance(value, str):
-                    meta_values.append(value)
+    try:
+        database = args["database"]
+        suggester = args["suggester"]
+        field_names = args["field_names"]
 
-        origin_values = []
-        if "origin" in x:
-            for key, value in x["origin"].items():
-                if key in ["link", "license"]:
-                    continue
-                if isinstance(value, str):
-                    origin_values.append(value)
+        meta_fields = []
+        origin_fields = []
+        classifier_fields = []
 
-        annotations_values = []
-        if "classifier" in x:
-            for classifier in x["classifier"]:
-                for annotations in classifier["annotations"]:
-                    annotations_values.append(annotations["name"])
-        suggester.update_entry(hash_id=x["id"], meta=meta_values, annotations=annotations_values)
+        for x in field_names:
+            split = x.split(".")
+            if split[0] == "meta":
+                meta_fields.append(split[1])
+            if split[0] == "origin":
+                origin_fields.append(split[1])
+            if split[0] == "classifier":
+                classifier_fields.append(split[1])
+
+        for i, x in enumerate(database.all()):
+            meta_values = []
+            if "meta" in x:
+                for m in x["meta"]:
+                    if m["name"] not in meta_fields:
+                        if "*" not in meta_fields:
+                            continue
+
+                    if isinstance(m["value_str"], str):
+                        meta_values.extend(filter_autocompletion(m["value_str"]))
+
+            origin_values = []
+            if "origin" in x:
+                for o in x["origin"]:
+                    if m["name"] not in origin_fields:
+                        if "*" not in origin_fields:
+                            continue
+                    if isinstance(m["value_str"], str):
+                        origin_values.extend(filter_autocompletion(m["value_str"]))
+
+            annotations_values = []
+            if "classifier" in x:
+                for classifier in x["classifier"]:
+
+                    if classifier["plugin"] not in classifier_fields:
+                        if "*" not in classifier_fields:
+                            continue
+
+                    for annotations in classifier["annotations"]:
+                        annotations_values.extend(filter_autocompletion(m["name"]))
+
+            meta_values = list(set(meta_values))
+            origin_values = list(set(origin_values))
+            annotations_values = list(set(annotations_values))
+
+            suggester.update_entry(
+                hash_id=x["id"], meta=meta_values, annotations=annotations_values, origins=origin_values
+            )
+
+            if i % 10000 == 0:
+                logging.info(f"build_autocompletion: {i}")
+
+    except Exception as e:
+
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        logging.error(repr(e))
 
 
 def build_indexer(args):
@@ -593,11 +654,11 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
         suggester = ElasticSearchSuggester(config=self.config.get("elasticsearch", {}))
-
         job_id = uuid.uuid4().hex
         variable = {
             "database": database,
             "suggester": suggester,
+            "field_names": list(request.field_names),
             "progress": 0,
             "status": 0,
             "result": "",

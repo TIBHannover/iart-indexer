@@ -200,7 +200,7 @@ message GetReply {
   repeated FeatureResult feature = 5;
 }
 
-message SuggesterRequest {}
+message SuggesterRequest {repeated string field_names = 1;}
 message SuggesterReply { string id = 1; }
 
 message FeatureSearchTerm {

@@ -47,6 +47,7 @@ def parse_args():
     parser.add_argument("--dump_path", help="path to image or folder to indexing")
     parser.add_argument("--path", help="path to image or folder to indexing")
     parser.add_argument("--id", help="id for entry query")
+    parser.add_argument("--field_name", nargs="+", help="id for entry query")
 
     parser.add_argument("--output", help="copy image to new folder with hash id")
     parser.add_argument("--image_output", help="copy image to new folder with hash id")
@@ -124,7 +125,7 @@ def main():
             client.bulk_indexing(paths=args.path, image_paths=args.image_paths, plugins=plugins)
 
         elif args.task == "build_suggester":
-            client.build_suggester()
+            client.build_suggester(args.field_name)
 
         elif args.task == "get":
             print(client.get(args.id))

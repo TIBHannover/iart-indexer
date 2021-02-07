@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'P\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rindexer.proto\"\x87\x03\n\x06Tensor\x12\x18\n\x05\x64type\x18\x01 \x01(\x0e\x32\t.DataType\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\x0c\n\x04name\x18\x0e \x01(\t\x12\x15\n\rproto_content\x18\x04 \x01(\x0c\x12$\n\x05inter\x18\r \x01(\x0e\x32\x15.Tensor.Inerpretation\x12\x11\n\tfloat_val\x18\x05 \x03(\x02\x12\x16\n\ndouble_val\x18\x06 \x03(\x01\x42\x02\x10\x01\x12\x13\n\x07int_val\x18\x07 \x03(\x05\x42\x02\x10\x01\x12\x12\n\nstring_val\x18\x08 \x03(\x0c\x12\x18\n\x0cscomplex_val\x18\t \x03(\x02\x42\x02\x10\x01\x12\x15\n\tint64_val\x18\n \x03(\x03\x42\x02\x10\x01\x12\x14\n\x08\x62ool_val\x18\x0b \x03(\x08\x42\x02\x10\x01\x12\x14\n\x08half_val\x18\x0c \x03(\x05\x42\x02\x10\x01\"X\n\rInerpretation\x12\x07\n\x03\x44OT\x10\x00\x12\x08\n\x04LINE\x10\x01\x12\x0c\n\x08TRIANGLE\x10\x02\x12\r\n\tRECTANGLE\x10\x03\x12\x0c\n\x08PENTAGON\x10\x04\x12\t\n\x05IMAGE\x10\x05\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\x8a\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x19\n\x04meta\x18\x05 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x06 \x03(\x0b\x32\x0b.ValueFieldB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\">\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x1a\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x08.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"c\n\x13\x42ulkIndexingRequest\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x16\n\x06images\x18\x02 \x03(\x0b\x32\x06.Image\x12\x17\n\x0fupdate_database\x18\x03 \x01(\x08\"\x1f\n\x11\x42ulkIndexingReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"L\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12#\n\x08indexing\x18\x02 \x01(\x0b\x32\x0f.IndexingResultH\x00\x42\x08\n\x06result\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\x96\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\"\x12\n\x10SuggesterRequest\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"G\n\x11\x46\x65\x61tureSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x15\n\x05image\x18\x02 \x01(\x0b\x32\x06.Image\"%\n\x14\x43lassifierSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\".\n\x0eMetaSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\"\x89\x01\n\nSearchTerm\x12\x1f\n\x04meta\x18\x01 \x01(\x0b\x32\x0f.MetaSearchTermH\x00\x12%\n\x07\x66\x65\x61ture\x18\x02 \x01(\x0b\x32\x12.FeatureSearchTermH\x00\x12+\n\nclassifier\x18\x03 \x01(\x0b\x32\x15.ClassifierSearchTermH\x00\x42\x06\n\x04term\"M\n\rSearchRequest\x12\x1a\n\x05terms\x18\x01 \x03(\x0b\x32\x0b.SearchTerm\x12\x0f\n\x07sorting\x18\x02 \x01(\t\x12\x0f\n\x07mapping\x18\x03 \x01(\t\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb4\x01\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"<\n\x15ListSearchResultReply\x12#\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x12.SearchResultEntry\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\"-\n\x0cSuggestReply\x12\x1d\n\x06groups\x18\x01 \x03(\x0b\x32\r.SuggestGroup\"\x15\n\x13\x42uildIndexerRequest\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\r\n\x0b\x44umpRequest\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"(\n\x0fIndexingRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t*\xd2\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0c\n\x08\x44T_FLOAT\x10\x01\x12\r\n\tDT_DOUBLE\x10\x02\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\r\n\tDT_STRING\x10\x07\x12\x0c\n\x08\x44T_INT64\x10\t\x12\x0b\n\x07\x44T_BOOL\x10\n\x12\r\n\tDT_UINT16\x10\x11\x12\x0b\n\x07\x44T_HALF\x10\x13\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x32\xb1\x05\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12;\n\rbulk_indexing\x12\x14.BulkIndexingRequest\x1a\x12.BulkIndexingReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x12\x37\n\x0f\x62uild_suggester\x12\x11.SuggesterRequest\x1a\x0f.SuggesterReply\"\x00\x12\x1f\n\x03get\x12\x0b.GetRequest\x1a\t.GetReply\"\x00\x12(\n\x06search\x12\x0e.SearchRequest\x1a\x0c.SearchReply\"\x00\x12H\n\x12list_search_result\x12\x18.ListSearchResultRequest\x1a\x16.ListSearchResultReply\"\x00\x12+\n\x07suggest\x12\x0f.SuggestRequest\x1a\r.SuggestReply\"\x00\x12;\n\rbuild_indexer\x12\x14.BuildIndexerRequest\x1a\x12.BuildIndexerReply\"\x00\x12K\n\x13\x62uild_feature_cache\x12\x19.BuildFeatureCacheRequest\x1a\x17.BuildFeatureCacheReply\"\x00\x12\x32\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00(\x01\x30\x01\x12$\n\x04\x64ump\x12\x0c.DumpRequest\x1a\n.DumpReply\"\x00\x30\x01\x12&\n\x04load\x12\x0c.LoadRequest\x1a\n.LoadReply\"\x00(\x01\x30\x01\x42\x02P\x01\x62\x06proto3'
+  serialized_pb=b'\n\rindexer.proto\"\x87\x03\n\x06Tensor\x12\x18\n\x05\x64type\x18\x01 \x01(\x0e\x32\t.DataType\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\x0c\n\x04name\x18\x0e \x01(\t\x12\x15\n\rproto_content\x18\x04 \x01(\x0c\x12$\n\x05inter\x18\r \x01(\x0e\x32\x15.Tensor.Inerpretation\x12\x11\n\tfloat_val\x18\x05 \x03(\x02\x12\x16\n\ndouble_val\x18\x06 \x03(\x01\x42\x02\x10\x01\x12\x13\n\x07int_val\x18\x07 \x03(\x05\x42\x02\x10\x01\x12\x12\n\nstring_val\x18\x08 \x03(\x0c\x12\x18\n\x0cscomplex_val\x18\t \x03(\x02\x42\x02\x10\x01\x12\x15\n\tint64_val\x18\n \x03(\x03\x42\x02\x10\x01\x12\x14\n\x08\x62ool_val\x18\x0b \x03(\x08\x42\x02\x10\x01\x12\x14\n\x08half_val\x18\x0c \x03(\x05\x42\x02\x10\x01\"X\n\rInerpretation\x12\x07\n\x03\x44OT\x10\x00\x12\x08\n\x04LINE\x10\x01\x12\x0c\n\x08TRIANGLE\x10\x02\x12\r\n\tRECTANGLE\x10\x03\x12\x0c\n\x08PENTAGON\x10\x04\x12\t\n\x05IMAGE\x10\x05\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\x8a\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x19\n\x04meta\x18\x05 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x06 \x03(\x0b\x32\x0b.ValueFieldB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\">\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x1a\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x08.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"c\n\x13\x42ulkIndexingRequest\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x16\n\x06images\x18\x02 \x03(\x0b\x32\x06.Image\x12\x17\n\x0fupdate_database\x18\x03 \x01(\x08\"\x1f\n\x11\x42ulkIndexingReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"L\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12#\n\x08indexing\x18\x02 \x01(\x0b\x32\x0f.IndexingResultH\x00\x42\x08\n\x06result\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\x96\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"G\n\x11\x46\x65\x61tureSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x15\n\x05image\x18\x02 \x01(\x0b\x32\x06.Image\"%\n\x14\x43lassifierSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\".\n\x0eMetaSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\"\x89\x01\n\nSearchTerm\x12\x1f\n\x04meta\x18\x01 \x01(\x0b\x32\x0f.MetaSearchTermH\x00\x12%\n\x07\x66\x65\x61ture\x18\x02 \x01(\x0b\x32\x12.FeatureSearchTermH\x00\x12+\n\nclassifier\x18\x03 \x01(\x0b\x32\x15.ClassifierSearchTermH\x00\x42\x06\n\x04term\"M\n\rSearchRequest\x12\x1a\n\x05terms\x18\x01 \x03(\x0b\x32\x0b.SearchTerm\x12\x0f\n\x07sorting\x18\x02 \x01(\t\x12\x0f\n\x07mapping\x18\x03 \x01(\t\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb4\x01\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"<\n\x15ListSearchResultReply\x12#\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x12.SearchResultEntry\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\"-\n\x0cSuggestReply\x12\x1d\n\x06groups\x18\x01 \x03(\x0b\x32\r.SuggestGroup\"\x15\n\x13\x42uildIndexerRequest\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\r\n\x0b\x44umpRequest\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"(\n\x0fIndexingRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t*\xd2\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0c\n\x08\x44T_FLOAT\x10\x01\x12\r\n\tDT_DOUBLE\x10\x02\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\r\n\tDT_STRING\x10\x07\x12\x0c\n\x08\x44T_INT64\x10\t\x12\x0b\n\x07\x44T_BOOL\x10\n\x12\r\n\tDT_UINT16\x10\x11\x12\x0b\n\x07\x44T_HALF\x10\x13\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x32\xb1\x05\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12;\n\rbulk_indexing\x12\x14.BulkIndexingRequest\x1a\x12.BulkIndexingReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x12\x37\n\x0f\x62uild_suggester\x12\x11.SuggesterRequest\x1a\x0f.SuggesterReply\"\x00\x12\x1f\n\x03get\x12\x0b.GetRequest\x1a\t.GetReply\"\x00\x12(\n\x06search\x12\x0e.SearchRequest\x1a\x0c.SearchReply\"\x00\x12H\n\x12list_search_result\x12\x18.ListSearchResultRequest\x1a\x16.ListSearchResultReply\"\x00\x12+\n\x07suggest\x12\x0f.SuggestRequest\x1a\r.SuggestReply\"\x00\x12;\n\rbuild_indexer\x12\x14.BuildIndexerRequest\x1a\x12.BuildIndexerReply\"\x00\x12K\n\x13\x62uild_feature_cache\x12\x19.BuildFeatureCacheRequest\x1a\x17.BuildFeatureCacheReply\"\x00\x12\x32\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00(\x01\x30\x01\x12$\n\x04\x64ump\x12\x0c.DumpRequest\x1a\n.DumpReply\"\x00\x30\x01\x12&\n\x04load\x12\x0c.LoadRequest\x1a\n.LoadReply\"\x00(\x01\x30\x01\x42\x02P\x01\x62\x06proto3'
 )
 
 _DATATYPE = _descriptor.EnumDescriptor(
@@ -103,8 +103,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3037,
-  serialized_end=3247,
+  serialized_start=3058,
+  serialized_end=3268,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -1194,6 +1194,13 @@ _SUGGESTERREQUEST = _descriptor.Descriptor(
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='field_names', full_name='SuggesterRequest.field_names', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1207,7 +1214,7 @@ _SUGGESTERREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1865,
-  serialized_end=1883,
+  serialized_end=1904,
 )
 
 
@@ -1238,8 +1245,8 @@ _SUGGESTERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1885,
-  serialized_end=1913,
+  serialized_start=1906,
+  serialized_end=1934,
 )
 
 
@@ -1277,8 +1284,8 @@ _FEATURESEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1915,
-  serialized_end=1986,
+  serialized_start=1936,
+  serialized_end=2007,
 )
 
 
@@ -1309,8 +1316,8 @@ _CLASSIFIERSEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1988,
-  serialized_end=2025,
+  serialized_start=2009,
+  serialized_end=2046,
 )
 
 
@@ -1348,8 +1355,8 @@ _METASEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2027,
-  serialized_end=2073,
+  serialized_start=2048,
+  serialized_end=2094,
 )
 
 
@@ -1399,8 +1406,8 @@ _SEARCHTERM = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2076,
-  serialized_end=2213,
+  serialized_start=2097,
+  serialized_end=2234,
 )
 
 
@@ -1445,8 +1452,8 @@ _SEARCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2215,
-  serialized_end=2292,
+  serialized_start=2236,
+  serialized_end=2313,
 )
 
 
@@ -1477,8 +1484,8 @@ _SEARCHREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2294,
-  serialized_end=2319,
+  serialized_start=2315,
+  serialized_end=2340,
 )
 
 
@@ -1544,8 +1551,8 @@ _SEARCHRESULTENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2322,
-  serialized_end=2502,
+  serialized_start=2343,
+  serialized_end=2523,
 )
 
 
@@ -1576,8 +1583,8 @@ _LISTSEARCHRESULTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2504,
-  serialized_end=2541,
+  serialized_start=2525,
+  serialized_end=2562,
 )
 
 
@@ -1608,8 +1615,8 @@ _LISTSEARCHRESULTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2543,
-  serialized_end=2603,
+  serialized_start=2564,
+  serialized_end=2624,
 )
 
 
@@ -1647,8 +1654,8 @@ _SUGGESTGROUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2605,
-  serialized_end=2655,
+  serialized_start=2626,
+  serialized_end=2676,
 )
 
 
@@ -1679,8 +1686,8 @@ _SUGGESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2657,
-  serialized_end=2688,
+  serialized_start=2678,
+  serialized_end=2709,
 )
 
 
@@ -1711,8 +1718,8 @@ _SUGGESTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2690,
-  serialized_end=2735,
+  serialized_start=2711,
+  serialized_end=2756,
 )
 
 
@@ -1736,8 +1743,8 @@ _BUILDINDEXERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2737,
-  serialized_end=2758,
+  serialized_start=2758,
+  serialized_end=2779,
 )
 
 
@@ -1761,8 +1768,8 @@ _BUILDINDEXERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2760,
-  serialized_end=2779,
+  serialized_start=2781,
+  serialized_end=2800,
 )
 
 
@@ -1786,8 +1793,8 @@ _BUILDFEATURECACHEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2781,
-  serialized_end=2807,
+  serialized_start=2802,
+  serialized_end=2828,
 )
 
 
@@ -1811,8 +1818,8 @@ _BUILDFEATURECACHEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2809,
-  serialized_end=2833,
+  serialized_start=2830,
+  serialized_end=2854,
 )
 
 
@@ -1836,8 +1843,8 @@ _DUMPREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2835,
-  serialized_end=2848,
+  serialized_start=2856,
+  serialized_end=2869,
 )
 
 
@@ -1868,8 +1875,8 @@ _DUMPREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2850,
-  serialized_end=2876,
+  serialized_start=2871,
+  serialized_end=2897,
 )
 
 
@@ -1900,8 +1907,8 @@ _LOADREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2878,
-  serialized_end=2906,
+  serialized_start=2899,
+  serialized_end=2927,
 )
 
 
@@ -1939,8 +1946,8 @@ _LOADREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2908,
-  serialized_end=2947,
+  serialized_start=2929,
+  serialized_end=2968,
 )
 
 
@@ -1971,8 +1978,8 @@ _INDEXINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2949,
-  serialized_end=2989,
+  serialized_start=2970,
+  serialized_end=3010,
 )
 
 
@@ -2010,8 +2017,8 @@ _INDEXINGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2991,
-  serialized_end=3034,
+  serialized_start=3012,
+  serialized_end=3055,
 )
 
 _TENSOR.fields_by_name['dtype'].enum_type = _DATATYPE
@@ -2460,8 +2467,8 @@ _INDEXER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=3250,
-  serialized_end=3939,
+  serialized_start=3271,
+  serialized_end=3960,
   methods=[
   _descriptor.MethodDescriptor(
     name='list_plugins',

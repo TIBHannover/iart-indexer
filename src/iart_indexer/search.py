@@ -86,7 +86,10 @@ class Searcher:
                             if p.name.lower() == f["plugin"].lower():
 
                                 feature_search.append(
-                                    {**f, "weight": p.weight,}
+                                    {
+                                        **f,
+                                        "weight": p.weight,
+                                    }
                                 )
 
                 # TODO add example search here
@@ -134,13 +137,29 @@ class Searcher:
     ):
 
         search_terms = []
-
+        logging.info(text_search)
         for e in text_search:
             if e["field"] is not None:
                 fields = [e["field"]]
+                search_terms.append(
+                    {
+                        "multi_match": {
+                            "query": e["query"],
+                            "fields": fields,
+                        }
+                    }
+                )
             else:
-                fields = list(self.meta_lut.values())
-            search_terms.append({"multi_match": {"query": e["query"], "fields": fields,}})
+                search_terms.append(
+                    {
+                        "multi_match": {
+                            "query": e["query"],
+                            "fields": "meta_text",
+                        }
+                    }
+                )
+
+        logging.info(search_terms)
 
         for e in classifier_search:
             search_terms.append(
@@ -187,7 +206,7 @@ class Searcher:
         if elastic_sorting is not None:
             body.update({"sort": elastic_sorting})
 
-        # print(json.dumps(body, indent=2))
+        logging.info(json.dumps(body, indent=2))
         entries = self.database.raw_search(body, size=size)
         return entries
 

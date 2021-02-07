@@ -47,6 +47,8 @@ class UMapMapping(MappingPlugin):
                     a = e_f["annotations"][0]["val_128"]
                 if "val_256" in e_f["annotations"][0]:
                     a = e_f["annotations"][0]["val_256"]
+                if "value" in e_f["annotations"][0]:
+                    a = e_f["annotations"][0]["value"]
                 features.append(a)
         features = np.asarray(features)
         embedding = self.reducer.fit_transform(features)
