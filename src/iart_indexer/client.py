@@ -422,7 +422,7 @@ class Client:
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.BuildIndexerRequest()
         response = stub.build_indexer(request)
-
+        print(response)
         return response
 
     def build_feature_cache(self):

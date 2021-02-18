@@ -338,6 +338,8 @@ def build_indexer(args):
         database = args["database"]
         indexer = args["indexer_manager"]
 
+        logging.info(f"Indexer: start")
+
         class EntryReader:
             def __iter__(self):
                 for entry in database.all():
@@ -346,7 +348,7 @@ def build_indexer(args):
         indexer.indexing(EntryReader())
 
     except Exception as e:
-
+        logging.info(f"Indexer: {e}")
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 
@@ -783,6 +785,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def build_indexer(self, request, context):
+        print("WTF")
+        logging.info("BUILD_INDEXER")
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
         job_id = uuid.uuid4().hex

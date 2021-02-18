@@ -27,19 +27,7 @@ class FeatureCosineMapping(MappingPlugin):
                     for e_f in e["feature"]:
                         if q_f["plugin"] != e_f["plugin"]:
                             continue
-                        # TODO remove me
-                        if "val_64" in e_f["annotations"][0]:
-                            a = e_f["annotations"][0]["val_64"]
-                            b = q_f["value"]
-                            score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                        if "val_128" in e_f["annotations"][0]:
-                            a = e_f["annotations"][0]["val_128"]
-                            b = q_f["value"]
-                            score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
-                        if "val_256" in e_f["annotations"][0]:
-                            a = e_f["annotations"][0]["val_256"]
-                            b = q_f["value"]
-                            score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+
                         if "value" in e_f["annotations"][0]:
                             a = e_f["annotations"][0]["value"]
                             b = q_f["value"]

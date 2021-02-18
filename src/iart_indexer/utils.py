@@ -23,12 +23,6 @@ def get_features_from_db_entry(entry):
         for annotation in feature["annotations"]:
             if "value" in annotation:
                 value = annotation["value"]
-            if "val_64" in annotation:
-                value = annotation["val_64"]
-            if "val_128" in annotation:
-                value = annotation["val_128"]
-            if "val_256" in annotation:
-                value = annotation["val_256"]
             data_dict["feature"].append(
                 {"plugin": feature["plugin"], "type": annotation["type"], "version": feature["version"], "value": value}
             )
@@ -54,12 +48,6 @@ def get_features_from_db_plugins(entry):
         for annotation in feature["annotations"]:
             if "value" in annotation:
                 value = annotation["value"]
-            if "val_64" in annotation:
-                value = annotation["val_64"]
-            if "val_128" in annotation:
-                value = annotation["val_128"]
-            if "val_256" in annotation:
-                value = annotation["val_256"]
             data_dict["feature"].append({"plugin": feature["plugin"], "type": annotation["type"], "value": value})
 
     return data_dict
@@ -232,14 +220,8 @@ def feature_to_proto(proto, data):
         feature.plugin = f["plugin"]
         # TODO support list here
         for a in f["annotations"]:
-            if "val_64" in a:
-                feature.feature.extend(a["val_64"])
-
-            if "val_128" in a:
-                feature.feature.extend(a["val_128"])
-
-            if "val_256" in a:
-                feature.feature.extend(a["val_256"])
+            if "value" in a:
+                feature.feature.extend(a["value"])
             feature.type = a["type"]
     return proto
 

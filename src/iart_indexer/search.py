@@ -4,23 +4,6 @@ import json
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
-# def get_features_from_db_entry(entry):
-#     data_dict = {"id": entry["id"], "feature": []}
-#     # TODO
-#     for feature in entry["feature"]:
-#         for annotation in feature["annotations"]:
-#             if "value" in annotation:
-#                 value = annotation["value"]
-#             if "val_64" in annotation:
-#                 value = annotation["val_64"]
-#             if "val_128" in annotation:
-#                 value = annotation["val_128"]
-#             if "val_256" in annotation:
-#                 value = annotation["val_256"]
-#             data_dict["feature"].append({"plugin": feature["plugin"], "type": annotation["type"], "value": value})
-
-#     return data_dict
-
 
 class Searcher:
     def __init__(

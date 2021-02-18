@@ -23,6 +23,7 @@ class FaissIndexer(IndexerPlugin):
     default_config = {
         "indexer_dir": "",
         "train_size": 8 * 65536,
+        "number_of_cluster": 100
         # "indexing_size": 105536,
     }
 
@@ -33,6 +34,7 @@ class FaissIndexer(IndexerPlugin):
 
         self.indexer_dir = self.config["indexer_dir"]
         self.train_size = self.config["train_size"]
+        self.number_of_cluster = self.config["number_of_cluster"]
         # self.indexing_size = self.config["indexing_size"]
 
         self.indexer_data = {}
@@ -75,7 +77,7 @@ class FaissIndexer(IndexerPlugin):
         for index_name, index_data in data.items():
             d = index_data["d"]
             quantizer = faiss.IndexFlatL2(d)
-            index = faiss.IndexIVFFlat(quantizer, d, 100)
+            index = faiss.IndexIVFFlat(quantizer, d, self.number_of_cluster)
 
             train_data = np.asarray(index_data["data"]).astype("float32")
             index.train(train_data)

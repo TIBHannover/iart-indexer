@@ -41,12 +41,6 @@ class UMapMapping(MappingPlugin):
             for e_f in e["feature"]:
                 if ref_feature != e_f["plugin"]:
                     continue
-                if "val_64" in e_f["annotations"][0]:
-                    a = e_f["annotations"][0]["val_64"]
-                if "val_128" in e_f["annotations"][0]:
-                    a = e_f["annotations"][0]["val_128"]
-                if "val_256" in e_f["annotations"][0]:
-                    a = e_f["annotations"][0]["val_256"]
                 if "value" in e_f["annotations"][0]:
                     a = e_f["annotations"][0]["value"]
                 features.append(a)

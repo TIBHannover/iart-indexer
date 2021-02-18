@@ -257,14 +257,7 @@ class ElasticSearchDatabase(Database):
                 binary = anno.feature.binary
                 feature = list(anno.feature.feature)
 
-                if len(feature) == 64:
-                    annotation_dict["val_64"] = feature
-                elif len(feature) == 128:
-                    annotation_dict["val_128"] = feature
-                elif len(feature) == 256:
-                    annotation_dict["val_256"] = feature
-                else:
-                    annotation_dict["value"] = feature
+                annotation_dict["value"] = feature
 
                 hash_splits_list = []
                 for x in range(4):
