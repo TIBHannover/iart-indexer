@@ -189,7 +189,7 @@ class Searcher:
         if elastic_sorting is not None:
             body.update({"sort": elastic_sorting})
 
-        logging.info(json.dumps(body, indent=2))
+        # logging.info(json.dumps(body, indent=2))
         entries = self.database.raw_search(body, size=size)
         return entries
 
@@ -213,11 +213,14 @@ class Searcher:
             sorting=sorting,
             size=max(len(entries_feature), 100),
         )
-
+        entries = list(entries)
+        logging.info(f"Entries 1 {len(entries)}")
         if query.sorting.lower() == "feature":
-            entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["FeatureCosineMapping"]))
+            entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["FeatureL2Mapping"]))
 
+        logging.info(f"Entries 2 {len(entries)}")
         if query.mapping.lower() == "umap":
             entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["UMapMapping"]))
 
+        logging.info(f"Entries 3 {len(entries)}")
         return list(entries)[:100]

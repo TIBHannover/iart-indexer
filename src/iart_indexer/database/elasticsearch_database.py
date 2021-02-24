@@ -1,5 +1,6 @@
 import math
 import json
+import logging
 from datetime import datetime
 
 from elasticsearch import Elasticsearch, exceptions
@@ -64,26 +65,6 @@ class ElasticSearchDatabase(Database):
                                 "annotations": {
                                     "type": "nested",
                                     "properties": {
-                                        "hash": {
-                                            "properties": {
-                                                "split_0": {
-                                                    "type": "text",
-                                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                                },
-                                                "split_1": {
-                                                    "type": "text",
-                                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                                },
-                                                "split_2": {
-                                                    "type": "text",
-                                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                                },
-                                                "split_3": {
-                                                    "type": "text",
-                                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                                },
-                                            }
-                                        },
                                         "type": {
                                             "type": "text",
                                             "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
@@ -114,33 +95,7 @@ class ElasticSearchDatabase(Database):
                                     "copy_to": ["meta_text", "all_text"],
                                 },
                                 "value_int": {"type": "long"},
-                                "value_has": {"type": "long"}
-                                # "artist_hash": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                # },
-                                # "artist_name": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "institution": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "location": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "title": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "yaer_max": {"type": "long", "copy_to": ["meta_text", "all_text"],},
-                                # "year_min": {"type": "long", "copy_to": ["meta_text", "all_text"],},
+                                "value_has": {"type": "long"},
                             },
                         },
                         "meta_": {
@@ -154,37 +109,12 @@ class ElasticSearchDatabase(Database):
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                 },
-                                "value_int": {"type": "long"}
-                                # "artist_hash": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                # },
-                                # "artist_name": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "institution": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "location": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "title": {
-                                #     "type": "text",
-                                #     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                #     "copy_to": ["meta_text", "all_text"],
-                                # },
-                                # "yaer_max": {"type": "long", "copy_to": ["meta_text", "all_text"],},
-                                # "year_min": {"type": "long", "copy_to": ["meta_text", "all_text"],},
+                                "value_int": {"type": "long"},
                             },
                         },
                         "meta_text": {"type": "text"},
                         "origin": {
+                            "type": "nested",
                             "properties": {
                                 "name": {
                                     "type": "text",
@@ -199,7 +129,7 @@ class ElasticSearchDatabase(Database):
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                 },
-                            }
+                            },
                         },
                         "origin_text": {"type": "text"},
                         "all_text": {"type": "text"},
@@ -213,6 +143,7 @@ class ElasticSearchDatabase(Database):
     def bulk_insert(self, generator):
         def add_fields(generator):
             for x in generator:
+                logging.info(f'BULK: {x["id"]}')
                 yield {"_id": x["id"], "_index": self.index, **x}
 
         bulk(client=self.es, actions=add_fields(generator))
@@ -232,11 +163,7 @@ class ElasticSearchDatabase(Database):
     def get_entries(self, hash_ids):
         try:
             body = {"query": {"ids": {"type": "_doc", "values": hash_ids}}}
-            print("#########################")
-            print(body)
             results = self.es.search(index=self.index, doc_type=self.type, body=body, size=len(hash_ids))
-            print(len(hash_ids))
-            print(len(results["hits"]["hits"]))
             for x in results["hits"]["hits"]:
                 yield x["_source"]
         except exceptions.NotFoundError:
@@ -427,6 +354,36 @@ class ElasticSearchDatabase(Database):
         except exceptions.NotFoundError:
             return []
         # self.es.update('')
+
+    def raw_aggregate(self, body):
+        if not self.es.indices.exists(index=self.index):
+            return []
+
+        try:
+            results = self.es.search(index=self.index, body=body, size=0)
+            return results
+        except exceptions.NotFoundError:
+            return []
+        # self.es.update('')
+
+    def raw_all(self, body, pagesize=250, scroll_timeout="10m"):
+        if not self.es.indices.exists(index=self.index):
+            return None
+        is_first = True
+        while True:
+            # Scroll next
+            if is_first:  # Initialize scroll
+                result = self.es.search(index=self.index, scroll="1m", body=body)
+                is_first = False
+            else:
+                result = self.es.scroll(body={"scroll_id": scroll_id, "scroll": scroll_timeout})
+            scroll_id = result["_scroll_id"]
+            hits = result["hits"]["hits"]
+            # Stop after no more docs
+            if not hits:
+                break
+            # Yield each entry
+            yield from (hit["_source"] for hit in hits)
 
     def all(self, pagesize=250, scroll_timeout="10m", **kwargs):
         if not self.es.indices.exists(index=self.index):

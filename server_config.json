@@ -1,6 +1,6 @@
 {
     "cache":{
-        "cache_dir": "/nfs/data/iart/web/models/web/cache_all/"
+        "cache_dir": "/nfs/data/iart/web/models/web/cache_all_210221/"
     },
     "grpc": {
         "port": 50051
@@ -90,7 +90,7 @@
     {
       "type": "FaissIndexer",
       "params": {
-        "indexer_dir": "/nfs/data/iart/web/models/web/faiss_all/",
+        "indexer_dir": "/nfs/data/iart/web/models/web/faiss_all_210221/",
         "train_size": 50000
       }
     }

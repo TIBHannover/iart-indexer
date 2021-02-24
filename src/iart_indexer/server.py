@@ -22,6 +22,7 @@ from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_d
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 from iart_indexer.search import Searcher
+from iart_indexer.aggregation import Aggregator
 
 from iart_indexer.plugins.cache import Cache
 
@@ -92,15 +93,8 @@ def indexing(args):
                                 binary_vec = result.feature.binary
                                 feature_vec = list(result.feature.feature)
 
-                                hash_splits_list = []
-                                for x in range(4):
-                                    hash_splits_list.append(
-                                        binary_vec[x * len(binary_vec) // 4 : (x + 1) * len(binary_vec) // 4]
-                                    )
-
                                 plugin_annotations.append(
                                     {
-                                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
                                         "type": result.feature.type,
                                         "value": feature_vec,
                                     }
@@ -179,7 +173,6 @@ def indexing(args):
                                 "annotations": [
                                     {
                                         "type": exist_f["type"],
-                                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
                                         "value": exist_f["value"],
                                     }
                                 ],
@@ -236,14 +229,9 @@ def search(args):
 
 def suggest(args):
     try:
-        # if True:
         logging.info("Start suggesting job")
         query = args["query"]
         database = args["database"]
-
-        #
-        # if not request.is_ajax():
-        #     return Http404()
 
     except Exception as e:
         logging.error(repr(e))
@@ -327,10 +315,8 @@ def build_autocompletion(args):
                 logging.info(f"build_autocompletion: {i}")
 
     except Exception as e:
-
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-        logging.error(repr(e))
+        logging.error(f"Indexer: {repr(e)}")
+        logging.error(traceback.format_exc())
 
 
 def build_indexer(args):
@@ -342,15 +328,19 @@ def build_indexer(args):
 
         class EntryReader:
             def __iter__(self):
-                for entry in database.all():
+                for entry in database.raw_all(
+                    {
+                        "query": {"function_score": {"random_score": {"seed": 42}}},
+                        "size": 250,
+                    }
+                ):
                     yield get_features_from_db_entry(entry)
 
         indexer.indexing(EntryReader())
 
     except Exception as e:
-        logging.info(f"Indexer: {e}")
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        logging.error(f"Indexer: {repr(e)}")
+        logging.error(traceback.format_exc())
 
 
 def build_feature_cache(args):
@@ -386,10 +376,12 @@ def build_feature_cache(args):
 
 
 def indexing_job(entry):
-
-    image = imageio.imread(entry["image_data"])
-    image = image_normalize(image)
-
+    try:
+        image = imageio.imread(entry["image_data"])
+        image = image_normalize(image)
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        return "error", {"id": entry["id"]}
     plugins = []
     for c in entry["cache"]["classifier"]:
         plugins.append({"plugin": c["plugin"], "version": c["version"]})
@@ -413,13 +405,8 @@ def indexing_job(entry):
                 binary_vec = result.feature.binary
                 feature_vec = list(result.feature.feature)
 
-                hash_splits_list = []
-                for x in range(4):
-                    hash_splits_list.append(binary_vec[x * len(binary_vec) // 4 : (x + 1) * len(binary_vec) // 4])
-
                 plugin_annotations.append(
                     {
-                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
                         "type": result.feature.type,
                         "value": feature_vec,
                     }
@@ -494,7 +481,6 @@ def indexing_job(entry):
                 "annotations": [
                     {
                         "type": exist_f["type"],
-                        "hash": {f"split_{i}": x for i, x in enumerate(hash_splits_list)},
                         "value": exist_f["value"],
                     }
                 ],
@@ -506,7 +492,7 @@ def indexing_job(entry):
 
     # classification_chunk = list(classifier_plugin_manager.run(images_chunk, filter_classifier_plugins))
 
-    return doc
+    return "ok", doc
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):
@@ -618,11 +604,14 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         with Pool(16, initializer=init_worker, initargs=[indexing_job, self.config]) as p:
             db_bulk_cache = []
             logging.info(f"Indexing: start indexing")
-            for i, entry in enumerate(p.imap(indexing_job, filter_and_translate(request_iterator))):
-                if entry is None:
+            for i, (status, entry) in enumerate(p.imap(indexing_job, filter_and_translate(request_iterator))):
+                if status != "ok":
+                    logging.error(f"Indexing: {entry['id']}")
                     yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
                     continue
                 # print(entry)
+                # logging.info("##########")
+                # logging.info(entry)
                 db_bulk_cache.append(entry)
 
                 if len(db_bulk_cache) > 1000:
@@ -647,7 +636,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
                 yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
 
-            if len(db_bulk_cache) > 1:
+            if len(db_bulk_cache) > 0:
                 logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
                 database.bulk_insert(db_bulk_cache)
                 db_bulk_cache = []
@@ -763,6 +752,34 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         context.set_details("Job unknown")
         return indexer_pb2.ListSearchResultReply()
 
+    def aggregate(self, request, context):
+
+        jsonObj = MessageToJson(request)
+        logging.info(jsonObj)
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+        aggregator = Aggregator(database)
+
+        size = 5 if request.size <= 0 else request.size
+        result_list = []
+        if request.part == "meta" and request.type == "count":
+            result_list = aggregator.meta_text_count(field_name=request.field_name, size=size)
+        elif request.part == "origin" and request.type == "count":
+            result_list = aggregator.origin_test_count(field_name=request.field_name, size=size)
+        elif request.part == "feature" and request.type == "count":
+            result_list = aggregator.feature_count(size=size)
+        elif request.part == "classifier" and request.type == "count":
+            result_list = aggregator.classifier_tag_count(size=size)
+        else:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details("Job unknown")
+
+        result = indexer_pb2.AggregateReply()
+        for x in result_list:
+            f = result.field.add()
+            f.key = x["name"]
+            f.int_val = x["value"]
+        return result
+
     def suggest(self, request, context):
 
         jsonObj = MessageToJson(request)
@@ -785,7 +802,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def build_indexer(self, request, context):
-        print("WTF")
         logging.info("BUILD_INDEXER")
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 

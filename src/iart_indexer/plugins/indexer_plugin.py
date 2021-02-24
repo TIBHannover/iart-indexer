@@ -57,37 +57,6 @@ class IndexerPluginManager(PluginManager):
 
         return result_list
 
-    # def indexing(self, entries, plugins=None, configs=None):
-    #     print("############")
-    #     print(plugins)
-    #     plugin_list = self.init_plugins(plugins, configs)
-    #     print(plugin_list)
-
-    #     # TODO use batch size
-    #     for image in entries:
-    #         plugin_result_list = {"id": image.id, "image": image, "plugins": []}
-    #         for plugin in plugin_list:
-    #             # logging.info(dir(plugin_class["plugin"]))
-    #             plugin = plugin["plugin"]
-
-    #             plugin_version = plugin.version
-    #             plugin_name = plugin.name
-
-    #             logging.info(f"Plugin start {plugin.name}:{plugin.version}")
-
-    #             plugin_results = plugin([image])
-    #             plugin_result_list["plugins"].append(plugin_results)
-
-    #             # plugin_result_list["plugins"]plugin_results._plugin
-    #             # # # TODO entries_processed also contains the entries zip will be
-
-    #             # logging.info(f"Plugin done {plugin.name}:{plugin.version}")
-    #             # for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-    #             #     if entry.id not in plugin_result_list:
-    #             #         plugin_result_list[entry.id] = {"image": entry, "results": []}
-    #             #     plugin_result_list["results"].extend(annotations)
-    #         yield plugin_result_list
-
 
 class IndexerPlugin(Plugin):
     _type = "indexer"

@@ -1,74 +1,6 @@
 syntax = "proto3";
 option java_multiple_files = true;
 
-enum DataType {
-  // Not a legal value for DataType.  Used to indicate a DataType field
-  // has not been set.
-  DT_INVALID = 0;
-
-  // Data types that all computation devices are expected to be
-  // capable to support.
-  DT_FLOAT = 1;
-  DT_DOUBLE = 2;
-  DT_INT32 = 3;
-  DT_UINT8 = 4;
-  DT_INT16 = 5;
-  DT_INT8 = 6;
-  DT_STRING = 7;
-  DT_INT64 = 9;
-  DT_BOOL = 10;
-
-  DT_UINT16 = 17;
-  DT_HALF = 19;
-  DT_UINT32 = 22;
-  DT_UINT64 = 23;
-}
-
-message Tensor {
-  DataType dtype = 1;
-
-  repeated int32 shape = 2;
-
-  enum Inerpretation {
-    DOT = 0;
-    LINE = 1;
-    TRIANGLE = 2;
-    RECTANGLE = 3;
-    PENTAGON = 4;
-    IMAGE = 5;
-  }
-
-  string name = 14;
-
-  bytes proto_content = 4;
-
-  Inerpretation inter = 13;
-
-  // DT_FLOAT.
-  repeated float float_val = 5;
-
-  // DT_DOUBLE.
-  repeated double double_val = 6 [ packed = true ];
-
-  // DT_INT32, DT_INT16, DT_INT8, DT_UINT8.
-  repeated int32 int_val = 7 [ packed = true ];
-
-  // DT_STRING
-  repeated bytes string_val = 8;
-
-  // DT_COMPLEX64. scomplex_val(2*i) and scomplex_val(2*i+1) are real
-  // and imaginary parts of i-th single precision complex.
-  repeated float scomplex_val = 9 [ packed = true ];
-
-  // DT_INT64
-  repeated int64 int64_val = 10 [ packed = true ];
-
-  // DT_BOOL
-  repeated bool bool_val = 11 [ packed = true ];
-
-  repeated int32 half_val = 12 [ packed = true ];
-}
-
 // python -m grpc_tools.protoc -I../web --python_out=. --grpc_python_out=.
 // ../web/tunnel.proto python -m grpc_tools.protoc -I../backend --python_out=.
 // --grpc_python_out=. ../backend/tunnel.proto create json stringds
@@ -79,15 +11,23 @@ service Indexer {
   rpc status(StatusRequest) returns (StatusReply) {}
   rpc build_suggester(SuggesterRequest) returns (SuggesterReply) {}
   rpc get(GetRequest) returns (GetReply) {}
+
   rpc search(SearchRequest) returns (SearchReply) {}
   rpc list_search_result(ListSearchResultRequest)
       returns (ListSearchResultReply) {}
+
+    
+  rpc aggregate(AggregateRequest) returns (AggregateReply) {}
+  
+  
   rpc suggest(SuggestRequest) returns (SuggestReply) {}
+
   rpc build_indexer(BuildIndexerRequest) returns (BuildIndexerReply) {}
   rpc build_feature_cache(BuildFeatureCacheRequest)
       returns (BuildFeatureCacheReply) {}
 
   rpc indexing(stream IndexingRequest) returns (stream IndexingReply) {}
+
   rpc dump(DumpRequest) returns (stream DumpReply) {}
   rpc load(stream LoadRequest) returns (stream LoadReply) {}
 }
@@ -269,3 +209,15 @@ message IndexingRequest {
 }
 
 message IndexingReply { string status = 1; string id = 2; }
+
+
+message AggregateRequest {
+  string type = 1;
+  string part = 2;
+  string field_name = 3;
+  int32 size = 4;
+}
+
+message AggregateReply {
+  repeated ValueField field = 1;
+}

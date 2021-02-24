@@ -22,12 +22,15 @@ class PluginManager:
             if plugin_name.lower() not in plugin_name_list:
                 continue
 
+            plugin_has_config = False
             plugin_config = {"params": {}}
             for x in self.configs:
                 if x["type"].lower() == plugin_name.lower():
                     plugin_config.update(x)
+                    plugin_has_config = True
+            if not plugin_has_config:
+                continue
 
             plugin = plugin_class(config=plugin_config["params"])
             plugin_list.append({"plugin": plugin, "plugin_cls": plugin_class, "config": plugin_config})
-
         return plugin_list

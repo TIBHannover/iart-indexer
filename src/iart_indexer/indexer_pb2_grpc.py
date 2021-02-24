@@ -53,6 +53,11 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.ListSearchResultRequest.SerializeToString,
             response_deserializer=indexer__pb2.ListSearchResultReply.FromString,
         )
+        self.aggregate = channel.unary_unary(
+            "/Indexer/aggregate",
+            request_serializer=indexer__pb2.AggregateRequest.SerializeToString,
+            response_deserializer=indexer__pb2.AggregateReply.FromString,
+        )
         self.suggest = channel.unary_unary(
             "/Indexer/suggest",
             request_serializer=indexer__pb2.SuggestRequest.SerializeToString,
@@ -134,6 +139,12 @@ class IndexerServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def aggregate(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def suggest(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -207,6 +218,11 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.list_search_result,
             request_deserializer=indexer__pb2.ListSearchResultRequest.FromString,
             response_serializer=indexer__pb2.ListSearchResultReply.SerializeToString,
+        ),
+        "aggregate": grpc.unary_unary_rpc_method_handler(
+            servicer.aggregate,
+            request_deserializer=indexer__pb2.AggregateRequest.FromString,
+            response_serializer=indexer__pb2.AggregateReply.SerializeToString,
         ),
         "suggest": grpc.unary_unary_rpc_method_handler(
             servicer.suggest,
@@ -444,6 +460,35 @@ class Indexer(object):
             "/Indexer/list_search_result",
             indexer__pb2.ListSearchResultRequest.SerializeToString,
             indexer__pb2.ListSearchResultReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def aggregate(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/Indexer/aggregate",
+            indexer__pb2.AggregateRequest.SerializeToString,
+            indexer__pb2.AggregateReply.FromString,
             options,
             channel_credentials,
             insecure,

@@ -100,8 +100,9 @@ class FaissIndexer(IndexerPlugin):
         # indexer_data = {}
         for i, entry in enumerate(entries):
             id = entry["id"]
-
+            found_clip = False
             for feature in entry["feature"]:
+
                 index_name = feature["plugin"] + "." + feature["type"]
                 # print(dir(indexer_data[index_name]))
                 indexer_data[index_name]["data"].append(feature["value"])
@@ -109,11 +110,17 @@ class FaissIndexer(IndexerPlugin):
                 if id not in indexer_data[index_name]["entries"]:
                     indexer_data[index_name]["entries"][id] = len(indexer_data[index_name]["entries"])
 
+                if feature["plugin"] == "clip_embedding_feature":
+                    found_clip = True
+            if not found_clip:
+                logging.error(entry)
             if i % 10000 == 0 and i > 0:
                 logging.info(f"FaissIndexer: Read {i} ")
 
                 for index_name, index_data in indexer_data.items():
-                    logging.info(f"{len(indexer_data[index_name]['data'])}")
+                    logging.info(f"{index_name}:{len(indexer_data[index_name]['data'])}")
+                    if len(indexer_data[index_name]["data"]) == 0:
+                        continue
                     train_data = np.asarray(index_data["data"]).astype("float32")
                     # index_data["index"].train(train_data)
                     index_data["index"].add(train_data)

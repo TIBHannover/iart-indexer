@@ -497,3 +497,18 @@ class Client:
             except Exception as e:
                 logging.error(e)
                 try_count -= 1
+
+    def aggregate(self, part, type, field_name, size):
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+        request = indexer_pb2.AggregateRequest(type=type, part=part, field_name=field_name, size=size)
+        response = stub.aggregate(request)
+
+        return response

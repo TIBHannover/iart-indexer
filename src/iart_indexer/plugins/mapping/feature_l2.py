@@ -9,14 +9,14 @@ from iart_indexer.plugins import MappingPlugin, MappingPluginManager, PluginResu
 from iart_indexer.utils import image_from_proto, image_resize
 
 
-@MappingPluginManager.export("FeatureCosineMapping")
-class FeatureCosineMapping(MappingPlugin):
+@MappingPluginManager.export("FeatureL2Mapping")
+class FeatureL2Mapping(MappingPlugin):
     default_config = {}
 
     default_version = 0.1
 
     def __init__(self, **kwargs):
-        super(FeatureCosineMapping, self).__init__(**kwargs)
+        super(FeatureL2Mapping, self).__init__(**kwargs)
 
     def call(self, entries, query):
 
@@ -30,9 +30,9 @@ class FeatureCosineMapping(MappingPlugin):
                             continue
 
                         if "value" in e_f["annotations"][0]:
-                            a = e_f["annotations"][0]["value"]
-                            b = q_f["value"]
-                            score += np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)) * q_f["weight"]
+                            a = np.asarray(e_f["annotations"][0]["value"])
+                            b = np.asarray(q_f["value"])
+                            score += 1 / (np.linalg.norm(a - b) + 1) * q_f["weight"]
 
                 new_entries.append((score, {**e, "coordinates": [score]}))
             new_entries = sorted(new_entries, key=lambda x: -x[0])

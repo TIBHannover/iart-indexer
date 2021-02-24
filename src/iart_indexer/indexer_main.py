@@ -37,6 +37,7 @@ def parse_args():
             "get",
             "build_indexer",
             "search",
+            "aggregate",
             "build_feature_cache",
             "load",
             "dump",
@@ -51,6 +52,11 @@ def parse_args():
 
     parser.add_argument("--output", help="copy image to new folder with hash id")
     parser.add_argument("--image_output", help="copy image to new folder with hash id")
+
+    parser.add_argument("--aggr_part", help="id for entry query")
+    parser.add_argument("--aggr_type", help="id for entry query")
+    parser.add_argument("--aggr_field_name", help="id for entry query")
+    parser.add_argument("--aggr_size", type=int, help="id for entry query")
 
     parser.add_argument("-c", "--config", help="config path")
     parser.add_argument("-m", "--mode", choices=["client", "server"], default="local", help="verbose output")
@@ -157,6 +163,13 @@ def main():
 
         elif args.task == "load":
             client.load(args.dump_path)
+
+        elif args.task == "aggregate":
+            print(
+                client.aggregate(
+                    part=args.aggr_part, type=args.aggr_type, field_name=args.aggr_field_name, size=args.aggr_size
+                )
+            )
 
     elif args.mode == "server":
         server = Server(config)

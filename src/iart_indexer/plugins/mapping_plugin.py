@@ -41,7 +41,7 @@ class MappingPluginManager(PluginManager):
         if len(plugin_list) > 1:
             logging.error("Only one mapping plugin should excecuted")
             raise ValueError
-
+        logging.info(f"MappingPluginManager: {plugin_list}")
         # TODO use batch size
         for plugin in plugin_list:
             # logging.info(dir(plugin_class["plugin"]))

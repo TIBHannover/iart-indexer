@@ -1,3 +1,4 @@
+import logging
 from iart_indexer.utils import convert_name
 
 
