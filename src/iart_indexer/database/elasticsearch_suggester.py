@@ -1,8 +1,10 @@
 from datetime import datetime
+import logging
 
 from elasticsearch import Elasticsearch, exceptions
 
 from iart_indexer.database.suggester import Suggester
+from elasticsearch.helpers import bulk
 
 # from elasticsearch_dsl import Search
 
@@ -34,6 +36,14 @@ class ElasticSearchSuggester(Suggester):
                     }
                 },
             )
+
+    def bulk_insert(self, generator):
+        def add_fields(generator):
+            for x in generator:
+                # logging.info(f"BULK: {x}")
+                yield {"_id": x["id"], "_index": self.index, **x}
+
+        bulk(client=self.es, actions=add_fields(generator))
 
     def update_entry(self, hash_id, meta=None, features=None, annotations=None, origins=None):
         body = {}

@@ -37,159 +37,6 @@ sp_en = spacy.load("en_core_web_sm")
 sp_de = spacy.load("de_core_news_sm")
 
 
-def indexing(args):
-    # try:
-    if True:
-        logging.info("Start indexing job")
-        feature_plugin_manager = args["feature_manager"]
-        classifier_plugin_manager = args["classifier_manager"]
-        images = args["images"]
-        database = args["database"]
-        cache = args["cache"]
-        existing_predictions = {}
-        filter_feature_plugins = []
-        filter_classifier_plugins = []
-
-        with cache as cache:
-            for image in images:
-                cache_data = cache[image.id]
-                existing_predictions[image.id] = cache_data
-
-                plugins = []
-                for c in cache_data["classifier"]:
-                    plugins.append({"plugin": c["plugin"], "version": c["version"]})
-                filter_classifier_plugins.append(plugins)
-
-                plugins = []
-                for c in cache_data["feature"]:
-                    plugins.append({"plugin": c["plugin"], "version": c["version"]})
-                filter_feature_plugins.append(plugins)
-
-        def chunks(lst, n):
-            for i in range(0, len(lst), n):
-                yield lst[i : i + n]
-
-        def prepare_doc():
-            for images_chunk in chunks(images, 32):
-
-                feature_chunk = list(feature_plugin_manager.run(images_chunk, filter_feature_plugins))
-
-                classification_chunk = list(classifier_plugin_manager.run(images_chunk, filter_classifier_plugins))
-
-                for img, feature, classification in zip(images_chunk, feature_chunk, classification_chunk):
-
-                    meta = meta_from_proto(img.meta)
-                    origin = meta_from_proto(img.origin)
-                    doc = {"id": img.id, "meta": meta, "origin": origin}
-
-                    annotations = []
-                    for f in feature["plugins"]:
-
-                        for anno in f._annotations:
-
-                            for result in anno:
-                                plugin_annotations = []
-
-                                binary_vec = result.feature.binary
-                                feature_vec = list(result.feature.feature)
-
-                                plugin_annotations.append(
-                                    {
-                                        "type": result.feature.type,
-                                        "value": feature_vec,
-                                    }
-                                )
-
-                                feature_result = {
-                                    "plugin": result.plugin,
-                                    "version": result.version,
-                                    "annotations": plugin_annotations,
-                                }
-                                annotations.append(feature_result)
-
-                    if len(annotations) > 0:
-                        doc["feature"] = annotations
-
-                    annotations = []
-                    for c in classification["plugins"]:
-
-                        for anno in c._annotations:
-
-                            for result in anno:
-                                plugin_annotations = []
-                                for concept in result.classifier.concepts:
-                                    plugin_annotations.append(
-                                        {"name": concept.concept, "type": concept.type, "value": concept.prob}
-                                    )
-
-                                classifier_result = {
-                                    "plugin": result.plugin,
-                                    "version": result.version,
-                                    "annotations": plugin_annotations,
-                                }
-                                annotations.append(classifier_result)
-
-                    if len(annotations) > 0:
-                        doc["classifier"] = annotations
-
-                    # copy predictions from cache
-                    for exist_c in existing_predictions[img.id]["classifier"]:
-                        if "classifier" not in doc:
-                            doc["classifier"] = []
-
-                        founded = False
-                        for computed_c in doc["classifier"]:
-                            if computed_c["plugin"] == exist_c["plugin"] and version.parse(
-                                str(computed_c["version"])
-                            ) > version.parse(str(exist_c["version"])):
-                                founded = True
-
-                        if not founded:
-                            doc["classifier"].append(exist_c)
-
-                    for exist_f in existing_predictions[img.id]["feature"]:
-                        if "feature" not in doc:
-                            doc["feature"] = []
-                        exist_f_version = version.parse(str(exist_f["version"]))
-
-                        founded = False
-                        for computed_f in doc["feature"]:
-                            computed_f_version = version.parse(str(computed_f["version"]))
-                            if computed_f["plugin"] == exist_f["plugin"] and computed_f_version >= exist_f_version:
-                                founded = True
-                        if not founded:
-                            # TODO build hash
-                            output = np.asarray(exist_f["value"])
-                            output_bin = (output > 0).astype(np.int32).tolist()
-                            output_hash = "".join([str(x) for x in output_bin])
-                            hash_splits_list = []
-                            for x in range(4):
-                                hash_splits_list.append(
-                                    output_hash[x * len(output_hash) // 4 : (x + 1) * len(output_hash) // 4]
-                                )
-                            exist_f = {
-                                "plugin": exist_f["plugin"],
-                                "version": exist_f["version"],
-                                "annotations": [
-                                    {
-                                        "type": exist_f["type"],
-                                        "value": exist_f["value"],
-                                    }
-                                ],
-                            }
-                            doc["feature"].append(exist_f)
-
-                    yield doc
-
-        database.bulk_insert(prepare_doc())
-
-        return indexer_pb2.IndexingResult(results=[])
-
-    # except Exception as e:
-    #     exc_type, exc_value, exc_traceback = sys.exc_info()
-    #     traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-
-
 def search(args):
     start_time = time.time()
     query = args["query"]
@@ -252,7 +99,7 @@ def filter_autocompletion(autocompletion_string):
     return result_list
 
 
-def build_autocompletion(args):
+def build_suggestion_job(args):
 
     try:
         database = args["database"]
@@ -272,7 +119,9 @@ def build_autocompletion(args):
             if split[0] == "classifier":
                 classifier_fields.append(split[1])
 
+        db_bulk_cache = []
         for i, x in enumerate(database.all()):
+            # print("####################")
             meta_values = []
             if "meta" in x:
                 for m in x["meta"]:
@@ -286,11 +135,11 @@ def build_autocompletion(args):
             origin_values = []
             if "origin" in x:
                 for o in x["origin"]:
-                    if m["name"] not in origin_fields:
+                    if o["name"] not in origin_fields:
                         if "*" not in origin_fields:
                             continue
-                    if isinstance(m["value_str"], str):
-                        origin_values.extend(filter_autocompletion(m["value_str"]))
+                    if isinstance(o["value_str"], str):
+                        origin_values.extend(filter_autocompletion(o["value_str"]))
 
             annotations_values = []
             if "classifier" in x:
@@ -301,19 +150,53 @@ def build_autocompletion(args):
                             continue
 
                     for annotations in classifier["annotations"]:
-                        annotations_values.extend(filter_autocompletion(m["name"]))
+                        annotations_values.extend(filter_autocompletion(annotations["name"]))
 
             meta_values = list(set(meta_values))
             origin_values = list(set(origin_values))
             annotations_values = list(set(annotations_values))
 
-            suggester.update_entry(
-                hash_id=x["id"], meta=meta_values, annotations=annotations_values, origins=origin_values
+            db_bulk_cache.append(
+                {
+                    "id": x["id"],
+                    "meta_completion": meta_values,
+                    "features_completion": [],
+                    "annotations_completion": annotations_values,
+                    "origin_completion": origin_values,
+                }
             )
+            # print(
+            #     {
+            #         "id": x["id"],
+            #         "meta_completion": meta_values,
+            #         "features_completion": [],
+            #         "annotations_completion": annotations_values,
+            #         "origin_completion": origin_values,
+            #     }
+            # )
+            # print()
+            # if i > 100:
+            #     exit()
 
-            if i % 10000 == 0:
-                logging.info(f"build_autocompletion: {i}")
+            if len(db_bulk_cache) > 1000:
 
+                logging.info(f"BuildSuggester: flush results to database (count:{i} {len(db_bulk_cache)})")
+                try_count = 20
+                while try_count > 0:
+                    try:
+                        suggester.bulk_insert(db_bulk_cache)
+                        db_bulk_cache = []
+                        try_count = 0
+                    except KeyboardInterrupt:
+                        raise
+                    except Exception as e:
+                        logging.error(f"BuildSuggester: database error (try count: {try_count} {e})")
+                        time.sleep(1)
+                        try_count -= 1
+
+        if len(db_bulk_cache) > 0:
+            logging.info(f"BuildSuggester: flush results to database (count:{i} {len(db_bulk_cache)})")
+            suggester.bulk_insert(db_bulk_cache)
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
         logging.error(traceback.format_exc())
@@ -468,13 +351,6 @@ def indexing_job(entry):
             if computed_f["plugin"] == exist_f["plugin"] and computed_f_version >= exist_f_version:
                 founded = True
         if not founded:
-            # TODO build hash
-            output = np.asarray(exist_f["value"])
-            output_bin = (output > 0).astype(np.int32).tolist()
-            output_hash = "".join([str(x) for x in output_bin])
-            hash_splits_list = []
-            for x in range(4):
-                hash_splits_list.append(output_hash[x * len(output_hash) // 4 : (x + 1) * len(output_hash) // 4])
             exist_f = {
                 "plugin": exist_f["plugin"],
                 "version": exist_f["version"],
@@ -522,57 +398,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             pluginInfo.type = "classifier"
 
         return reply
-
-    def bulk_indexing(self, request, context):
-        plugin_list = []
-        plugin_name_list = [x.name.lower() for x in request.plugins]
-        for plugin_name, plugin_class in self.feature_manager.plugins().items():
-            if plugin_name.lower() not in plugin_name_list:
-                continue
-
-            plugin_config = {"params": {}}
-            for x in self.config["features"]:
-                if x["type"].lower() == plugin_name.lower():
-                    plugin_config.update(x)
-            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
-
-        for plugin_name, plugin_class in self.classifier_manager.plugins().items():
-            if plugin_name.lower() not in plugin_name_list:
-                continue
-            plugin_config = {"params": {}}
-            for x in self.config["classifiers"]:
-                if x["type"].lower() == plugin_name.lower():
-                    plugin_config.update(x)
-            plugin_list.append({"plugin": plugin_class, "config": plugin_config})
-        database = None
-        if request.update_database:
-            database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
-
-        job_id = uuid.uuid4().hex
-
-        variable = {
-            "bulk": True,
-            "feature_manager": self.feature_manager,
-            "classifier_manager": self.classifier_manager,
-            "cache": self.cache,
-            "images": request.images,
-            "database": database,
-            "progress": 0,
-            "status": 0,
-            "result": "",
-            "future": None,
-            "id": job_id,
-        }
-
-        future = self.thread_pool.submit(indexing, variable)
-
-        variable["future"] = future
-        self.futures.append(variable)
-
-        self.futures = self.futures[-self.max_results :]
-        logging.info(f"Cache {len(self.futures)} future references")
-
-        return indexer_pb2.IndexingReply(id=job_id)
 
     def indexing(self, request_iterator, context):
 
@@ -656,7 +481,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(build_autocompletion, variable)
+        future = self.thread_pool.submit(build_suggestion_job, variable)
 
         variable["future"] = future
         self.futures.append(variable)
