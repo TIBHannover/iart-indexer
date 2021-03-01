@@ -34,7 +34,7 @@ class UMapMapping(MappingPlugin):
         self.scaler = MinMaxScaler()
 
     def call(self, entries, query):
-        ref_feature = "byol_embedding_feature"
+        ref_feature = "clip_embedding_feature"
         features = []
         entries = list(entries)
         for e in entries:
