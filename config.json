@@ -1,19 +1,36 @@
 {
+    "cache": {
+        "cache_dir": "/cache"
+    },
     "grpc": {
         "port": 50051
     },
     "elasticsearch": {
-        "host": "elasticsearch",
+        "host": "localhost",
         "port": 9200,
         "index": "iart",
         "suggester": "suggester"
     },
     "features": [
         {
+            "type": "ClipEmbeddingFeature",
+            "output": "clip_image",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "clip_image",
+                "model_device": "cpu",
+                "model_file": "/modelsclip_image/clip_img.pt",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244
+            }
+        },
+        {
             "type": "ImageNetInceptionFeature",
             "output": "image_net_inception",
             "params": {
-                "host": "redisai",
+                "host": "localhost",
                 "port": 6379,
                 "model_name": "imagenet_inception",
                 "model_device": "cpu",
@@ -29,17 +46,19 @@
             "type": "YUVHistogramFeature",
             "output": "yuv_histogram",
             "params": {
-                "host": "redisai",
+                "host": "localhost",
                 "port": 6379,
                 "model_name": "yuv_histogram",
-                "model_file": "/models/yuv_histogram/yuv_histogram.pt"
+                "model_file": "/models/yuv_histogram/yuv_histogram.pt",
+                "max_dim": 128,
+                "min_dim": 244
             }
         },
         {
             "type": "ByolEmbeddingFeature",
             "output": "byol_wikipedia",
             "params": {
-                "host": "redisai",
+                "host": "localhost",
                 "port": 6379,
                 "model_name": "byol_wikipedia",
                 "model_file": "/models/byol_embedding/byol_wikipedia.pt",
@@ -52,7 +71,7 @@
             "type": "KaggleDenseClassifier",
             "output": "image_net_inception",
             "params": {
-                "host": "redisai",
+                "host": "localhost",
                 "port": 6379,
                 "model_name": "kaggle_densenet",
                 "model_device": "cpu",
@@ -72,12 +91,39 @@
                 "port": 6379,
                 "model_name": "imagenet_resnet",
                 "model_device": "cpu",
-                "model_file": "/nfs/data/iart/models/web/imagenet_resnet/imagenet_resnet.pt",
-                "mapping_file": "/nfs/data/iart/models/web/imagenet_resnet/imagenet_mapping.json",
+                "model_file": "/models/imagenet_resnet/imagenet_resnet.pt",
+                "mapping_file": "/models/imagenet_resnet/imagenet_mapping.json",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244,
-                "threshold": 0.3
+                "threshold": 0.5
+            }
+        }
+    ],
+    "indexes": [
+        {
+            "type": "FaissIndexer",
+            "params": {
+                "indexer_dir": "/faiss/",
+                "train_size": 10000
+            }
+        }
+    ],
+    "mappings": [
+        {
+            "type": "FeatureCosineMapping",
+            "params": {}
+        },
+        {
+            "type": "FeatureL2Mapping",
+            "params": {}
+        },
+        {
+            "type": "UMapMapping",
+            "params": {
+                "random_state": 42,
+                "n_neighbors": 3,
+                "min_dist": 0.1
             }
         }
     ]
