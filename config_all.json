@@ -27,6 +27,22 @@
             }
         },
         {
+            "type": "ImageNetInceptionFeature",
+            "output": "image_net_inception",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "imagenet_inception",
+                "model_device": "cpu",
+                "model_file": "/models/imagenet_inception/imagenet_inception.pb",
+                "pca_model_name": "imagenet_inception_pca_128",
+                "pca_model_file": "/models/imagenet_inception/pca_128.onnx",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244
+            }
+        },
+        {
             "type": "YUVHistogramFeature",
             "output": "yuv_histogram",
             "params": {
