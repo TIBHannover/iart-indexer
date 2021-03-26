@@ -564,8 +564,13 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
                 context.set_details("Still running")
                 return indexer_pb2.ListSearchResultReply()
+            try:
+                result = job_data["future"].result()
 
-            result = job_data["future"].result()
+            except Exception as e:
+                logging.error(f"Indexer: {repr(e)}")
+                logging.error(traceback.format_exc())
+                result = None
             if result is None:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details("Search error")

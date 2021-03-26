@@ -55,7 +55,7 @@ def list_jsonl(paths, image_paths=None):
             entry = json.loads(line)
 
             if "path" not in entry:
-                entry["path"] = os.path.join(image_paths, entry["id"][0:3], entry["id"][3:6], f"{entry['id']}.jpg")
+                entry["path"] = os.path.join(image_paths, entry["id"][0:2], entry["id"][2:4], f"{entry['id']}.jpg")
             else:
                 if not os.path.isabs(entry["path"]):
                     entry["path"] = os.path.join(image_paths, entry["path"])
@@ -333,26 +333,19 @@ class Client:
         for q in query["queries"]:
             print(q)
 
-            if "type" in q and q["type"] is not None:
-                type_req = q["type"]
+            if "field" in q and q["field"] is not None:
+                type_req = q["field"]
                 if not isinstance(type_req, str):
                     return JsonResponse({"status": "error"})
 
                 term = request.terms.add()
-                if type_req.lower() == "meta":
-                    term = request.terms.add()
-                    term.meta.query = q["query"]
-                if type_req.lower() == "annotations":
-                    term = request.terms.add()
-                    term.classifier.query = q["query"]
-                    request.sorting = "classifier"
+                term.text.query = q["query"]
+                term.text.field = q["field"]
+                term.text.flag = q["flag"]
 
             elif "query" in q and q["query"] is not None:
                 term = request.terms.add()
-                term.meta.query = q["query"]
-
-                term = request.terms.add()
-                term.classifier.query = q["query"]
+                term.text.query = q["query"]
 
             if "reference" in q and q["reference"] is not None:
                 request.sorting = "feature"
@@ -380,6 +373,8 @@ class Client:
         if "mapping" in query and query["mapping"] == "umap":
             request.mapping = "umap"
 
+        print(request)
+
         response = stub.search(request)
 
         status_request = indexer_pb2.ListSearchResultRequest(id=response.id)
@@ -392,7 +387,7 @@ class Client:
                 # search is still running
                 if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
                     pass  # {"status": "running"}
-
+            return
             time.sleep(0.01)
         return {"error"}
 

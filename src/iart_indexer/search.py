@@ -21,34 +21,20 @@ class Searcher:
         self.indexer_plugin_manager = indexer_plugin_manager
         self.mapping_plugin_manager = mapping_plugin_manager
 
-        self.meta_lut = {
-            "title": "meta.title",
-            "author": "meta.author",
-            "location": "meta.location",
-            "institution": "meta.institution",
-        }
-
     def parse_query(self, query):
+        logging.info(query)
         text_search = []
-        classifier_search = []
         feature_search = []
         # search_terms = []
         for term in query.terms:
 
             term_type = term.WhichOneof("term")
-            if term_type == "meta":
-                meta = term.meta
-                if meta.field is not None and meta.field.lower() in self.meta_lut:
-                    field = self.meta_lut[term.field.lower()]
-                else:
-                    field = None
+            if term_type == "text":
+                text = term.text
+                field = text.field.lower()
+                flag = text.flag.lower()
 
-                text_search.append({"field": field, "query": meta.query})
-
-            if term_type == "classifier":
-                classifier = term.classifier
-                # TODO add lut
-                classifier_search.append({"query": classifier.query})
+                text_search.append({"field": field, "query": text.query, "flag": flag})
 
             if term_type == "feature":
                 feature = term.feature
@@ -107,57 +93,109 @@ class Searcher:
                                             }
                                         )
 
-        return text_search, classifier_search, feature_search, query.sorting
+        return text_search, feature_search, query.sorting
 
-    def search_db(
+    def build_search_body(
         self,
         text_search: List = [],
-        classifier_search: List = [],
         feature_search: List = [],
         whitelist: List = [],
         sorting=None,
         size: int = 200,
     ):
 
-        search_terms = []
-        logging.info(text_search)
+        must_terms = []
+        should_terms = []
         for e in text_search:
-            if e["field"] is not None:
-                fields = [e["field"]]
-                search_terms.append(
-                    {
-                        "multi_match": {
-                            "query": e["query"],
-                            "fields": fields,
-                        }
+            term = None
+            if "field" not in e or e["field"] is None:
+                term = {
+                    "multi_match": {
+                        "query": e["query"],
+                        "fields": ["meta_text", "classifier_text"],
                     }
-                )
-            else:
-                search_terms.append(
-                    {
+                }
+            field_path = e["field"].split(".")
+            if len(field_path) == 1:
+                if field_path[0] == "meta":
+                    term = {
                         "multi_match": {
                             "query": e["query"],
                             "fields": "meta_text",
                         }
                     }
-                )
-
-        logging.info(search_terms)
-
-        for e in classifier_search:
-            search_terms.append(
-                {
-                    "nested": {
-                        "path": "classifier",
-                        "query": {
-                            "nested": {
-                                "path": "classifier.annotations",
-                                "query": {"bool": {"should": [{"match": {"classifier.annotations.name": e["query"]}}]}},
-                            }
-                        },
+                elif field_path[0] == "classifier":
+                    term = {
+                        "multi_match": {
+                            "query": e["query"],
+                            "fields": "classifier_text",
+                        }
                     }
-                }
-            )
+                elif field_path[0] == "origin":
+                    term = {
+                        "multi_match": {
+                            "query": e["query"],
+                            "fields": "origin_text",
+                        }
+                    }
+
+            if len(field_path) == 2:
+
+                if field_path[0] == "meta":
+                    term = {
+                        "nested": {
+                            "path": "meta",
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {"match": {f"meta.name": field_path[1]}},
+                                        {"match": {f"meta.value_str": e["query"]}},
+                                    ]
+                                }
+                            },
+                        }
+                    }
+
+                if field_path[0] == "origin":
+                    term = {
+                        "nested": {
+                            "path": "origin",
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {"match": {f"origin.name": field_path[1]}},
+                                        {"match": {f"origin.value_str": e["query"]}},
+                                    ]
+                                }
+                            },
+                        }
+                    }
+
+            if term is None:
+                continue
+
+            if "flag" in e and e["flag"] is not None:
+                if e["flag"] == "must":
+                    must_terms.append(term)
+                else:
+                    should_terms.append(term)
+            else:
+                should_terms.append(term)
+
+        # for e in classifier_search:
+        #     search_terms.append(
+        #         {
+        #             "nested": {
+        #                 "path": "classifier",
+        #                 "query": {
+        #                     "nested": {
+        #                         "path": "classifier.annotations",
+        #                         "query": {"bool": {"should": [{"match": {"classifier.annotations.name": e["query"]}}]}},
+        #                     }
+        #                 },
+        #             }
+        #         }
+        #     )
 
         elastic_sorting = []
         if isinstance(sorting, str) and sorting.lower() == "classifier":
@@ -178,18 +216,28 @@ class Searcher:
             body = {
                 "query": {
                     "bool": {
-                        "must": [{"ids": {"type": "_doc", "values": whitelist}}, {"bool": {"should": search_terms}}]
+                        "must": [
+                            {"ids": {"type": "_doc", "values": whitelist}},
+                            {"bool": {"should": should_terms, "must": must_terms}},
+                        ]
                     }
                 }
             }
 
         else:
-            body = {"query": {"bool": {"should": search_terms}}}
+            body = {"query": {"bool": {"should": should_terms, "must": must_terms}}}
 
         if elastic_sorting is not None:
             body.update({"sort": elastic_sorting})
 
-        # logging.info(json.dumps(body, indent=2))
+        return body
+
+    def search_db(
+        self,
+        body,
+        size: int = 200,
+    ):
+
         entries = self.database.raw_search(body, size=size)
         return entries
 
@@ -198,23 +246,28 @@ class Searcher:
 
     def __call__(self, query: Dict):
         logging.info("Start searching")
-        text_search, classifier_search, feature_search, sorting = self.parse_query(query)
+        text_search, feature_search, sorting = self.parse_query(query)
 
         entries_feature = self.indexer_plugin_manager.search(feature_search, size=1000)
         if len(entries_feature) > 0:
             resutl = list(self.entries_lookup(entries_feature))
             # print(resutl[:10])
-        logging.info(f"Parsed query: {text_search} {classifier_search} {feature_search} {sorting}")
-        entries = self.search_db(
+        logging.info(f"Parsed query: {text_search} {feature_search} {sorting}")
+        body = self.build_search_body(
             text_search,
-            classifier_search,
             feature_search,
             whitelist=entries_feature,
             sorting=sorting,
-            size=max(len(entries_feature), 100),
         )
+
+        logging.info(json.dumps(body, indent=2))
+        # return []
+        entries = self.search_db(body=body, size=max(len(entries_feature), 100))
         entries = list(entries)
+        if len(entries) > 0:
+            logging.info(entries[0])
         logging.info(f"Entries 1 {len(entries)}")
+        # return []
         if query.sorting.lower() == "feature":
             entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["FeatureL2Mapping"]))
 

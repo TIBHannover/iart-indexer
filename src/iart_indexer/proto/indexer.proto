@@ -148,18 +148,16 @@ message FeatureSearchTerm {
   Image image = 2;
 }
 
-message ClassifierSearchTerm { string query = 1; }
-
-message MetaSearchTerm {
+message TextSearchTerm {
   string query = 1;
   string field = 2;
+  string flag = 3;
 }
 
 message SearchTerm {
   oneof term {
-    MetaSearchTerm meta = 1;
+    TextSearchTerm text = 1;
     FeatureSearchTerm feature = 2;
-    ClassifierSearchTerm classifier = 3;
   }
 }
 

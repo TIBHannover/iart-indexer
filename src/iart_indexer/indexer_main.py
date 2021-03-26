@@ -137,10 +137,10 @@ def main():
             print(client.get(args.id))
 
         elif args.task == "search":
-            try:
-                query = json.loads(args.query)
-            except:
-                query = {"queries": [{"type": "meta", "query": args.query}]}
+            # try:
+            query = json.loads(args.query)
+            # except:
+            #     query = {"queries": [{"type": "meta", "query": args.query}]}
             time_start = time.time()
             client.search(query)
             time_stop = time.time()
