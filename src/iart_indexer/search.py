@@ -14,6 +14,7 @@ class Searcher:
         classifier_plugin_manager=None,
         indexer_plugin_manager=None,
         mapping_plugin_manager=None,
+        aggregator=None,
     ):
         super().__init__()
         self.database = database
@@ -21,12 +22,14 @@ class Searcher:
         self.classifier_plugin_manager = classifier_plugin_manager
         self.indexer_plugin_manager = indexer_plugin_manager
         self.mapping_plugin_manager = mapping_plugin_manager
+        self.aggregator = aggregator
 
     def parse_query(self, query):
+        result = {}
         logging.info(query)
         text_search = []
         feature_search = []
-        # search_terms = []
+        aggregate_fields = []
         for term in query.terms:
 
             term_type = term.WhichOneof("term")
@@ -97,8 +100,16 @@ class Searcher:
                                                 "weight": p.weight,
                                             }
                                         )
+        result.update({"text_search": text_search})
+        result.update({"feature_search": feature_search})
+        result.update({"sorting": query.sorting.lower()})
+        result.update({"mapping": query.mapping.lower()})
 
-        return text_search, feature_search, query.sorting
+        if len(query.aggregate.fields) and query.aggregate.size > 0:
+            aggregate_fields = list(query.aggregate.fields)
+            result.update({"aggregate": {"fields": aggregate_fields, "size": query.aggregate.size}})
+
+        return result
 
     def build_search_body(
         self,
@@ -109,6 +120,7 @@ class Searcher:
         size: int = 200,
     ):
 
+        search_terms = []
         must_terms = []
         should_terms = []
         for e in text_search:
@@ -250,36 +262,45 @@ class Searcher:
         return self.database.get_entries(entries)
 
     def __call__(self, query: Dict):
+        result = {}
         logging.info("Start searching")
-        text_search, feature_search, sorting = self.parse_query(query)
+        query = self.parse_query(query)
 
         logging.info("Query parsed")
-        entries_feature = self.indexer_plugin_manager.search(feature_search, size=1000)
-        if len(entries_feature) > 0:
-            resutl = list(self.entries_lookup(entries_feature))
-            # print(resutl[:10])
-        logging.info(f"Parsed query: {text_search} {feature_search} {sorting}")
+        entries_feature = self.indexer_plugin_manager.search(query["feature_search"], size=1000)
+
+        logging.info(f"Parsed query: {query}")
         body = self.build_search_body(
-            text_search,
-            feature_search,
+            query["text_search"],
+            query["feature_search"],
             whitelist=entries_feature,
-            sorting=sorting,
+            sorting=query["sorting"],
         )
 
         logging.info(json.dumps(body, indent=2))
         # return []
         entries = self.search_db(body=body, size=max(len(entries_feature), 100))
+
         entries = list(entries)
         # if len(entries) > 0:
         #     logging.info(entries[0])
         logging.info(f"Entries 1 {len(entries)}")
         # return []
-        if query.sorting.lower() == "feature":
+        if query["sorting"] == "feature":
             entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["FeatureL2Mapping"]))
 
         logging.info(f"Entries 2 {len(entries)}")
-        if query.mapping.lower() == "umap":
+        if query["mapping"] == "umap":
             entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["UMapMapping"]))
 
         logging.info(f"Entries 3 {len(entries)}")
-        return list(entries)[:100]
+
+        result.update({"entries": list(entries)[:100]})
+
+        if self.aggregator and "aggregate" in query:
+            aggregations = self.aggregator(
+                query=body["query"], field_names=query["aggregate"]["fields"], size=query["aggregate"]["size"]
+            )
+            result.update({"aggregations": aggregations})
+
+        return result

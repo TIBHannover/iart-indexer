@@ -44,21 +44,28 @@ def search(args):
         feature_plugin_manager = args["feature_manager"]
         mapping_plugin_manager = args["mapping_manager"]
         indexer_plugin_manager = args["indexer_manager"]
+
         classifier_plugin_manager = None
         # indexer_plugin_manager = None
         database = args["database"]
 
+        aggregator = Aggregator(database)
         searcher = Searcher(
-            database, feature_plugin_manager, classifier_plugin_manager, indexer_plugin_manager, mapping_plugin_manager
+            database,
+            feature_plugin_manager,
+            classifier_plugin_manager,
+            indexer_plugin_manager,
+            mapping_plugin_manager,
+            aggregator=aggregator,
         )
         logging.info(f"Init done: {time.time()-start_time}")
 
-        entries = searcher(query)
+        search_result = searcher(query)
         logging.info(f"Search done: {time.time()-start_time}")
 
         result = indexer_pb2.ListSearchResultReply()
 
-        for e in entries:
+        for e in search_result["entries"]:
             entry = result.entries.add()
             entry.id = e["id"]
             if "meta" in e:
@@ -71,6 +78,16 @@ def search(args):
                 feature_to_proto(entry.feature, e["feature"])
             if "coordinates" in e:
                 entry.coordinates.extend(e["coordinates"])
+
+        if "aggregations" in search_result:
+            for e in search_result["aggregations"]:
+                # logging.info(e)
+                aggr = result.aggregate.add()
+                aggr.field_name = e["field_name"]
+                for y in e["entries"]:
+                    value_field = aggr.entries.add()
+                    value_field.key = y["name"]
+                    value_field.int_val = y["value"]
 
         return result
     except Exception as e:

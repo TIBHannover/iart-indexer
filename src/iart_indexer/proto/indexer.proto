@@ -148,6 +148,12 @@ message SuggesterReply { string id = 1; }
 message FeatureSearchTerm {
   repeated PluginRun plugins = 1;
   Image image = 2;
+
+  enum Flag {
+    POSITIVE = 0;
+    NEGATIVE = 1;
+  }
+  string flag = 3;
 }
 
 message TextSearchTerm {
@@ -164,7 +170,8 @@ message TextSearchTerm {
 
 
 message ImageTextSearchTerm {
-  string query = 1;
+  repeated PluginRun plugins = 1;
+  string query = 2;
 
   enum Flag {
     POSITIVE = 0;
@@ -198,10 +205,17 @@ message SearchTerm {
   }
 }
 
+
+message AggregateRequest {
+  repeated string fields = 1;
+  int32 size= 2;
+}
+
 message SearchRequest {
   repeated SearchTerm terms = 1;
   string sorting = 2;
   string mapping = 3;
+  AggregateRequest aggregate = 4;
 }
 
 message SearchReply { string id = 1; }
@@ -215,8 +229,14 @@ message SearchResultEntry {
   repeated float coordinates = 6;
 }
 
+message AggregateResult {
+  string field_name = 1;
+  repeated ValueField entries = 2;
+}
+
+
 message ListSearchResultRequest { string id = 1; }
-message ListSearchResultReply { repeated SearchResultEntry entries = 1; }
+message ListSearchResultReply { repeated SearchResultEntry entries = 1; repeated AggregateResult aggregate = 2; }
 
 message SuggestGroup {
   string group = 1;
@@ -246,12 +266,12 @@ message IndexingRequest {
 message IndexingReply { string status = 1; string id = 2; }
 
 
-message AggregateRequest {
-  string type = 1;
-  string part = 2;
-  string field_name = 3;
-  int32 size = 4;
-}
+// message AggregateRequest {
+//   string type = 1;
+//   string part = 2;
+//   string field_name = 3;
+//   int32 size = 4;
+// }
 
 message AggregateReply {
   repeated ValueField field = 1;
