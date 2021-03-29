@@ -38,40 +38,45 @@ sp_de = spacy.load("de_core_news_sm")
 
 
 def search(args):
-    start_time = time.time()
-    query = args["query"]
-    feature_plugin_manager = args["feature_manager"]
-    mapping_plugin_manager = args["mapping_manager"]
-    indexer_plugin_manager = args["indexer_manager"]
-    classifier_plugin_manager = None
-    # indexer_plugin_manager = None
-    database = args["database"]
+    try:
+        start_time = time.time()
+        query = args["query"]
+        feature_plugin_manager = args["feature_manager"]
+        mapping_plugin_manager = args["mapping_manager"]
+        indexer_plugin_manager = args["indexer_manager"]
+        classifier_plugin_manager = None
+        # indexer_plugin_manager = None
+        database = args["database"]
 
-    searcher = Searcher(
-        database, feature_plugin_manager, classifier_plugin_manager, indexer_plugin_manager, mapping_plugin_manager
-    )
-    logging.info(f"Init done: {time.time()-start_time}")
+        searcher = Searcher(
+            database, feature_plugin_manager, classifier_plugin_manager, indexer_plugin_manager, mapping_plugin_manager
+        )
+        logging.info(f"Init done: {time.time()-start_time}")
 
-    entries = searcher(query)
-    logging.info(f"Search done: {time.time()-start_time}")
+        entries = searcher(query)
+        logging.info(f"Search done: {time.time()-start_time}")
 
-    result = indexer_pb2.ListSearchResultReply()
+        result = indexer_pb2.ListSearchResultReply()
 
-    for e in entries:
-        entry = result.entries.add()
-        entry.id = e["id"]
-        if "meta" in e:
-            meta_to_proto(entry.meta, e["meta"])
-        if "origin" in e:
-            meta_to_proto(entry.origin, e["origin"])
-        if "classifier" in e:
-            classifier_to_proto(entry.classifier, e["classifier"])
-        if "feature" in e:
-            feature_to_proto(entry.feature, e["feature"])
-        if "coordinates" in e:
-            entry.coordinates.extend(e["coordinates"])
+        for e in entries:
+            entry = result.entries.add()
+            entry.id = e["id"]
+            if "meta" in e:
+                meta_to_proto(entry.meta, e["meta"])
+            if "origin" in e:
+                meta_to_proto(entry.origin, e["origin"])
+            if "classifier" in e:
+                classifier_to_proto(entry.classifier, e["classifier"])
+            if "feature" in e:
+                feature_to_proto(entry.feature, e["feature"])
+            if "coordinates" in e:
+                entry.coordinates.extend(e["coordinates"])
 
-    return result
+        return result
+    except Exception as e:
+        logging.error(f"Indexer: {repr(e)}")
+        logging.error(traceback.format_exc())
+    return None
 
 
 def suggest(args):

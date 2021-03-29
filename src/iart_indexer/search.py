@@ -1,6 +1,7 @@
 import logging
 import uuid
 import json
+import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
@@ -32,7 +33,11 @@ class Searcher:
             if term_type == "text":
                 text = term.text
                 field = text.field.lower()
-                flag = text.flag.lower()
+                logging.info(text.flag)
+                if text.flag == indexer_pb2.TextSearchTerm.MUST:
+                    flag = "must"
+                if text.flag == indexer_pb2.TextSearchTerm.SHOULD:
+                    flag = "should"
 
                 text_search.append({"field": field, "query": text.query, "flag": flag})
 
@@ -248,6 +253,7 @@ class Searcher:
         logging.info("Start searching")
         text_search, feature_search, sorting = self.parse_query(query)
 
+        logging.info("Query parsed")
         entries_feature = self.indexer_plugin_manager.search(feature_search, size=1000)
         if len(entries_feature) > 0:
             resutl = list(self.entries_lookup(entries_feature))
@@ -264,8 +270,8 @@ class Searcher:
         # return []
         entries = self.search_db(body=body, size=max(len(entries_feature), 100))
         entries = list(entries)
-        if len(entries) > 0:
-            logging.info(entries[0])
+        # if len(entries) > 0:
+        #     logging.info(entries[0])
         logging.info(f"Entries 1 {len(entries)}")
         # return []
         if query.sorting.lower() == "feature":
