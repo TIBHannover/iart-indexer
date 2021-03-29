@@ -143,6 +143,8 @@ message GetReply {
 message SuggesterRequest {repeated string field_names = 1;}
 message SuggesterReply { string id = 1; }
 
+
+// Search Request
 message FeatureSearchTerm {
   repeated PluginRun plugins = 1;
   Image image = 2;
@@ -151,13 +153,48 @@ message FeatureSearchTerm {
 message TextSearchTerm {
   string query = 1;
   string field = 2;
+
+  enum Flag {
+    MUST = 0;
+    SHOULD = 1;
+  }
+
+  Flag flag = 3;
+}
+
+
+message ImageTextSearchTerm {
+  string query = 1;
+
+  enum Flag {
+    POSITIVE = 0;
+    NEGATIVE = 1;
+  }
   string flag = 3;
 }
+
+message NumberSearchTerm {
+  string query = 1;
+  string field = 2;
+
+  enum Flag {
+    GREATER = 0;
+    GREATER_EQ = 1;
+    EQ = 2;
+    LESS_EQ = 3;
+    LESS = 4;
+  }
+
+  Flag flag = 3;
+}
+
 
 message SearchTerm {
   oneof term {
     TextSearchTerm text = 1;
-    FeatureSearchTerm feature = 2;
+    NumberSearchTerm number = 2;
+    ImageTextSearchTerm image_text = 3;
+    FeatureSearchTerm feature = 4;
   }
 }
 
