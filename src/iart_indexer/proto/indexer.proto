@@ -153,7 +153,7 @@ message FeatureSearchTerm {
     POSITIVE = 0;
     NEGATIVE = 1;
   }
-  string flag = 3;
+  Flag flag = 3;
 }
 
 message TextSearchTerm {
@@ -177,7 +177,7 @@ message ImageTextSearchTerm {
     POSITIVE = 0;
     NEGATIVE = 1;
   }
-  string flag = 3;
+  Flag flag = 3;
 }
 
 message NumberSearchTerm {

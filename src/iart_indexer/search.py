@@ -11,6 +11,7 @@ class Searcher:
         self,
         database,
         feature_plugin_manager=None,
+        image_text_plugin_manager=None,
         classifier_plugin_manager=None,
         indexer_plugin_manager=None,
         mapping_plugin_manager=None,
@@ -19,12 +20,14 @@ class Searcher:
         super().__init__()
         self.database = database
         self.feature_plugin_manager = feature_plugin_manager
+        self.image_text_plugin_manager = image_text_plugin_manager
         self.classifier_plugin_manager = classifier_plugin_manager
         self.indexer_plugin_manager = indexer_plugin_manager
         self.mapping_plugin_manager = mapping_plugin_manager
         self.aggregator = aggregator
 
     def parse_query(self, query):
+        logging.info(query)
         result = {}
         logging.info(query)
         text_search = []
@@ -43,6 +46,46 @@ class Searcher:
                     flag = "should"
 
                 text_search.append({"field": field, "query": text.query, "flag": flag})
+
+            if term_type == "image_text":
+
+                image_text = term.image_text
+                logging.info(image_text)
+                feature_results = list( self.image_text_plugin_manager.run(
+                    [image_text.query]
+                    )  # , plugins=[x.name.lower() for x in feature.plugins])
+                )[0]
+
+                
+
+                logging.info('#################################################')
+                logging.info('#################################################')
+                logging.info('#################################################')
+                logging.info('#################################################')
+                logging.info(image_text.plugins)
+                logging.info([ f._plugin.name.lower() for f in feature_results["plugins"]])
+                for p in image_text.plugins:
+                    # feature_results
+                    for f in feature_results["plugins"]:
+                        if p.name.lower() == f._plugin.name.lower():
+
+                            annotations = []
+                            for anno in f._annotations[0]:
+                                result_type = anno.WhichOneof("result")
+                                if result_type == "feature":
+                                    annotation_dict = {}
+                                    binary = anno.feature.binary
+                                    feature = list(anno.feature.feature)
+
+                                    feature_search.append(
+                                        {
+                                            "plugin": f._plugin.name,
+                                            "type": anno.feature.type,
+                                            "value": feature,
+                                            "weight": p.weight,
+                                        }
+                                    )
+
 
             if term_type == "feature":
                 feature = term.feature
@@ -116,11 +159,9 @@ class Searcher:
         text_search: List = [],
         feature_search: List = [],
         whitelist: List = [],
-        sorting=None,
-        size: int = 200,
+        sorting=None
     ):
 
-        search_terms = []
         must_terms = []
         should_terms = []
         for e in text_search:
@@ -227,7 +268,7 @@ class Searcher:
             )
 
         if isinstance(sorting, str) and sorting.lower() == "random":
-            search_terms.append({"function_score": {"functions": [{"random_score": {"seed": uuid.uuid4().hex}}]}})
+            should_terms.append({"function_score": {"functions": [{"random_score": {"seed": uuid.uuid4().hex}}]}})
 
         if whitelist is not None and len(whitelist) > 0:
             body = {
@@ -264,9 +305,13 @@ class Searcher:
     def __call__(self, query: Dict):
         result = {}
         logging.info("Start searching")
-        query = self.parse_query(query)
 
+        query = self.parse_query(query)
         logging.info("Query parsed")
+
+        # query = self.parse_query(query)
+        # logging.info("Query parsed")
+
         entries_feature = self.indexer_plugin_manager.search(query["feature_search"], size=1000)
 
         logging.info(f"Parsed query: {query}")
@@ -277,7 +322,7 @@ class Searcher:
             sorting=query["sorting"],
         )
 
-        logging.info(json.dumps(body, indent=2))
+        # logging.info(json.dumps(body, indent=2))
         # return []
         entries = self.search_db(body=body, size=max(len(entries_feature), 100))
 
@@ -285,13 +330,13 @@ class Searcher:
         # if len(entries) > 0:
         #     logging.info(entries[0])
         logging.info(f"Entries 1 {len(entries)}")
-        # return []
         if query["sorting"] == "feature":
-            entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["FeatureL2Mapping"]))
+            # entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["FeatureL2Mapping"]))
+            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["FeatureCosineMapping"]))
 
         logging.info(f"Entries 2 {len(entries)}")
         if query["mapping"] == "umap":
-            entries = list(self.mapping_plugin_manager.run(entries, feature_search, ["UMapMapping"]))
+            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"]))
 
         logging.info(f"Entries 3 {len(entries)}")
 

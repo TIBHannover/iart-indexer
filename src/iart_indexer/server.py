@@ -15,7 +15,7 @@ from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
 from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
 from iart_indexer.plugins import *
-from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin
+from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin, ImageTextPluginManager
 from iart_indexer.plugins import IndexerPluginManager
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
 from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry
@@ -41,6 +41,7 @@ def search(args):
     try:
         start_time = time.time()
         query = args["query"]
+        image_text_plugin_manager = args["image_text_manager"]
         feature_plugin_manager = args["feature_manager"]
         mapping_plugin_manager = args["mapping_manager"]
         indexer_plugin_manager = args["indexer_manager"]
@@ -53,6 +54,7 @@ def search(args):
         searcher = Searcher(
             database,
             feature_plugin_manager,
+            image_text_plugin_manager,
             classifier_plugin_manager,
             indexer_plugin_manager,
             mapping_plugin_manager,
@@ -394,9 +396,10 @@ def indexing_job(entry):
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, config, feature_manager, classifier_manager, indexer_manager, mapping_manager, cache):
+    def __init__(self, config, feature_manager, image_text_manager, classifier_manager, indexer_manager, mapping_manager, cache):
         self.config = config
         self.feature_manager = feature_manager
+        self.image_text_manager = image_text_manager
         self.classifier_manager = classifier_manager
         self.indexer_manager = indexer_manager
         self.mapping_manager = mapping_manager
@@ -558,6 +561,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         job_id = uuid.uuid4().hex
         variable = {
             "feature_manager": self.feature_manager,
+            "image_text_manager": self.image_text_manager,
             "mapping_manager": self.mapping_manager,
             "indexer_manager": self.indexer_manager,
             "database": database,
@@ -770,6 +774,8 @@ class Server:
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
             ],
         )
+        self.image_text_manager=  ImageTextPluginManager(configs=self.config.get("image_text", []))
+        self.image_text_manager.find()
 
         self.feature_manager = FeaturePluginManager(configs=self.config.get("features", []))
         self.feature_manager.find()
@@ -789,6 +795,7 @@ class Server:
             Commune(
                 config,
                 self.feature_manager,
+                self.image_text_manager,
                 self.classifier_manager,
                 self.indexer_manager,
                 self.mapping_manager,
