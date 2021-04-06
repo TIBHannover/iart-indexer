@@ -1,5 +1,6 @@
 import logging
 import uuid
+import numpy as np
 import json
 import indexer_pb2
 from typing import Dict, List
@@ -57,13 +58,6 @@ class Searcher:
                 )[0]
 
                 
-
-                logging.info('#################################################')
-                logging.info('#################################################')
-                logging.info('#################################################')
-                logging.info('#################################################')
-                logging.info(image_text.plugins)
-                logging.info([ f._plugin.name.lower() for f in feature_results["plugins"]])
                 for p in image_text.plugins:
                     # feature_results
                     for f in feature_results["plugins"]:
@@ -73,8 +67,6 @@ class Searcher:
                             for anno in f._annotations[0]:
                                 result_type = anno.WhichOneof("result")
                                 if result_type == "feature":
-                                    annotation_dict = {}
-                                    binary = anno.feature.binary
                                     feature = list(anno.feature.feature)
 
                                     feature_search.append(
@@ -83,6 +75,7 @@ class Searcher:
                                             "type": anno.feature.type,
                                             "value": feature,
                                             "weight": p.weight,
+                                            "positive":  term.image_text.flag == indexer_pb2.ImageTextSearchTerm.POSITIVE
                                         }
                                     )
 
@@ -131,8 +124,6 @@ class Searcher:
                                 for anno in f._annotations[0]:
                                     result_type = anno.WhichOneof("result")
                                     if result_type == "feature":
-                                        annotation_dict = {}
-                                        binary = anno.feature.binary
                                         feature = list(anno.feature.feature)
 
                                         feature_search.append(
@@ -141,6 +132,7 @@ class Searcher:
                                                 "type": anno.feature.type,
                                                 "value": feature,
                                                 "weight": p.weight,
+                                                "positive":  term.feature.flag == indexer_pb2.FeatureSearchTerm.POSITIVE
                                             }
                                         )
         result.update({"text_search": text_search})
@@ -153,6 +145,35 @@ class Searcher:
             result.update({"aggregate": {"fields": aggregate_fields, "size": query.aggregate.size}})
 
         return result
+
+    def mean_feature_search(self, feature_search: List = []):
+        # logging.info(feature_search)
+        logging.info('????????????????????????????????????????????????')
+        features = {}
+        for f in feature_search:
+            key = f"{f['plugin']}.{f['type']}"
+            logging.info(f"{key}{f['positive']}")
+            if key not in features:
+                features[key] = {**f, 'values': []}
+            
+            feature_value = np.asarray(f["value"])
+
+            if not f["positive"]:
+                feature_value *= -1
+
+            feature_value *= f["weight"]
+
+
+            logging.info(feature_value[:10])
+
+            features[key]["values"].append(feature_value)
+        
+        results = []
+
+        for _, f in features.items():
+            results.append({**f, "value": np.mean(f["values"], axis = 0).tolist()})
+
+        return results
 
     def build_search_body(
         self,
@@ -312,9 +333,15 @@ class Searcher:
         # query = self.parse_query(query)
         # logging.info("Query parsed")
 
+        # logging.info('###########################################')
+        query["feature_search"] = self.mean_feature_search(query["feature_search"])
+        # logging.info('###########################################')
+        # logging.info(query["feature_search"])
+        # logging.info('###########################################')
+
         entries_feature = self.indexer_plugin_manager.search(query["feature_search"], size=1000)
 
-        logging.info(f"Parsed query: {query}")
+        # logging.info(f"Parsed query: {query}")
         body = self.build_search_body(
             query["text_search"],
             query["feature_search"],

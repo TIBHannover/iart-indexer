@@ -194,8 +194,7 @@ class ClipEmbeddingFeature(ImageTextPlugin):
 
     def __init__(self, **kwargs):
         super(ClipEmbeddingFeature, self).__init__(**kwargs)
-        logging.info('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        logging.info(self.config)
+
         self.host = self.config["host"]
         self.port = self.config["port"]
         self.model_name = self.config["model_name"]
@@ -236,21 +235,11 @@ class ClipEmbeddingFeature(ImageTextPlugin):
             # image = image_from_proto(entry)
             text_imput = tokenize(self.tokenizer, text)
             job_id = uuid.uuid4().hex
-            logging.info(text_imput.shape)
             self.con.tensorset(f"text_{job_id}", text_imput)
             result = self.con.modelrun(self.model_name, f"text_{job_id}", f"output_{job_id}")
             output = self.con.tensorget(f"output_{job_id}")[0, ...]
             output_bin = (output > 0).astype(np.int32).tolist()
             output_bin_str = "".join([str(x) for x in output_bin])
-            logging.info('##############################################################')
-            logging.info('##############################################################')
-            logging.info('##############################################################')
-            logging.info('##############################################################')
-            logging.info(output)
-            logging.info('##############################################################')
-            logging.info('##############################################################')
-            logging.info('##############################################################')
-            logging.info('##############################################################')
             self.con.delete(f"text_{job_id}")
             self.con.delete(f"output_{job_id}")
 
