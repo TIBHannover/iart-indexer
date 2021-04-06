@@ -24,7 +24,7 @@ class ClipEmbeddingFeature(FeaturePlugin):
         "min_dim": 224,
     }
 
-    default_version = 0.1
+    default_version = 0.2
 
     def __init__(self, **kwargs):
         super(ClipEmbeddingFeature, self).__init__(**kwargs)
