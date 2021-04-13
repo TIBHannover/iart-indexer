@@ -2,7 +2,7 @@ import logging
 import uuid
 import numpy as np
 import json
-import indexer_pb2
+from iart_indexer import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
@@ -52,12 +52,12 @@ class Searcher:
 
                 image_text = term.image_text
                 logging.info(image_text)
-                feature_results = list( self.image_text_plugin_manager.run(
-                    [image_text.query]
+                feature_results = list(
+                    self.image_text_plugin_manager.run(
+                        [image_text.query]
                     )  # , plugins=[x.name.lower() for x in feature.plugins])
                 )[0]
 
-                
                 for p in image_text.plugins:
                     # feature_results
                     for f in feature_results["plugins"]:
@@ -75,10 +75,10 @@ class Searcher:
                                             "type": anno.feature.type,
                                             "value": feature,
                                             "weight": p.weight,
-                                            "positive":  term.image_text.flag == indexer_pb2.ImageTextSearchTerm.POSITIVE
+                                            "positive": term.image_text.flag
+                                            == indexer_pb2.ImageTextSearchTerm.POSITIVE,
                                         }
                                     )
-
 
             if term_type == "feature":
                 feature = term.feature
@@ -132,7 +132,7 @@ class Searcher:
                                                 "type": anno.feature.type,
                                                 "value": feature,
                                                 "weight": p.weight,
-                                                "positive":  term.feature.flag == indexer_pb2.FeatureSearchTerm.POSITIVE
+                                                "positive": term.feature.flag == indexer_pb2.FeatureSearchTerm.POSITIVE,
                                             }
                                         )
         result.update({"text_search": text_search})
@@ -148,14 +148,14 @@ class Searcher:
 
     def mean_feature_search(self, feature_search: List = []):
         # logging.info(feature_search)
-        logging.info('????????????????????????????????????????????????')
+        logging.info("????????????????????????????????????????????????")
         features = {}
         for f in feature_search:
             key = f"{f['plugin']}.{f['type']}"
             logging.info(f"{key}{f['positive']}")
             if key not in features:
-                features[key] = {**f, 'values': []}
-            
+                features[key] = {**f, "values": []}
+
             feature_value = np.asarray(f["value"])
 
             if not f["positive"]:
@@ -163,25 +163,18 @@ class Searcher:
 
             feature_value *= f["weight"]
 
-
             logging.info(feature_value[:10])
 
             features[key]["values"].append(feature_value)
-        
+
         results = []
 
         for _, f in features.items():
-            results.append({**f, "value": np.mean(f["values"], axis = 0).tolist()})
+            results.append({**f, "value": np.mean(f["values"], axis=0).tolist()})
 
         return results
 
-    def build_search_body(
-        self,
-        text_search: List = [],
-        feature_search: List = [],
-        whitelist: List = [],
-        sorting=None
-    ):
+    def build_search_body(self, text_search: List = [], feature_search: List = [], whitelist: List = [], sorting=None):
 
         must_terms = []
         should_terms = []
@@ -351,6 +344,8 @@ class Searcher:
 
         # logging.info(json.dumps(body, indent=2))
         # return []
+
+        #
         entries = self.search_db(body=body, size=max(len(entries_feature), 100))
 
         entries = list(entries)
