@@ -34,7 +34,23 @@
                 "port": 6379,
                 "model_name": "clip_image",
                 "model_device": "cpu",
-                "model_file": "/models/clip_image/clip_img.pt",
+                "model_file": "/models/clip_image/clip_image.pt",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244
+            }
+        },
+        {
+            "type": "ImageNetInceptionFeature",
+            "output": "image_net_inception",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "imagenet_inception",
+                "model_device": "cpu",
+                "model_file": "/models/imagenet_inception/imagenet_retrieval.pt",
+                "pca_model_name": "imagenet_inception_pca_256",
+                "pca_model_file": "/models/imagenet_inception/pca_256.onnx",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244
@@ -62,23 +78,55 @@
                 "model_file": "/models/byol_embedding/byol_wikipedia.pt",
                 "model_device": "cpu"
             }
+        },
+        {
+            "type": "KaggleResnetFeature",
+            "output": "KaggleResnetFeature",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "kaggle_resnet_embedding",
+                "model_device": "cpu",
+                "model_file": "/models/kaggle_embedding/kaggle_embedding.pt",
+                "mapping_file": "/models/kaggle_embedding/mapping.jsonl",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244
+            }
         }
     ],
     "classifiers": [
         {
-            "type": "KaggleDenseClassifier",
-            "output": "image_net_inception",
+            "type": "KaggleResnetClassifier",
+            "output": "KaggleResnetClassifier",
             "params": {
                 "host": "localhost",
                 "port": 6379,
-                "model_name": "kaggle_densenet",
+                "model_name": "kaggle_resnet_classifier",
                 "model_device": "cpu",
-                "model_file": "/models/kaggle_painter/kaggle_densenet.pb",
-                "mapping_file": "/models/kaggle_painter/kaggle_mapping.json",
+                "model_file": "/models/kaggle_classifier/kaggle_classifier.pt",
+                "mapping_file": "/models/kaggle_classifier/mapping.jsonl",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244,
-                "threshold": 0.5
+                "threshold": 0.4
+            }
+        },
+        {
+            "type": "IMet2020ResnetClassifier",
+            "output": "i_met2020_resnet_classifier",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "imet2020_resnet",
+                "model_device": "cpu",
+                "model_file": "/models/imet2020/imet2020_resnet.pt",
+                "mapping_file": "/models/imet2020/labels.csv",
+                "remove_prefix": true,
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244,
+                "threshold": 0.25
             }
         },
         {
