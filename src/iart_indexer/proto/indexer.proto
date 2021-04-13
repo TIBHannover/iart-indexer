@@ -181,10 +181,16 @@ message ImageTextSearchTerm {
 }
 
 message NumberSearchTerm {
-  string query = 1;
-  string field = 2;
+  
+  string field = 1;
 
-  enum Flag {
+  oneof query {
+    string string_query = 2;
+    int32 int_query = 3;
+    float float_query = 4;
+  }
+
+  enum Relation {
     GREATER = 0;
     GREATER_EQ = 1;
     EQ = 2;
@@ -192,7 +198,15 @@ message NumberSearchTerm {
     LESS = 4;
   }
 
-  Flag flag = 3;
+  Relation relation = 5;
+
+
+  enum Flag {
+    MUST = 0;
+    SHOULD = 1;
+  }
+
+  Flag flag = 6;
 }
 
 

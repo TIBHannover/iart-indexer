@@ -1,8 +1,7 @@
 import logging
 import uuid
-import numpy as np
 import json
-from iart_indexer import indexer_pb2
+import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
@@ -32,6 +31,7 @@ class Searcher:
         result = {}
         logging.info(query)
         text_search = []
+        range_search = []
         feature_search = []
         aggregate_fields = []
         for term in query.terms:
@@ -47,6 +47,44 @@ class Searcher:
                     flag = "should"
 
                 text_search.append({"field": field, "query": text.query, "flag": flag})
+
+            if term_type == "number":
+                number = term.number
+                field = number.field.lower()
+
+                # parse number query field
+                query_type = number.WhichOneof("query")
+                if query_type == "string_query":
+                    try:
+                        query_term = int(number.string_query)
+                    except:
+                        try:
+                            query_term = float(number.string_query)
+                        except:
+                            continue
+                if query_type == "int_query":
+                    query_term = number.int_query
+                if query_type == "float_query":
+                    query_term = number.float_query
+
+                # parse relation
+                if number.relation == indexer_pb2.NumberSearchTerm.GREATER:
+                    relation = "gt"
+                if number.relation == indexer_pb2.NumberSearchTerm.GREATER_EQ:
+                    relation = "gte"
+                if number.relation == indexer_pb2.NumberSearchTerm.EQ:
+                    relation = "eq"
+                if number.relation == indexer_pb2.NumberSearchTerm.LESS_EQ:
+                    relation = "lte"
+                if number.relation == indexer_pb2.NumberSearchTerm.LESS:
+                    relation = "lt"
+
+                if number.flag == indexer_pb2.TextSearchTerm.MUST:
+                    flag = "must"
+                if number.flag == indexer_pb2.TextSearchTerm.SHOULD:
+                    flag = "should"
+
+                range_search.append({"field": field, "query": query_term, "relation": relation, "flag": flag})
 
             if term_type == "image_text":
 
@@ -67,6 +105,8 @@ class Searcher:
                             for anno in f._annotations[0]:
                                 result_type = anno.WhichOneof("result")
                                 if result_type == "feature":
+                                    annotation_dict = {}
+                                    binary = anno.feature.binary
                                     feature = list(anno.feature.feature)
 
                                     feature_search.append(
@@ -75,8 +115,6 @@ class Searcher:
                                             "type": anno.feature.type,
                                             "value": feature,
                                             "weight": p.weight,
-                                            "positive": term.image_text.flag
-                                            == indexer_pb2.ImageTextSearchTerm.POSITIVE,
                                         }
                                     )
 
@@ -124,6 +162,8 @@ class Searcher:
                                 for anno in f._annotations[0]:
                                     result_type = anno.WhichOneof("result")
                                     if result_type == "feature":
+                                        annotation_dict = {}
+                                        binary = anno.feature.binary
                                         feature = list(anno.feature.feature)
 
                                         feature_search.append(
@@ -132,11 +172,11 @@ class Searcher:
                                                 "type": anno.feature.type,
                                                 "value": feature,
                                                 "weight": p.weight,
-                                                "positive": term.feature.flag == indexer_pb2.FeatureSearchTerm.POSITIVE,
                                             }
                                         )
         result.update({"text_search": text_search})
         result.update({"feature_search": feature_search})
+        result.update({"range_search": range_search})
         result.update({"sorting": query.sorting.lower()})
         result.update({"mapping": query.mapping.lower()})
 
@@ -146,35 +186,14 @@ class Searcher:
 
         return result
 
-    def mean_feature_search(self, feature_search: List = []):
-        # logging.info(feature_search)
-        logging.info("????????????????????????????????????????????????")
-        features = {}
-        for f in feature_search:
-            key = f"{f['plugin']}.{f['type']}"
-            logging.info(f"{key}{f['positive']}")
-            if key not in features:
-                features[key] = {**f, "values": []}
-
-            feature_value = np.asarray(f["value"])
-
-            if not f["positive"]:
-                feature_value *= -1
-
-            feature_value *= f["weight"]
-
-            logging.info(feature_value[:10])
-
-            features[key]["values"].append(feature_value)
-
-        results = []
-
-        for _, f in features.items():
-            results.append({**f, "value": np.mean(f["values"], axis=0).tolist()})
-
-        return results
-
-    def build_search_body(self, text_search: List = [], feature_search: List = [], whitelist: List = [], sorting=None):
+    def build_search_body(
+        self,
+        text_search: List = [],
+        range_search: List = [],
+        feature_search: List = [],
+        whitelist: List = [],
+        sorting=None,
+    ):
 
         must_terms = []
         should_terms = []
@@ -187,61 +206,62 @@ class Searcher:
                         "fields": ["meta_text", "classifier_text"],
                     }
                 }
-            field_path = e["field"].split(".")
-            if len(field_path) == 1:
-                if field_path[0] == "meta":
-                    term = {
-                        "multi_match": {
-                            "query": e["query"],
-                            "fields": "meta_text",
+            else:
+                field_path = e["field"].split(".")
+                if len(field_path) == 1:
+                    if field_path[0] == "meta":
+                        term = {
+                            "multi_match": {
+                                "query": e["query"],
+                                "fields": "meta_text",
+                            }
                         }
-                    }
-                elif field_path[0] == "classifier":
-                    term = {
-                        "multi_match": {
-                            "query": e["query"],
-                            "fields": "classifier_text",
+                    elif field_path[0] == "classifier":
+                        term = {
+                            "multi_match": {
+                                "query": e["query"],
+                                "fields": "classifier_text",
+                            }
                         }
-                    }
-                elif field_path[0] == "origin":
-                    term = {
-                        "multi_match": {
-                            "query": e["query"],
-                            "fields": "origin_text",
+                    elif field_path[0] == "origin":
+                        term = {
+                            "multi_match": {
+                                "query": e["query"],
+                                "fields": "origin_text",
+                            }
                         }
-                    }
 
-            if len(field_path) == 2:
+                if len(field_path) == 2:
 
-                if field_path[0] == "meta":
-                    term = {
-                        "nested": {
-                            "path": "meta",
-                            "query": {
-                                "bool": {
-                                    "must": [
-                                        {"match": {f"meta.name": field_path[1]}},
-                                        {"match": {f"meta.value_str": e["query"]}},
-                                    ]
-                                }
-                            },
+                    if field_path[0] == "meta":
+                        term = {
+                            "nested": {
+                                "path": "meta",
+                                "query": {
+                                    "bool": {
+                                        "must": [
+                                            {"match": {f"meta.name": field_path[1]}},
+                                            {"match": {f"meta.value_str": e["query"]}},
+                                        ]
+                                    }
+                                },
+                            }
                         }
-                    }
 
-                if field_path[0] == "origin":
-                    term = {
-                        "nested": {
-                            "path": "origin",
-                            "query": {
-                                "bool": {
-                                    "must": [
-                                        {"match": {f"origin.name": field_path[1]}},
-                                        {"match": {f"origin.value_str": e["query"]}},
-                                    ]
-                                }
-                            },
+                    if field_path[0] == "origin":
+                        term = {
+                            "nested": {
+                                "path": "origin",
+                                "query": {
+                                    "bool": {
+                                        "must": [
+                                            {"match": {f"origin.name": field_path[1]}},
+                                            {"match": {f"origin.value_str": e["query"]}},
+                                        ]
+                                    }
+                                },
+                            }
                         }
-                    }
 
             if term is None:
                 continue
@@ -254,6 +274,56 @@ class Searcher:
             else:
                 should_terms.append(term)
 
+        for e in range_search:
+            term = None
+            if "field" not in e or e["field"] is None:
+                # There is no generic int field in the database structure
+                continue
+            else:
+                field_path = e["field"].split(".")
+                if len(field_path) == 2:
+
+                    if field_path[0] == "meta":
+                        name_match = {"match": {f"meta.name": field_path[1]}}
+
+                        if e["relation"] != "eq":
+                            value_match = {"range": {f"meta.value_int": {e["relation"]: e["query"]}}}
+                        else:
+
+                            value_match = {"term": {f"meta.value_int": {"value": e["query"]}}}
+
+                        term = {
+                            "nested": {
+                                "path": "meta",
+                                "query": {"bool": {"must": [name_match, value_match]}},
+                            }
+                        }
+
+                    if field_path[0] == "origin":
+                        term = {
+                            "nested": {
+                                "path": "origin",
+                                "query": {
+                                    "bool": {
+                                        "must": [
+                                            {"match": {f"origin.name": field_path[1]}},
+                                            {"match": {f"origin.value_str": e["query"]}},
+                                        ]
+                                    }
+                                },
+                            }
+                        }
+
+            if term is None:
+                continue
+
+            if "flag" in e and e["flag"] is not None:
+                if e["flag"] == "must":
+                    must_terms.append(term)
+                else:
+                    should_terms.append(term)
+            else:
+                should_terms.append(term)
         # for e in classifier_search:
         #     search_terms.append(
         #         {
@@ -326,26 +396,19 @@ class Searcher:
         # query = self.parse_query(query)
         # logging.info("Query parsed")
 
-        # logging.info('###########################################')
-        query["feature_search"] = self.mean_feature_search(query["feature_search"])
-        # logging.info('###########################################')
-        # logging.info(query["feature_search"])
-        # logging.info('###########################################')
-
         entries_feature = self.indexer_plugin_manager.search(query["feature_search"], size=1000)
 
-        # logging.info(f"Parsed query: {query}")
+        logging.info(f"Parsed query: {query}")
         body = self.build_search_body(
             query["text_search"],
+            query["range_search"],
             query["feature_search"],
             whitelist=entries_feature,
             sorting=query["sorting"],
         )
 
-        # logging.info(json.dumps(body, indent=2))
+        logging.info(json.dumps(body, indent=2))
         # return []
-
-        #
         entries = self.search_db(body=body, size=max(len(entries_feature), 100))
 
         entries = list(entries)
