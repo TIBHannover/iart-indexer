@@ -300,17 +300,19 @@ class Searcher:
                         }
 
                     if field_path[0] == "origin":
+
+                        name_match = {"match": {f"origin.name": field_path[1]}}
+
+                        if e["relation"] != "eq":
+                            value_match = {"range": {f"origin.value_int": {e["relation"]: e["query"]}}}
+                        else:
+
+                            value_match = {"term": {f"origin.value_int": {"value": e["query"]}}}
+
                         term = {
                             "nested": {
                                 "path": "origin",
-                                "query": {
-                                    "bool": {
-                                        "must": [
-                                            {"match": {f"origin.name": field_path[1]}},
-                                            {"match": {f"origin.value_str": e["query"]}},
-                                        ]
-                                    }
-                                },
+                                "query": {"bool": {"must": [name_match, value_match]}},
                             }
                         }
 
