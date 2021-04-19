@@ -95,21 +95,7 @@ class ElasticSearchDatabase(Database):
                                     "copy_to": ["meta_text", "all_text"],
                                 },
                                 "value_int": {"type": "long"},
-                                "value_has": {"type": "long"},
-                            },
-                        },
-                        "meta_": {
-                            "type": "nested",
-                            "properties": {
-                                "name": {
-                                    "type": "text",
-                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                },
-                                "value_str": {
-                                    "type": "text",
-                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                },
-                                "value_int": {"type": "long"},
+                                "value_float": {"type": "float"},
                             },
                         },
                         "meta_text": {"type": "text"},
@@ -119,19 +105,28 @@ class ElasticSearchDatabase(Database):
                                 "name": {
                                     "type": "text",
                                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                },
+                                "value_str": {
+                                    "type": "text",
+                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                                     "copy_to": ["origin_text", "all_text"],
                                 },
-                                "license": {
-                                    "type": "text",
-                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                },
-                                "link": {
-                                    "type": "text",
-                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
-                                },
+                                "value_int": {"type": "long"},
+                                "value_float": {"type": "float"},
                             },
                         },
                         "origin_text": {"type": "text"},
+                        "collection": {
+                            "type": "nested",
+                            "properties": {
+                                "id": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                                "name": {
+                                    "type": "text",
+                                    "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                                },
+                                "is_public": {"type": "boolean"},
+                            },
+                        },
                         "all_text": {"type": "text"},
                         "path": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
                     }
