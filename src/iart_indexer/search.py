@@ -1,7 +1,7 @@
 import logging
 import uuid
 import json
-import indexer_pb2
+from iart_indexer import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
