@@ -229,6 +229,15 @@ class Client:
                                 origin_field.float_val = v
                             if isinstance(v, str):
                                 origin_field.string_val = v
+
+                if "collection" in entry:
+                    collection = request_image.collection
+                    if "id" in entry["collection"]:
+                        collection.id = entry["collection"]["id"]
+                    if "name" in entry["collection"]:
+                        collection.name = entry["collection"]["name"]
+                    if "is_public" in entry["collection"]:
+                        collection.is_public = entry["collection"]["is_public"]
                 # print(request_image)
                 request_image.encoded = open(entry["path"], "rb").read()
                 yield request

@@ -7,7 +7,6 @@ option java_multiple_files = true;
 
 service Indexer {
   rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
-  rpc bulk_indexing(BulkIndexingRequest) returns (BulkIndexingReply) {}
   rpc status(StatusRequest) returns (StatusReply) {}
   rpc build_suggester(SuggesterRequest) returns (SuggesterReply) {}
   rpc get(GetRequest) returns (GetReply) {}
@@ -30,6 +29,12 @@ service Indexer {
 
   rpc dump(DumpRequest) returns (stream DumpReply) {}
   rpc load(stream LoadRequest) returns (stream LoadReply) {}
+}
+
+message Collection {
+  string id = 1;
+  string name = 2;
+  bool is_public = 3;
 }
 
 message PluginRun {
@@ -63,6 +68,8 @@ message Image {
   RoI roi = 4;
   repeated ValueField meta = 5;
   repeated ValueField origin = 6;
+
+  Collection collection = 7;
 }
 
 message PluginConfig {
@@ -117,12 +124,6 @@ message PluginInfo {
 message ListPluginsRequest {}
 message ListPluginsReply { repeated PluginInfo plugins = 1; }
 
-message BulkIndexingRequest {
-  repeated PluginRun plugins = 1;
-  repeated Image images = 2;
-  bool update_database = 3;
-}
-message BulkIndexingReply { string id = 1; }
 
 message StatusRequest { string id = 1; }
 message StatusReply {
@@ -138,6 +139,7 @@ message GetReply {
   repeated ValueField origin = 3;
   repeated ClassifierResult classifier = 4;
   repeated FeatureResult feature = 5;
+  Collection collection = 7;
 }
 
 message SuggesterRequest {repeated string field_names = 1;}
@@ -234,10 +236,12 @@ message SearchRequest {
 
 message SearchReply { string id = 1; }
 
+
 message SearchResultEntry {
   string id = 1;
   repeated ValueField meta = 2;
   repeated ValueField origin = 3;
+  Collection collection = 7;
   repeated ClassifierResult classifier = 4;
   repeated FeatureResult feature = 5;
   repeated float coordinates = 6;
@@ -268,6 +272,7 @@ message BuildFeatureCacheReply {}
 
 message DumpRequest {}
 message DumpReply { bytes entry = 1; }
+
 message LoadRequest { bytes entry = 1; }
 message LoadReply {string status = 1; string id = 2; }
 

@@ -300,7 +300,8 @@ def indexing_job(entry):
         plugins.append({"plugin": c["plugin"], "version": c["version"]})
     features = list(indexing_job.feature_manager.run([image], [plugins]))[0]
 
-    doc = {"id": entry["id"], "meta": entry["meta"], "origin": entry["origin"]}
+    doc = {"id": entry["id"], "meta": entry["meta"], "origin": entry["origin"], "collection": entry["collection"]}
+    logging.info(doc)
     annotations = []
     for f in features["plugins"]:
 
@@ -436,11 +437,17 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
                     meta = meta_from_proto(x.image.meta)
                     origin = meta_from_proto(x.image.origin)
+                    collection = {}
+                    if x.image.collection.id != "":
+                        collection["id"] = x.image.collection.id
+                        collection["name"] = x.image.collection.name
+                        collection["is_public"] = x.image.collection.is_public
                     yield {
                         "id": x.image.id,
                         "image_data": x.image.encoded,
                         "meta": meta,
                         "origin": origin,
+                        "collection": collection,
                         "cache": cache_data,
                     }
 
@@ -544,6 +551,11 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         result.id = entry["id"]
         if "meta" in entry:
             meta_to_proto(result.meta, entry["meta"])
+        if "collection" in entry:
+            logging.info(entry["collection"])
+            result.collection.id = entry["collection"]["id"]
+            result.collection.name = entry["collection"]["name"]
+            result.collection.is_public = entry["collection"]["is_public"]
         if "origin" in entry:
             meta_to_proto(result.origin, entry["origin"])
         if "classifier" in entry:

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'P\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rindexer.proto\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\x8a\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x19\n\x04meta\x18\x05 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x06 \x03(\x0b\x32\x0b.ValueFieldB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\">\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x1a\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x08.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"c\n\x13\x42ulkIndexingRequest\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x16\n\x06images\x18\x02 \x03(\x0b\x32\x06.Image\x12\x17\n\x0fupdate_database\x18\x03 \x01(\x08\"\x1f\n\x11\x42ulkIndexingReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"L\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12#\n\x08indexing\x18\x02 \x01(\x0b\x32\x0f.IndexingResultH\x00\x42\x08\n\x06result\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\x96\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x92\x01\n\x11\x46\x65\x61tureSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x15\n\x05image\x18\x02 \x01(\x0b\x32\x06.Image\x12%\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x17.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"p\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12\"\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x14.TextSearchTerm.Flag\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\"\x8e\x01\n\x13ImageTextSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\'\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x19.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xa8\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12,\n\x08relation\x18\x05 \x01(\x0e\x32\x1a.NumberSearchTerm.Relation\x12$\n\x04\x66lag\x18\x06 \x01(\x0e\x32\x16.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x0b\n\x07GREATER\x10\x00\x12\x0e\n\nGREATER_EQ\x10\x01\x12\x06\n\x02\x45Q\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x42\x07\n\x05query\"\xad\x01\n\nSearchTerm\x12\x1f\n\x04text\x18\x01 \x01(\x0b\x32\x0f.TextSearchTermH\x00\x12#\n\x06number\x18\x02 \x01(\x0b\x32\x11.NumberSearchTermH\x00\x12*\n\nimage_text\x18\x03 \x01(\x0b\x32\x14.ImageTextSearchTermH\x00\x12%\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x12.FeatureSearchTermH\x00\x42\x06\n\x04term\"0\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\"s\n\rSearchRequest\x12\x1a\n\x05terms\x18\x01 \x03(\x0b\x32\x0b.SearchTerm\x12\x0f\n\x07sorting\x18\x02 \x01(\t\x12\x0f\n\x07mapping\x18\x03 \x01(\t\x12$\n\taggregate\x18\x04 \x01(\x0b\x32\x11.AggregateRequest\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb4\x01\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\"C\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12\x1c\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x0b.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"a\n\x15ListSearchResultReply\x12#\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x12.SearchResultEntry\x12#\n\taggregate\x18\x02 \x03(\x0b\x32\x10.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\"-\n\x0cSuggestReply\x12\x1d\n\x06groups\x18\x01 \x03(\x0b\x32\r.SuggestGroup\"\x15\n\x13\x42uildIndexerRequest\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\r\n\x0b\x44umpRequest\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"(\n\x0fIndexingRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\",\n\x0e\x41ggregateReply\x12\x1a\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x0b.ValueField2\xe4\x05\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12;\n\rbulk_indexing\x12\x14.BulkIndexingRequest\x1a\x12.BulkIndexingReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x12\x37\n\x0f\x62uild_suggester\x12\x11.SuggesterRequest\x1a\x0f.SuggesterReply\"\x00\x12\x1f\n\x03get\x12\x0b.GetRequest\x1a\t.GetReply\"\x00\x12(\n\x06search\x12\x0e.SearchRequest\x1a\x0c.SearchReply\"\x00\x12H\n\x12list_search_result\x12\x18.ListSearchResultRequest\x1a\x16.ListSearchResultReply\"\x00\x12\x31\n\taggregate\x12\x11.AggregateRequest\x1a\x0f.AggregateReply\"\x00\x12+\n\x07suggest\x12\x0f.SuggestRequest\x1a\r.SuggestReply\"\x00\x12;\n\rbuild_indexer\x12\x14.BuildIndexerRequest\x1a\x12.BuildIndexerReply\"\x00\x12K\n\x13\x62uild_feature_cache\x12\x19.BuildFeatureCacheRequest\x1a\x17.BuildFeatureCacheReply\"\x00\x12\x32\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00(\x01\x30\x01\x12$\n\x04\x64ump\x12\x0c.DumpRequest\x1a\n.DumpReply\"\x00\x30\x01\x12&\n\x04load\x12\x0c.LoadRequest\x1a\n.LoadReply\"\x00(\x01\x30\x01\x42\x02P\x01\x62\x06proto3'
+  serialized_pb=b'\n\rindexer.proto\"9\n\nCollection\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tis_public\x18\x03 \x01(\x08\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\xab\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x19\n\x04meta\x18\x05 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x06 \x03(\x0b\x32\x0b.ValueField\x12\x1f\n\ncollection\x18\x07 \x01(\x0b\x32\x0b.CollectionB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\">\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x1a\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x08.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"L\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12#\n\x08indexing\x18\x02 \x01(\x0b\x32\x0f.IndexingResultH\x00\x42\x08\n\x06result\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xb7\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\x12\x1f\n\ncollection\x18\x07 \x01(\x0b\x32\x0b.Collection\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x92\x01\n\x11\x46\x65\x61tureSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x15\n\x05image\x18\x02 \x01(\x0b\x32\x06.Image\x12%\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x17.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"p\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12\"\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x14.TextSearchTerm.Flag\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\"\x8e\x01\n\x13ImageTextSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\'\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x19.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xa8\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12,\n\x08relation\x18\x05 \x01(\x0e\x32\x1a.NumberSearchTerm.Relation\x12$\n\x04\x66lag\x18\x06 \x01(\x0e\x32\x16.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x0b\n\x07GREATER\x10\x00\x12\x0e\n\nGREATER_EQ\x10\x01\x12\x06\n\x02\x45Q\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x42\x07\n\x05query\"\xad\x01\n\nSearchTerm\x12\x1f\n\x04text\x18\x01 \x01(\x0b\x32\x0f.TextSearchTermH\x00\x12#\n\x06number\x18\x02 \x01(\x0b\x32\x11.NumberSearchTermH\x00\x12*\n\nimage_text\x18\x03 \x01(\x0b\x32\x14.ImageTextSearchTermH\x00\x12%\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x12.FeatureSearchTermH\x00\x42\x06\n\x04term\"0\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\"s\n\rSearchRequest\x12\x1a\n\x05terms\x18\x01 \x03(\x0b\x32\x0b.SearchTerm\x12\x0f\n\x07sorting\x18\x02 \x01(\t\x12\x0f\n\x07mapping\x18\x03 \x01(\t\x12$\n\taggregate\x18\x04 \x01(\x0b\x32\x11.AggregateRequest\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xd5\x01\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12\x1f\n\ncollection\x18\x07 \x01(\x0b\x32\x0b.Collection\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\"C\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12\x1c\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x0b.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"a\n\x15ListSearchResultReply\x12#\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x12.SearchResultEntry\x12#\n\taggregate\x18\x02 \x03(\x0b\x32\x10.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\"-\n\x0cSuggestReply\x12\x1d\n\x06groups\x18\x01 \x03(\x0b\x32\r.SuggestGroup\"\x15\n\x13\x42uildIndexerRequest\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\r\n\x0b\x44umpRequest\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"(\n\x0fIndexingRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\",\n\x0e\x41ggregateReply\x12\x1a\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x0b.ValueField2\xa7\x05\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x12\x37\n\x0f\x62uild_suggester\x12\x11.SuggesterRequest\x1a\x0f.SuggesterReply\"\x00\x12\x1f\n\x03get\x12\x0b.GetRequest\x1a\t.GetReply\"\x00\x12(\n\x06search\x12\x0e.SearchRequest\x1a\x0c.SearchReply\"\x00\x12H\n\x12list_search_result\x12\x18.ListSearchResultRequest\x1a\x16.ListSearchResultReply\"\x00\x12\x31\n\taggregate\x12\x11.AggregateRequest\x1a\x0f.AggregateReply\"\x00\x12+\n\x07suggest\x12\x0f.SuggestRequest\x1a\r.SuggestReply\"\x00\x12;\n\rbuild_indexer\x12\x14.BuildIndexerRequest\x1a\x12.BuildIndexerReply\"\x00\x12K\n\x13\x62uild_feature_cache\x12\x19.BuildFeatureCacheRequest\x1a\x17.BuildFeatureCacheReply\"\x00\x12\x32\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00(\x01\x30\x01\x12$\n\x04\x64ump\x12\x0c.DumpRequest\x1a\n.DumpReply\"\x00\x30\x01\x12&\n\x04load\x12\x0c.LoadRequest\x1a\n.LoadReply\"\x00(\x01\x30\x01\x42\x02P\x01\x62\x06proto3'
 )
 
 
@@ -44,8 +44,8 @@ _FEATURESEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1655,
-  serialized_end=1689,
+  serialized_start=1646,
+  serialized_end=1680,
 )
 _sym_db.RegisterEnumDescriptor(_FEATURESEARCHTERM_FLAG)
 
@@ -69,8 +69,8 @@ _TEXTSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1775,
-  serialized_end=1803,
+  serialized_start=1766,
+  serialized_end=1794,
 )
 _sym_db.RegisterEnumDescriptor(_TEXTSEARCHTERM_FLAG)
 
@@ -94,8 +94,8 @@ _IMAGETEXTSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1655,
-  serialized_end=1689,
+  serialized_start=1646,
+  serialized_end=1680,
 )
 _sym_db.RegisterEnumDescriptor(_IMAGETEXTSEARCHTERM_FLAG)
 
@@ -134,8 +134,8 @@ _NUMBERSEARCHTERM_RELATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2138,
-  serialized_end=2208,
+  serialized_start=2129,
+  serialized_end=2199,
 )
 _sym_db.RegisterEnumDescriptor(_NUMBERSEARCHTERM_RELATION)
 
@@ -159,10 +159,56 @@ _NUMBERSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1775,
-  serialized_end=1803,
+  serialized_start=1766,
+  serialized_end=1794,
 )
 _sym_db.RegisterEnumDescriptor(_NUMBERSEARCHTERM_FLAG)
+
+
+_COLLECTION = _descriptor.Descriptor(
+  name='Collection',
+  full_name='Collection',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='Collection.id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='Collection.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_public', full_name='Collection.is_public', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=17,
+  serialized_end=74,
+)
 
 
 _PLUGINRUN = _descriptor.Descriptor(
@@ -199,8 +245,8 @@ _PLUGINRUN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17,
-  serialized_end=58,
+  serialized_start=76,
+  serialized_end=117,
 )
 
 
@@ -252,8 +298,8 @@ _ROI = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=60,
-  serialized_end=118,
+  serialized_start=119,
+  serialized_end=177,
 )
 
 
@@ -310,8 +356,8 @@ _VALUEFIELD = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=120,
-  serialized_end=216,
+  serialized_start=179,
+  serialized_end=275,
 )
 
 
@@ -365,6 +411,13 @@ _IMAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='collection', full_name='Image.collection', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -382,8 +435,8 @@ _IMAGE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=219,
-  serialized_end=357,
+  serialized_start=278,
+  serialized_end=449,
 )
 
 
@@ -435,8 +488,8 @@ _PLUGINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=359,
-  serialized_end=433,
+  serialized_start=451,
+  serialized_end=525,
 )
 
 
@@ -481,8 +534,8 @@ _CONCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=435,
-  serialized_end=489,
+  serialized_start=527,
+  serialized_end=581,
 )
 
 
@@ -520,8 +573,8 @@ _CLASSIFIERRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=491,
-  serialized_end=553,
+  serialized_start=583,
+  serialized_end=645,
 )
 
 
@@ -573,8 +626,8 @@ _FEATURERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=555,
-  serialized_end=633,
+  serialized_start=647,
+  serialized_end=725,
 )
 
 
@@ -638,8 +691,8 @@ _PLUGINRESULT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=636,
-  serialized_end=783,
+  serialized_start=728,
+  serialized_end=875,
 )
 
 
@@ -677,8 +730,8 @@ _IMAGERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=785,
-  serialized_end=853,
+  serialized_start=877,
+  serialized_end=945,
 )
 
 
@@ -709,8 +762,8 @@ _INDEXINGRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=855,
-  serialized_end=902,
+  serialized_start=947,
+  serialized_end=994,
 )
 
 
@@ -755,8 +808,8 @@ _PLUGININFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=904,
-  serialized_end=977,
+  serialized_start=996,
+  serialized_end=1069,
 )
 
 
@@ -780,8 +833,8 @@ _LISTPLUGINSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=979,
-  serialized_end=999,
+  serialized_start=1071,
+  serialized_end=1091,
 )
 
 
@@ -812,86 +865,8 @@ _LISTPLUGINSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1001,
-  serialized_end=1049,
-)
-
-
-_BULKINDEXINGREQUEST = _descriptor.Descriptor(
-  name='BulkIndexingRequest',
-  full_name='BulkIndexingRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='plugins', full_name='BulkIndexingRequest.plugins', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='images', full_name='BulkIndexingRequest.images', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='update_database', full_name='BulkIndexingRequest.update_database', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1051,
-  serialized_end=1150,
-)
-
-
-_BULKINDEXINGREPLY = _descriptor.Descriptor(
-  name='BulkIndexingReply',
-  full_name='BulkIndexingReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='BulkIndexingReply.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1152,
-  serialized_end=1183,
+  serialized_start=1093,
+  serialized_end=1141,
 )
 
 
@@ -922,8 +897,8 @@ _STATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1185,
-  serialized_end=1212,
+  serialized_start=1143,
+  serialized_end=1170,
 )
 
 
@@ -966,8 +941,8 @@ _STATUSREPLY = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1214,
-  serialized_end=1290,
+  serialized_start=1172,
+  serialized_end=1248,
 )
 
 
@@ -998,8 +973,8 @@ _GETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1292,
-  serialized_end=1316,
+  serialized_start=1250,
+  serialized_end=1274,
 )
 
 
@@ -1046,6 +1021,13 @@ _GETREPLY = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='collection', full_name='GetReply.collection', index=5,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1058,8 +1040,8 @@ _GETREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1319,
-  serialized_end=1469,
+  serialized_start=1277,
+  serialized_end=1460,
 )
 
 
@@ -1090,8 +1072,8 @@ _SUGGESTERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1471,
-  serialized_end=1510,
+  serialized_start=1462,
+  serialized_end=1501,
 )
 
 
@@ -1122,8 +1104,8 @@ _SUGGESTERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1512,
-  serialized_end=1540,
+  serialized_start=1503,
+  serialized_end=1531,
 )
 
 
@@ -1169,8 +1151,8 @@ _FEATURESEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1543,
-  serialized_end=1689,
+  serialized_start=1534,
+  serialized_end=1680,
 )
 
 
@@ -1216,8 +1198,8 @@ _TEXTSEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1691,
-  serialized_end=1803,
+  serialized_start=1682,
+  serialized_end=1794,
 )
 
 
@@ -1263,8 +1245,8 @@ _IMAGETEXTSEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1806,
-  serialized_end=1948,
+  serialized_start=1797,
+  serialized_end=1939,
 )
 
 
@@ -1337,8 +1319,8 @@ _NUMBERSEARCHTERM = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1951,
-  serialized_end=2247,
+  serialized_start=1942,
+  serialized_end=2238,
 )
 
 
@@ -1395,8 +1377,8 @@ _SEARCHTERM = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2250,
-  serialized_end=2423,
+  serialized_start=2241,
+  serialized_end=2414,
 )
 
 
@@ -1434,8 +1416,8 @@ _AGGREGATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2425,
-  serialized_end=2473,
+  serialized_start=2416,
+  serialized_end=2464,
 )
 
 
@@ -1487,8 +1469,8 @@ _SEARCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2475,
-  serialized_end=2590,
+  serialized_start=2466,
+  serialized_end=2581,
 )
 
 
@@ -1519,8 +1501,8 @@ _SEARCHREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2592,
-  serialized_end=2617,
+  serialized_start=2583,
+  serialized_end=2608,
 )
 
 
@@ -1554,21 +1536,28 @@ _SEARCHRESULTENTRY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='classifier', full_name='SearchResultEntry.classifier', index=3,
+      name='collection', full_name='SearchResultEntry.collection', index=3,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='classifier', full_name='SearchResultEntry.classifier', index=4,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='feature', full_name='SearchResultEntry.feature', index=4,
+      name='feature', full_name='SearchResultEntry.feature', index=5,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='coordinates', full_name='SearchResultEntry.coordinates', index=5,
+      name='coordinates', full_name='SearchResultEntry.coordinates', index=6,
       number=6, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1586,8 +1575,8 @@ _SEARCHRESULTENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2620,
-  serialized_end=2800,
+  serialized_start=2611,
+  serialized_end=2824,
 )
 
 
@@ -1625,8 +1614,8 @@ _AGGREGATERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2802,
-  serialized_end=2869,
+  serialized_start=2826,
+  serialized_end=2893,
 )
 
 
@@ -1657,8 +1646,8 @@ _LISTSEARCHRESULTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2871,
-  serialized_end=2908,
+  serialized_start=2895,
+  serialized_end=2932,
 )
 
 
@@ -1696,8 +1685,8 @@ _LISTSEARCHRESULTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2910,
-  serialized_end=3007,
+  serialized_start=2934,
+  serialized_end=3031,
 )
 
 
@@ -1735,8 +1724,8 @@ _SUGGESTGROUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3009,
-  serialized_end=3059,
+  serialized_start=3033,
+  serialized_end=3083,
 )
 
 
@@ -1767,8 +1756,8 @@ _SUGGESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3061,
-  serialized_end=3092,
+  serialized_start=3085,
+  serialized_end=3116,
 )
 
 
@@ -1799,8 +1788,8 @@ _SUGGESTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3094,
-  serialized_end=3139,
+  serialized_start=3118,
+  serialized_end=3163,
 )
 
 
@@ -1824,8 +1813,8 @@ _BUILDINDEXERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3141,
-  serialized_end=3162,
+  serialized_start=3165,
+  serialized_end=3186,
 )
 
 
@@ -1849,8 +1838,8 @@ _BUILDINDEXERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3164,
-  serialized_end=3183,
+  serialized_start=3188,
+  serialized_end=3207,
 )
 
 
@@ -1874,8 +1863,8 @@ _BUILDFEATURECACHEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3185,
-  serialized_end=3211,
+  serialized_start=3209,
+  serialized_end=3235,
 )
 
 
@@ -1899,8 +1888,8 @@ _BUILDFEATURECACHEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3213,
-  serialized_end=3237,
+  serialized_start=3237,
+  serialized_end=3261,
 )
 
 
@@ -1924,8 +1913,8 @@ _DUMPREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3239,
-  serialized_end=3252,
+  serialized_start=3263,
+  serialized_end=3276,
 )
 
 
@@ -1956,8 +1945,8 @@ _DUMPREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3254,
-  serialized_end=3280,
+  serialized_start=3278,
+  serialized_end=3304,
 )
 
 
@@ -1988,8 +1977,8 @@ _LOADREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3282,
-  serialized_end=3310,
+  serialized_start=3306,
+  serialized_end=3334,
 )
 
 
@@ -2027,8 +2016,8 @@ _LOADREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3312,
-  serialized_end=3351,
+  serialized_start=3336,
+  serialized_end=3375,
 )
 
 
@@ -2059,8 +2048,8 @@ _INDEXINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3353,
-  serialized_end=3393,
+  serialized_start=3377,
+  serialized_end=3417,
 )
 
 
@@ -2098,8 +2087,8 @@ _INDEXINGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3395,
-  serialized_end=3438,
+  serialized_start=3419,
+  serialized_end=3462,
 )
 
 
@@ -2130,8 +2119,8 @@ _AGGREGATEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3440,
-  serialized_end=3484,
+  serialized_start=3464,
+  serialized_end=3508,
 )
 
 _VALUEFIELD.oneofs_by_name['value'].fields.append(
@@ -2146,6 +2135,7 @@ _VALUEFIELD.fields_by_name['float_val'].containing_oneof = _VALUEFIELD.oneofs_by
 _IMAGE.fields_by_name['roi'].message_type = _ROI
 _IMAGE.fields_by_name['meta'].message_type = _VALUEFIELD
 _IMAGE.fields_by_name['origin'].message_type = _VALUEFIELD
+_IMAGE.fields_by_name['collection'].message_type = _COLLECTION
 _IMAGE.oneofs_by_name['image'].fields.append(
   _IMAGE.fields_by_name['path'])
 _IMAGE.fields_by_name['path'].containing_oneof = _IMAGE.oneofs_by_name['image']
@@ -2166,8 +2156,6 @@ _IMAGERESULT.fields_by_name['results'].message_type = _PLUGINRESULT
 _INDEXINGRESULT.fields_by_name['results'].message_type = _IMAGERESULT
 _PLUGININFO.fields_by_name['settings'].message_type = _PLUGINCONFIG
 _LISTPLUGINSREPLY.fields_by_name['plugins'].message_type = _PLUGININFO
-_BULKINDEXINGREQUEST.fields_by_name['plugins'].message_type = _PLUGINRUN
-_BULKINDEXINGREQUEST.fields_by_name['images'].message_type = _IMAGE
 _STATUSREPLY.fields_by_name['indexing'].message_type = _INDEXINGRESULT
 _STATUSREPLY.oneofs_by_name['result'].fields.append(
   _STATUSREPLY.fields_by_name['indexing'])
@@ -2176,6 +2164,7 @@ _GETREPLY.fields_by_name['meta'].message_type = _VALUEFIELD
 _GETREPLY.fields_by_name['origin'].message_type = _VALUEFIELD
 _GETREPLY.fields_by_name['classifier'].message_type = _CLASSIFIERRESULT
 _GETREPLY.fields_by_name['feature'].message_type = _FEATURERESULT
+_GETREPLY.fields_by_name['collection'].message_type = _COLLECTION
 _FEATURESEARCHTERM.fields_by_name['plugins'].message_type = _PLUGINRUN
 _FEATURESEARCHTERM.fields_by_name['image'].message_type = _IMAGE
 _FEATURESEARCHTERM.fields_by_name['flag'].enum_type = _FEATURESEARCHTERM_FLAG
@@ -2218,6 +2207,7 @@ _SEARCHREQUEST.fields_by_name['terms'].message_type = _SEARCHTERM
 _SEARCHREQUEST.fields_by_name['aggregate'].message_type = _AGGREGATEREQUEST
 _SEARCHRESULTENTRY.fields_by_name['meta'].message_type = _VALUEFIELD
 _SEARCHRESULTENTRY.fields_by_name['origin'].message_type = _VALUEFIELD
+_SEARCHRESULTENTRY.fields_by_name['collection'].message_type = _COLLECTION
 _SEARCHRESULTENTRY.fields_by_name['classifier'].message_type = _CLASSIFIERRESULT
 _SEARCHRESULTENTRY.fields_by_name['feature'].message_type = _FEATURERESULT
 _AGGREGATERESULT.fields_by_name['entries'].message_type = _VALUEFIELD
@@ -2226,6 +2216,7 @@ _LISTSEARCHRESULTREPLY.fields_by_name['aggregate'].message_type = _AGGREGATERESU
 _SUGGESTREPLY.fields_by_name['groups'].message_type = _SUGGESTGROUP
 _INDEXINGREQUEST.fields_by_name['image'].message_type = _IMAGE
 _AGGREGATEREPLY.fields_by_name['field'].message_type = _VALUEFIELD
+DESCRIPTOR.message_types_by_name['Collection'] = _COLLECTION
 DESCRIPTOR.message_types_by_name['PluginRun'] = _PLUGINRUN
 DESCRIPTOR.message_types_by_name['RoI'] = _ROI
 DESCRIPTOR.message_types_by_name['ValueField'] = _VALUEFIELD
@@ -2240,8 +2231,6 @@ DESCRIPTOR.message_types_by_name['IndexingResult'] = _INDEXINGRESULT
 DESCRIPTOR.message_types_by_name['PluginInfo'] = _PLUGININFO
 DESCRIPTOR.message_types_by_name['ListPluginsRequest'] = _LISTPLUGINSREQUEST
 DESCRIPTOR.message_types_by_name['ListPluginsReply'] = _LISTPLUGINSREPLY
-DESCRIPTOR.message_types_by_name['BulkIndexingRequest'] = _BULKINDEXINGREQUEST
-DESCRIPTOR.message_types_by_name['BulkIndexingReply'] = _BULKINDEXINGREPLY
 DESCRIPTOR.message_types_by_name['StatusRequest'] = _STATUSREQUEST
 DESCRIPTOR.message_types_by_name['StatusReply'] = _STATUSREPLY
 DESCRIPTOR.message_types_by_name['GetRequest'] = _GETREQUEST
@@ -2275,6 +2264,13 @@ DESCRIPTOR.message_types_by_name['IndexingRequest'] = _INDEXINGREQUEST
 DESCRIPTOR.message_types_by_name['IndexingReply'] = _INDEXINGREPLY
 DESCRIPTOR.message_types_by_name['AggregateReply'] = _AGGREGATEREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+Collection = _reflection.GeneratedProtocolMessageType('Collection', (_message.Message,), {
+  'DESCRIPTOR' : _COLLECTION,
+  '__module__' : 'indexer_pb2'
+  # @@protoc_insertion_point(class_scope:Collection)
+  })
+_sym_db.RegisterMessage(Collection)
 
 PluginRun = _reflection.GeneratedProtocolMessageType('PluginRun', (_message.Message,), {
   'DESCRIPTOR' : _PLUGINRUN,
@@ -2373,20 +2369,6 @@ ListPluginsReply = _reflection.GeneratedProtocolMessageType('ListPluginsReply', 
   # @@protoc_insertion_point(class_scope:ListPluginsReply)
   })
 _sym_db.RegisterMessage(ListPluginsReply)
-
-BulkIndexingRequest = _reflection.GeneratedProtocolMessageType('BulkIndexingRequest', (_message.Message,), {
-  'DESCRIPTOR' : _BULKINDEXINGREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:BulkIndexingRequest)
-  })
-_sym_db.RegisterMessage(BulkIndexingRequest)
-
-BulkIndexingReply = _reflection.GeneratedProtocolMessageType('BulkIndexingReply', (_message.Message,), {
-  'DESCRIPTOR' : _BULKINDEXINGREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:BulkIndexingReply)
-  })
-_sym_db.RegisterMessage(BulkIndexingReply)
 
 StatusRequest = _reflection.GeneratedProtocolMessageType('StatusRequest', (_message.Message,), {
   'DESCRIPTOR' : _STATUSREQUEST,
@@ -2622,8 +2604,8 @@ _INDEXER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=3487,
-  serialized_end=4227,
+  serialized_start=3511,
+  serialized_end=4190,
   methods=[
   _descriptor.MethodDescriptor(
     name='list_plugins',
@@ -2636,19 +2618,9 @@ _INDEXER = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='bulk_indexing',
-    full_name='Indexer.bulk_indexing',
-    index=1,
-    containing_service=None,
-    input_type=_BULKINDEXINGREQUEST,
-    output_type=_BULKINDEXINGREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
     name='status',
     full_name='Indexer.status',
-    index=2,
+    index=1,
     containing_service=None,
     input_type=_STATUSREQUEST,
     output_type=_STATUSREPLY,
@@ -2658,7 +2630,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='build_suggester',
     full_name='Indexer.build_suggester',
-    index=3,
+    index=2,
     containing_service=None,
     input_type=_SUGGESTERREQUEST,
     output_type=_SUGGESTERREPLY,
@@ -2668,7 +2640,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='get',
     full_name='Indexer.get',
-    index=4,
+    index=3,
     containing_service=None,
     input_type=_GETREQUEST,
     output_type=_GETREPLY,
@@ -2678,7 +2650,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='search',
     full_name='Indexer.search',
-    index=5,
+    index=4,
     containing_service=None,
     input_type=_SEARCHREQUEST,
     output_type=_SEARCHREPLY,
@@ -2688,7 +2660,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='list_search_result',
     full_name='Indexer.list_search_result',
-    index=6,
+    index=5,
     containing_service=None,
     input_type=_LISTSEARCHRESULTREQUEST,
     output_type=_LISTSEARCHRESULTREPLY,
@@ -2698,7 +2670,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='aggregate',
     full_name='Indexer.aggregate',
-    index=7,
+    index=6,
     containing_service=None,
     input_type=_AGGREGATEREQUEST,
     output_type=_AGGREGATEREPLY,
@@ -2708,7 +2680,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='suggest',
     full_name='Indexer.suggest',
-    index=8,
+    index=7,
     containing_service=None,
     input_type=_SUGGESTREQUEST,
     output_type=_SUGGESTREPLY,
@@ -2718,7 +2690,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='build_indexer',
     full_name='Indexer.build_indexer',
-    index=9,
+    index=8,
     containing_service=None,
     input_type=_BUILDINDEXERREQUEST,
     output_type=_BUILDINDEXERREPLY,
@@ -2728,7 +2700,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='build_feature_cache',
     full_name='Indexer.build_feature_cache',
-    index=10,
+    index=9,
     containing_service=None,
     input_type=_BUILDFEATURECACHEREQUEST,
     output_type=_BUILDFEATURECACHEREPLY,
@@ -2738,7 +2710,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='indexing',
     full_name='Indexer.indexing',
-    index=11,
+    index=10,
     containing_service=None,
     input_type=_INDEXINGREQUEST,
     output_type=_INDEXINGREPLY,
@@ -2748,7 +2720,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='dump',
     full_name='Indexer.dump',
-    index=12,
+    index=11,
     containing_service=None,
     input_type=_DUMPREQUEST,
     output_type=_DUMPREPLY,
@@ -2758,7 +2730,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='load',
     full_name='Indexer.load',
-    index=13,
+    index=12,
     containing_service=None,
     input_type=_LOADREQUEST,
     output_type=_LOADREPLY,

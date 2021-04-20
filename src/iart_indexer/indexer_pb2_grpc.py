@@ -23,11 +23,6 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.ListPluginsRequest.SerializeToString,
             response_deserializer=indexer__pb2.ListPluginsReply.FromString,
         )
-        self.bulk_indexing = channel.unary_unary(
-            "/Indexer/bulk_indexing",
-            request_serializer=indexer__pb2.BulkIndexingRequest.SerializeToString,
-            response_deserializer=indexer__pb2.BulkIndexingReply.FromString,
-        )
         self.status = channel.unary_unary(
             "/Indexer/status",
             request_serializer=indexer__pb2.StatusRequest.SerializeToString,
@@ -98,12 +93,6 @@ class IndexerServicer(object):
     """
 
     def list_plugins(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def bulk_indexing(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -188,11 +177,6 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.list_plugins,
             request_deserializer=indexer__pb2.ListPluginsRequest.FromString,
             response_serializer=indexer__pb2.ListPluginsReply.SerializeToString,
-        ),
-        "bulk_indexing": grpc.unary_unary_rpc_method_handler(
-            servicer.bulk_indexing,
-            request_deserializer=indexer__pb2.BulkIndexingRequest.FromString,
-            response_serializer=indexer__pb2.BulkIndexingReply.SerializeToString,
         ),
         "status": grpc.unary_unary_rpc_method_handler(
             servicer.status,
@@ -286,35 +270,6 @@ class Indexer(object):
             "/Indexer/list_plugins",
             indexer__pb2.ListPluginsRequest.SerializeToString,
             indexer__pb2.ListPluginsReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def bulk_indexing(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/Indexer/bulk_indexing",
-            indexer__pb2.BulkIndexingRequest.SerializeToString,
-            indexer__pb2.BulkIndexingReply.FromString,
             options,
             channel_credentials,
             insecure,
