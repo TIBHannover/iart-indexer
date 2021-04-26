@@ -1,7 +1,10 @@
 import logging
 import uuid
 import json
-import indexer_pb2
+
+import numpy as np
+
+from iart_indexer import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
@@ -25,6 +28,30 @@ class Searcher:
         self.indexer_plugin_manager = indexer_plugin_manager
         self.mapping_plugin_manager = mapping_plugin_manager
         self.aggregator = aggregator
+
+    def merge_feature(self, features):
+        plugin_feature = {}
+        for p in features:
+            plugin = p["plugin"]
+            type = p["type"]
+            value = p["value"]
+            weight = p["weight"]
+            if plugin not in plugin_feature:
+                plugin_feature[plugin] = {}
+            if type not in plugin_feature[plugin]:
+                plugin_feature[plugin][type] = []
+            plugin_feature[plugin][type].append({"value": np.asarray(value), "weight": weight})
+
+        result_features = []
+        for p, plugin_data in plugin_feature.items():
+
+            for t, values in plugin_data.items():
+
+                mean_value = np.mean(np.stack([v["value"] * v["weight"] for v in values]), axis=0)
+                mean_weight = np.mean(np.stack([np.abs(v["weight"]) for v in values]))
+                result_features.append({"plugin": p, "type": t, "value": mean_value.tolist(), "weight": mean_weight})
+
+        return result_features
 
     def parse_query(self, query):
         logging.info(query)
@@ -96,6 +123,11 @@ class Searcher:
                     )  # , plugins=[x.name.lower() for x in feature.plugins])
                 )[0]
 
+                if image_text.flag == indexer_pb2.ImageTextSearchTerm.NEGATIVE:
+                    weight_mult = -1.0
+                else:
+                    weight_mult = 1.0
+
                 for p in image_text.plugins:
                     # feature_results
                     for f in feature_results["plugins"]:
@@ -114,12 +146,17 @@ class Searcher:
                                             "plugin": f._plugin.name,
                                             "type": anno.feature.type,
                                             "value": feature,
-                                            "weight": p.weight,
+                                            "weight": p.weight * weight_mult,
                                         }
                                     )
 
             if term_type == "feature":
                 feature = term.feature
+
+                if feature.flag == indexer_pb2.FeatureSearchTerm.NEGATIVE:
+                    weight_mult = -1.0
+                else:
+                    weight_mult = 1.0
 
                 query_feature = []
 
@@ -139,7 +176,7 @@ class Searcher:
                                 feature_search.append(
                                     {
                                         **f,
-                                        "weight": p.weight,
+                                        "weight": p.weight * weight_mult,
                                     }
                                 )
 
@@ -171,7 +208,7 @@ class Searcher:
                                                 "plugin": f._plugin.name,
                                                 "type": anno.feature.type,
                                                 "value": feature,
-                                                "weight": p.weight,
+                                                "weight": p.weight * weight_mult,
                                             }
                                         )
         result.update({"text_search": text_search})
@@ -395,6 +432,8 @@ class Searcher:
         query = self.parse_query(query)
         logging.info("Query parsed")
 
+        query["feature_search"] = self.merge_feature(query["feature_search"])
+
         # query = self.parse_query(query)
         # logging.info("Query parsed")
 
@@ -409,7 +448,7 @@ class Searcher:
             sorting=query["sorting"],
         )
 
-        logging.info(json.dumps(body, indent=2))
+        # logging.info(json.dumps(body, indent=2))
         # return []
         entries = self.search_db(body=body, size=max(len(entries_feature), 100))
 
