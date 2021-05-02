@@ -38,15 +38,16 @@ class IndexerPluginManager(PluginManager):
                 if "register" in function_dir:
                     a.register(self)
 
-    def indexing(self, entries, plugins=None, configs=None):
-        print("IndexerPluginManager: START")
+    def indexing(self, train_entries, index_entries, rebuild=False, plugins=None, configs=None):
+        # TODO add lock here
+        logging.info("IndexerPluginManager: indexing")
         plugin_list = self.init_plugins(plugins, configs)
-        print(f"IndexerPluginManager: {len(plugin_list)}")
+        logging.info(f"IndexerPluginManager: {len(plugin_list)}")
         for plugin in plugin_list:
             plugin = plugin["plugin"]
-            print(f"IndexerPluginManager: {plugin.name}")
-            plugin.indexing(entries)
-            # print(x)
+            logging.info(f"IndexerPluginManager: {plugin.name}")
+            plugin.indexing(train_entries, index_entries, rebuild=rebuild)
+        # TODO force reloading of other processes
 
     def search(self, queries, size=100):
         result_list = []
@@ -64,7 +65,7 @@ class IndexerPlugin(Plugin):
     def __init__(self, **kwargs):
         super(IndexerPlugin, self).__init__(**kwargs)
 
-    def indexing(self, images):
+    def indexing(self, train_entries, index_entries):
         pass
 
     def search(self, queries, size=100):

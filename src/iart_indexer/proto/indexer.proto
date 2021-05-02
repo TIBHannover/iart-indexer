@@ -264,7 +264,7 @@ message SuggestGroup {
 message SuggestRequest { string query = 1; }
 message SuggestReply { repeated SuggestGroup groups = 1; }
 
-message BuildIndexerRequest {}
+message BuildIndexerRequest { bool rebuild=1;}
 message BuildIndexerReply {}
 
 message BuildFeatureCacheRequest {}

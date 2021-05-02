@@ -145,7 +145,6 @@ def build_suggestion_job(args):
 
         db_bulk_cache = []
         for i, x in enumerate(database.all()):
-            # print("####################")
             meta_values = []
             if "meta" in x:
                 for m in x["meta"]:
@@ -189,18 +188,6 @@ def build_suggestion_job(args):
                     "origin_completion": origin_values,
                 }
             )
-            # print(
-            #     {
-            #         "id": x["id"],
-            #         "meta_completion": meta_values,
-            #         "features_completion": [],
-            #         "annotations_completion": annotations_values,
-            #         "origin_completion": origin_values,
-            #     }
-            # )
-            # print()
-            # if i > 100:
-            #     exit()
 
             if len(db_bulk_cache) > 1000:
 
@@ -229,21 +216,39 @@ def build_suggestion_job(args):
 def build_indexer(args):
     try:
         database = args["database"]
+        rebuild = args["rebuild"]
         indexer = args["indexer_manager"]
 
         logging.info(f"Indexer: start")
+
+        class TrainEntryReader:
+            def __iter__(self):
+                for entry in database.raw_all(
+                    {
+                        "query": {
+                            "function_score": {
+                                "query": {
+                                    "nested": {"path": "collection", "query": {"match": {"collection.is_public": True}}}
+                                },
+                                "random_score": {"seed": 42},
+                            },
+                        },
+                        "size": 1000,
+                    }
+                ):
+                    yield get_features_from_db_entry(entry, return_collection=True)
 
         class EntryReader:
             def __iter__(self):
                 for entry in database.raw_all(
                     {
                         "query": {"function_score": {"random_score": {"seed": 42}}},
-                        "size": 250,
+                        "size": 1000,
                     }
                 ):
-                    yield get_features_from_db_entry(entry)
+                    yield get_features_from_db_entry(entry, return_collection=True)
 
-        indexer.indexing(EntryReader())
+        indexer.indexing(train_entries=TrainEntryReader(), index_entries=EntryReader(), rebuild=rebuild)
 
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
@@ -267,11 +272,6 @@ def build_feature_cache(args):
 
                             exc_type, exc_value, exc_traceback = sys.exc_info()
                             traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-
-                            # print(entry)
-                            # print(features)
-                            # print(classifiers)
-                            # exit()
 
             for entry in EntryReader():
                 cache.write(entry)
@@ -301,7 +301,7 @@ def indexing_job(entry):
     features = list(indexing_job.feature_manager.run([image], [plugins]))[0]
 
     doc = {"id": entry["id"], "meta": entry["meta"], "origin": entry["origin"], "collection": entry["collection"]}
-    logging.info(doc)
+
     annotations = []
     for f in features["plugins"]:
 
@@ -397,7 +397,9 @@ def indexing_job(entry):
 
 
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, config, feature_manager, image_text_manager, classifier_manager, indexer_manager, mapping_manager, cache):
+    def __init__(
+        self, config, feature_manager, image_text_manager, classifier_manager, indexer_manager, mapping_manager, cache
+    ):
         self.config = config
         self.feature_manager = feature_manager
         self.image_text_manager = image_text_manager
@@ -466,6 +468,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                     logging.error(f"Indexing: {entry['id']}")
                     yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
                     continue
+
                 # print(entry)
                 # logging.info("##########")
                 # logging.info(entry)
@@ -486,10 +489,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                             logging.error(f"Indexing: database error (try count: {try_count})")
                             time.sleep(1)
                             try_count -= 1
-                # print(entry)
-                # print()
-                # print(database.get_entry(entry["id"]))
-                # exit()
 
                 yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
 
@@ -670,14 +669,16 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def build_indexer(self, request, context):
-        logging.info("BUILD_INDEXER")
+        logging.info("build_indexer")
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
+        logging.info(f"rebuild {request.rebuild}")
         job_id = uuid.uuid4().hex
         variable = {
             "database": database,
             "feature_manager": self.feature_manager,
             "indexer_manager": self.indexer_manager,
+            "rebuild": request.rebuild,
             "progress": 0,
             "status": 0,
             "result": "",
@@ -786,7 +787,7 @@ class Server:
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
             ],
         )
-        self.image_text_manager=  ImageTextPluginManager(configs=self.config.get("image_text", []))
+        self.image_text_manager = ImageTextPluginManager(configs=self.config.get("image_text", []))
         self.image_text_manager.find()
 
         self.feature_manager = FeaturePluginManager(configs=self.config.get("features", []))

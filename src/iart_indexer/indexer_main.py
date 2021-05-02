@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument("--query", help="")
     parser.add_argument("--batch", default=512, type=int, help="split images in batch")
 
+    parser.add_argument("--rebuild", action="store_true", help="verbose output")
     parser.add_argument(
         "--task",
         choices=[
@@ -147,13 +148,11 @@ def main():
             print(time_stop - time_start)
 
         elif args.task == "build_indexer":
-            client.build_indexer()
+            print(args.rebuild)
+            client.build_indexer(rebuild=args.rebuild)
 
         elif args.task == "build_feature_cache":
             client.build_feature_cache()
-
-        elif args.task == "build_indexer":
-            client.build_indexer()
 
         elif args.task == "build_feature_cache":
             client.build_feature_cache()

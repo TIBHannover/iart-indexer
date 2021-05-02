@@ -14,8 +14,15 @@ import numbers
 from iart_indexer import indexer_pb2
 
 
-def get_features_from_db_entry(entry):
+def get_features_from_db_entry(entry, return_collection=False):
     data_dict = {"id": entry["id"], "feature": []}
+
+    if return_collection:
+        if "collection" in entry:
+            data_dict["collection"] = entry["collection"]
+        else:
+            data_dict["collection"] = {"id": "", "name": "", "is_public": False}
+
     # TODO
     if "feature" not in entry:
         return data_dict

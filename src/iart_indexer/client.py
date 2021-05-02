@@ -414,7 +414,7 @@ class Client:
 
         return response
 
-    def build_indexer(self):
+    def build_indexer(self, rebuild=False):
 
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -425,6 +425,9 @@ class Client:
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.BuildIndexerRequest()
+        request.rebuild = rebuild
+
+        logging.info(f"rebuild {request.rebuild}")
         response = stub.build_indexer(request)
         print(response)
         return response
