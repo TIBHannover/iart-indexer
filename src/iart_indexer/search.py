@@ -8,6 +8,8 @@ from iart_indexer import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
+from iart_indexer.utils import image_from_proto
+
 
 class Searcher:
     def __init__(
@@ -168,6 +170,8 @@ class Searcher:
                     entry = get_features_from_db_entry(entry)
 
                     for p in feature.plugins:
+                        if p.weight is None or abs(p.weight) < 1e-4:
+                            continue
                         # TODO add weight
                         for f in entry["feature"]:
 
@@ -184,13 +188,18 @@ class Searcher:
                 else:
                     logging.info("Feature")
 
+                    logging.info(feature.image)
+
+                    image = image_from_proto(feature.image)
+
                     feature_results = list(
-                        self.feature_plugin_manager.run(
-                            [feature.image]
-                        )  # , plugins=[x.name.lower() for x in feature.plugins])
+                        self.feature_plugin_manager.run([image])  # , plugins=[x.name.lower() for x in feature.plugins])
                     )[0]
 
                     for p in feature.plugins:
+
+                        if p.weight is None or abs(p.weight) < 1e-4:
+                            continue
                         # feature_results
                         for f in feature_results["plugins"]:
                             if p.name.lower() == f._plugin.name.lower():
