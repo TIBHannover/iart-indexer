@@ -59,7 +59,6 @@ class IconclassCLIPClassifier(ClassifierPlugin):
         with open(self.txt_embedding_file, "rb") as f:
             self.txt_mapping = pickle.load(f)
             self.txt_feature = np.concatenate([x["clip"] for x in self.txt_mapping])
-            print(self.txt_feature.shape)
 
         self.con = rai.Client(host=self.host, port=self.port)
 

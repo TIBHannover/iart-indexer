@@ -395,29 +395,69 @@ def indexing_job(entry):
     return "ok", doc
 
 
+def init_plugins(config):
+    data_dict = {}
+
+    image_text_manager = ImageTextPluginManager(configs=config.get("image_text", []))
+    image_text_manager.find()
+
+    data_dict["image_text_manager"] = image_text_manager
+
+    feature_manager = FeaturePluginManager(configs=config.get("features", []))
+    feature_manager.find()
+
+    data_dict["feature_manager"] = feature_manager
+
+    classifier_manager = ClassifierPluginManager(configs=config.get("classifiers", []))
+    classifier_manager.find()
+
+    data_dict["classifier_manager"] = classifier_manager
+
+    indexer_manager = IndexerPluginManager(configs=config.get("indexes", []))
+    indexer_manager.find()
+
+    data_dict["indexer_manager"] = indexer_manager
+
+    mapping_manager = MappingPluginManager(configs=config.get("mappings", []))
+    mapping_manager.find()
+
+    data_dict["mapping_manager"] = mapping_manager
+
+    cache = Cache(cache_dir=config.get("cache", {"cache_dir": None})["cache_dir"], mode="r")
+
+    data_dict["cache"] = cache
+
+    return data_dict
+
+
+def init_process(config):
+    globals().update(init_plugins(config))
+
+
+def _test_init():
+    pass
+
+
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(self, config, feature_manager, image_text_manager, classifier_manager, indexer_manager, mapping_manager, cache):
+    def __init__(self, config):
         self.config = config
-        self.feature_manager = feature_manager
-        self.image_text_manager = image_text_manager
-        self.classifier_manager = classifier_manager
-        self.indexer_manager = indexer_manager
-        self.mapping_manager = mapping_manager
-        self.cache = cache
-        self.thread_pool = futures.ThreadPoolExecutor(max_workers=16)
+        self.managers = init_plugins(config)
+        self.thread_pool = futures.ProcessPoolExecutor(max_workers=2, initializer=init_process, initargs=(config,))
         self.futures = []
+
+        # self.thread_pool.submit(_test_init)
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
 
-        for plugin_name, plugin_class in self.feature_manager.plugins().items():
+        for plugin_name, plugin_class in self.managers["feature_manager"].plugins().items():
             pluginInfo = reply.plugins.add()
             pluginInfo.name = plugin_name
             pluginInfo.type = "feature"
 
-        for plugin_name, plugin_class in self.classifier_manager.plugins().items():
+        for plugin_name, plugin_class in self.managers["classifier_manager"].plugins().items():
             pluginInfo = reply.plugins.add()
             pluginInfo.name = plugin_name
             pluginInfo.type = "classifier"
@@ -774,33 +814,8 @@ class Server:
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
             ],
         )
-        self.image_text_manager=  ImageTextPluginManager(configs=self.config.get("image_text", []))
-        self.image_text_manager.find()
-
-        self.feature_manager = FeaturePluginManager(configs=self.config.get("features", []))
-        self.feature_manager.find()
-
-        self.classifier_manager = ClassifierPluginManager(configs=self.config.get("classifiers", []))
-        self.classifier_manager.find()
-
-        self.indexer_manager = IndexerPluginManager(configs=self.config.get("indexes", []))
-        self.indexer_manager.find()
-
-        self.mapping_manager = MappingPluginManager(configs=self.config.get("mappings", []))
-        self.mapping_manager.find()
-
-        self.cache = Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="r")
-
         indexer_pb2_grpc.add_IndexerServicer_to_server(
-            Commune(
-                config,
-                self.feature_manager,
-                self.image_text_manager,
-                self.classifier_manager,
-                self.indexer_manager,
-                self.mapping_manager,
-                self.cache,
-            ),
+            Commune(config),
             self.server,
         )
         grpc_config = config.get("grpc", {})
