@@ -229,7 +229,7 @@ def build_suggestion_job(args):
 def build_indexer(args):
     try:
         database = args["database"]
-        indexer = args["indexer_manager"]
+        indexer = globals().get("indexer_manager")
 
         logging.info(f"Indexer: start")
 
@@ -251,9 +251,11 @@ def build_indexer(args):
 
 
 def build_feature_cache(args):
+
     try:
-        database = args["database"]
-        cache = args["cache"]
+        config = args["config"]
+        database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
+        cache = Cache(cache_dir=config.get("cache", {"cache_dir": None})["cache_dir"], mode="a")
         with cache as cache:
 
             class EntryReader:
@@ -264,20 +266,13 @@ def build_feature_cache(args):
                             classifiers = get_classifier_from_db_entry(entry)
                             yield {**features, **classifiers}
                         except Exception as e:
-
                             exc_type, exc_value, exc_traceback = sys.exc_info()
                             traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-
-                            # print(entry)
-                            # print(features)
-                            # print(classifiers)
-                            # exit()
 
             for entry in EntryReader():
                 cache.write(entry)
 
     except Exception as e:
-
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 
@@ -391,7 +386,7 @@ def indexing_job(entry):
     # feature_chunk = list(feature_plugin_manager.run([image], filter_feature_plugins))
 
     # classification_chunk = list(classifier_plugin_manager.run(images_chunk, filter_classifier_plugins))
-
+    # logging.info(doc)
     return "ok", doc
 
 
@@ -434,18 +429,12 @@ def init_process(config):
     globals().update(init_plugins(config))
 
 
-def _test_init():
-    pass
-
-
 class Commune(indexer_pb2_grpc.IndexerServicer):
     def __init__(self, config):
         self.config = config
         self.managers = init_plugins(config)
-        self.thread_pool = futures.ProcessPoolExecutor(max_workers=2, initializer=init_process, initargs=(config,))
+        self.process_pool = futures.ProcessPoolExecutor(max_workers=4, initializer=init_process, initargs=(config,))
         self.futures = []
-
-        # self.thread_pool.submit(_test_init)
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
 
@@ -546,7 +535,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(build_suggestion_job, variable)
+        future = self.process_pool.submit(build_suggestion_job, variable)
 
         variable["future"] = future
         self.futures.append(variable)
@@ -612,7 +601,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(search, variable)
+        future = self.process_pool.submit(search, variable)
 
         variable["future"] = future
         self.futures.append(variable)
@@ -704,15 +693,13 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         job_id = uuid.uuid4().hex
         variable = {
             "database": database,
-            "feature_manager": self.feature_manager,
-            "indexer_manager": self.indexer_manager,
             "progress": 0,
             "status": 0,
             "result": "",
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(build_indexer, variable)
+        future = self.process_pool.submit(build_indexer, variable)
 
         variable["future"] = future
         self.futures.append(variable)
@@ -721,19 +708,20 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def build_feature_cache(self, request, context):
-        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
         job_id = uuid.uuid4().hex
         variable = {
-            "database": database,
-            "cache": Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="a"),
+            "config": self.config,
             "progress": 0,
             "status": 0,
             "result": "",
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(build_feature_cache, variable)
-
+        future = self.process_pool.submit(build_feature_cache, variable)
+        for x in range(100):
+            logging.info(future)
+            future.exception(2.0)
+            time.sleep(0.1)
         variable["future"] = future
         self.futures.append(variable)
         result = indexer_pb2.BuildFeatureCacheReply()
