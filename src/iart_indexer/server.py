@@ -718,10 +718,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "id": job_id,
         }
         future = self.process_pool.submit(build_feature_cache, variable)
-        for x in range(100):
-            logging.info(future)
-            future.exception(2.0)
-            time.sleep(0.1)
         variable["future"] = future
         self.futures.append(variable)
         result = indexer_pb2.BuildFeatureCacheReply()
@@ -729,8 +725,28 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def dump(self, request, context):
+        if request.origin is not None and request.origin != "":
+
+            body = {"query": {"bool": {"must": [
+                 {
+                            "nested": {
+                                "path": "origin",
+                                "query": {
+                                    "bool": {
+                                        "must": [
+                                            {"match": {f"origin.name": "name"}},
+                                            {"match": {f"origin.value_str": request.origin}},
+                                        ]
+                                    }
+                                },
+                            }
+                        }
+            ]}}}
+        else:
+            body=None
+        print(body)
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
-        for entry in database.all():
+        for entry in database.raw_all(body=body):
             yield indexer_pb2.DumpReply(entry=msgpack.packb(entry))
 
     def load(self, request_iterator, context):

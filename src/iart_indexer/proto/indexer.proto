@@ -266,7 +266,7 @@ message BuildIndexerReply {}
 message BuildFeatureCacheRequest {}
 message BuildFeatureCacheReply {}
 
-message DumpRequest {}
+message DumpRequest {string origin = 1;}
 message DumpReply { bytes entry = 1; }
 message LoadRequest { bytes entry = 1; }
 message LoadReply {string status = 1; string id = 2; }
