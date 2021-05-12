@@ -9,7 +9,7 @@ from concurrent import futures
 
 import numpy as np
 import grpc
-from google.protobuf.json_format import MessageToJson
+from google.protobuf.json_format import MessageToJson, MessageToDict
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
@@ -40,15 +40,18 @@ sp_de = spacy.load("de_core_news_sm")
 def search(args):
     try:
         start_time = time.time()
-        query = args["query"]
-        image_text_plugin_manager = args["image_text_manager"]
-        feature_plugin_manager = args["feature_manager"]
-        mapping_plugin_manager = args["mapping_manager"]
-        indexer_plugin_manager = args["indexer_manager"]
+        query = indexer_pb2.SearchRequest.ParseFromString(args["query"])
+        config = args["config"]
+
+        database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
+
+        image_text_plugin_manager = globals().get("image_text_manager")
+        feature_plugin_manager = globals().get("feature_manager")
+        mapping_plugin_manager = globals().get("mapping_manager")
+        indexer_plugin_manager = globals().get("indexer_manager")
 
         classifier_plugin_manager = None
         # indexer_plugin_manager = None
-        database = args["database"]
 
         aggregator = Aggregator(database)
         searcher = Searcher(
@@ -91,7 +94,7 @@ def search(args):
                     value_field.key = y["name"]
                     value_field.int_val = y["value"]
 
-        return result
+        return result.SerializeToString()
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
         logging.error(traceback.format_exc())
@@ -228,7 +231,8 @@ def build_suggestion_job(args):
 
 def build_indexer(args):
     try:
-        database = args["database"]
+        config = args.get("config")
+        database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
         indexer = globals().get("indexer_manager")
 
         logging.info(f"Indexer: start")
@@ -583,18 +587,12 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
     def search(self, request, context):
 
-        jsonObj = MessageToJson(request)
+        jsonObj = MessageToDict(request)
         logging.info(jsonObj)
-        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
         job_id = uuid.uuid4().hex
         variable = {
-            "feature_manager": self.feature_manager,
-            "image_text_manager": self.image_text_manager,
-            "mapping_manager": self.mapping_manager,
-            "indexer_manager": self.indexer_manager,
-            "database": database,
-            "query": request,
+            "query": MessageToDict(request),
             "progress": 0,
             "status": 0,
             "result": "",
@@ -620,7 +618,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 context.set_details("Still running")
                 return indexer_pb2.ListSearchResultReply()
             try:
-                result = job_data["future"].result()
+                result = indexer_pb2.ListSearchResultReply.ParseFromString(job_data["future"].result())
 
             except Exception as e:
                 logging.error(f"Indexer: {repr(e)}")
@@ -688,11 +686,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
     def build_indexer(self, request, context):
         logging.info("BUILD_INDEXER")
-        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
         job_id = uuid.uuid4().hex
         variable = {
-            "database": database,
+            "config": self.config,
             "progress": 0,
             "status": 0,
             "result": "",
@@ -700,6 +697,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "id": job_id,
         }
         future = self.process_pool.submit(build_indexer, variable)
+
+        for x in range(20):
+            print(future)
+            time.sleep(0.1)
 
         variable["future"] = future
         self.futures.append(variable)
@@ -744,7 +745,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             ]}}}
         else:
             body=None
-        print(body)
+        logging.info(body)
+        # return
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
         for entry in database.raw_all(body=body):
             yield indexer_pb2.DumpReply(entry=msgpack.packb(entry))

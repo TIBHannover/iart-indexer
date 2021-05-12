@@ -435,7 +435,7 @@ class Client:
 
         return response
 
-    def dump(self, output_path):
+    def dump(self, output_path, origin):
 
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -445,7 +445,7 @@ class Client:
             ],
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
-        request = indexer_pb2.DumpRequest()
+        request = indexer_pb2.DumpRequest(origin=origin)
         with open(output_path, "wb") as f:
             for i, x in enumerate(stub.dump(request)):
 
