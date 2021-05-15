@@ -97,7 +97,7 @@ def search(args):
                     value_field.key = y["name"]
                     value_field.int_val = y["value"]
         result_dict = MessageToDict(result)
-        logging.info(result_dict)
+
         return result_dict
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")

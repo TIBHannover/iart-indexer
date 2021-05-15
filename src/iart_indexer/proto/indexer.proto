@@ -246,6 +246,12 @@ message SearchRequest {
   Mapping mapping = 3;
   AggregateRequest aggregate = 4;
   string random_seed = 5;
+
+  enum Extra {
+    EXTRA_FEATURES = 0;
+  }
+
+  repeated Extra extras = 6;
 }
 
 message SearchReply { string id = 1; }
