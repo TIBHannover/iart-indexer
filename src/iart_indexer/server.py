@@ -7,9 +7,10 @@ import re
 import traceback
 from concurrent import futures
 
+import copy
 import numpy as np
 import grpc
-from google.protobuf.json_format import MessageToJson, MessageToDict
+from google.protobuf.json_format import MessageToJson, MessageToDict, ParseDict
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
@@ -38,9 +39,11 @@ sp_de = spacy.load("de_core_news_sm")
 
 
 def search(args):
+    logging.info("Search: Start")
     try:
+
         start_time = time.time()
-        query = indexer_pb2.SearchRequest.ParseFromString(args["query"])
+        query = ParseDict(args["query"], indexer_pb2.SearchRequest())
         config = args["config"]
 
         database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
@@ -93,11 +96,15 @@ def search(args):
                     value_field = aggr.entries.add()
                     value_field.key = y["name"]
                     value_field.int_val = y["value"]
-
-        return result.SerializeToString()
+        result_dict = MessageToDict(result)
+        logging.info(result_dict)
+        return result_dict
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
-        logging.error(traceback.format_exc())
+        # logging.error(traceback.format_exc())
+
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
     return None
 
 
@@ -592,15 +599,12 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         job_id = uuid.uuid4().hex
         variable = {
-            "query": MessageToDict(request),
-            "progress": 0,
-            "status": 0,
-            "result": "",
+            "query": jsonObj,
+            "config": self.config,
             "future": None,
             "id": job_id,
         }
-        future = self.process_pool.submit(search, variable)
-
+        future = self.process_pool.submit(search, copy.deepcopy(variable))
         variable["future"] = future
         self.futures.append(variable)
 
@@ -618,7 +622,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 context.set_details("Still running")
                 return indexer_pb2.ListSearchResultReply()
             try:
-                result = indexer_pb2.ListSearchResultReply.ParseFromString(job_data["future"].result())
+                result = ParseDict(job_data["future"].result(), indexer_pb2.ListSearchResultReply())
+                # result = indexer_pb2.ListSearchResultReply.ParseFromString(job_data["future"].result())
 
             except Exception as e:
                 logging.error(f"Indexer: {repr(e)}")
@@ -696,7 +701,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "future": None,
             "id": job_id,
         }
-        future = self.process_pool.submit(build_indexer, variable)
+        future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
 
         for x in range(20):
             print(future)
@@ -718,7 +723,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "future": None,
             "id": job_id,
         }
-        future = self.process_pool.submit(build_feature_cache, variable)
+        future = self.process_pool.submit(build_feature_cache, copy.deepcopy(variable))
         variable["future"] = future
         self.futures.append(variable)
         result = indexer_pb2.BuildFeatureCacheReply()
@@ -727,24 +732,29 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
     def dump(self, request, context):
         if request.origin is not None and request.origin != "":
-
-            body = {"query": {"bool": {"must": [
-                 {
-                            "nested": {
-                                "path": "origin",
-                                "query": {
-                                    "bool": {
-                                        "must": [
-                                            {"match": {f"origin.name": "name"}},
-                                            {"match": {f"origin.value_str": request.origin}},
-                                        ]
-                                    }
-                                },
+            body = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "nested": {
+                                    "path": "origin",
+                                    "query": {
+                                        "bool": {
+                                            "must": [
+                                                {"match": {f"origin.name": "name"}},
+                                                {"match": {f"origin.value_str": request.origin}},
+                                            ]
+                                        }
+                                    },
+                                }
                             }
-                        }
-            ]}}}
+                        ]
+                    }
+                }
+            }
         else:
-            body=None
+            body = None
         logging.info(body)
         # return
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
@@ -813,6 +823,8 @@ class Server:
     def __init__(self, config):
         self.config = config
 
+        self.commune = Commune(config)
+
         self.server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=10),
             options=[
@@ -821,7 +833,7 @@ class Server:
             ],
         )
         indexer_pb2_grpc.add_IndexerServicer_to_server(
-            Commune(config),
+            self.commune,
             self.server,
         )
         grpc_config = config.get("grpc", {})
@@ -834,6 +846,9 @@ class Server:
         logging.info("Server is now running.")
         try:
             while True:
-                time.sleep(_ONE_DAY_IN_SECONDS)
+                logging.info(
+                    f"[Debug] all:{len(self.commune.futures)} done:{len([x for x in self.commune.futures if x['future'].done()])}"
+                )
+                time.sleep(10)
         except KeyboardInterrupt:
             self.server.stop(0)
