@@ -54,11 +54,14 @@ class FaissIndexer(IndexerPlugin):
 
     def train(self, entries):
         data = {}
+        index_names = set()
         for i, entry in enumerate(entries):
             id = entry["id"]
+            logging.info(id)
 
             for feature in entry["feature"]:
                 index_name = feature["plugin"] + "." + feature["type"]
+
                 if index_name not in data:
                     data[index_name] = {"entries": {}, "data": [], "d": 0, "id": uuid.uuid4().hex}
                 data[index_name]["data"].append(feature["value"])
@@ -67,8 +70,24 @@ class FaissIndexer(IndexerPlugin):
                 if id not in data[index_name]["entries"]:
                     data[index_name]["entries"][id] = len(data[index_name]["entries"])
 
-            if i % 10000 == 0 and i > 0:
+                index_names.add(index_name)
+
+            sample_index_names = set()
+            for feature in entry["feature"]:
+                index_name = feature["plugin"] + "." + feature["type"]
+                sample_index_names.add(index_name)
+
+            logging.info(f"{index_names} {sample_index_names}")
+            for x in index_names:
+                if x not in sample_index_names:
+                    logging.info(entry)
+                    exit()
+
+            if i % 1000 == 0 and i > 0:
                 logging.info(f"FaissIndexer: Read {i}")
+
+                for index_name, index_data in data.items():
+                    logging.info(f"{index_name}:{len(data[index_name]['data'])}")
             if i > self.train_size:
                 break
                 # break
@@ -112,11 +131,7 @@ class FaissIndexer(IndexerPlugin):
                 if id not in indexer_data[index_name]["entries"]:
                     indexer_data[index_name]["entries"][id] = len(indexer_data[index_name]["entries"])
 
-                if feature["plugin"] == "clip_embedding_feature":
-                    found_clip = True
-            if not found_clip:
-                logging.error(entry)
-            if i % 10000 == 0 and i > 0:
+            if i % 1000 == 0 and i > 0:
                 logging.info(f"FaissIndexer: Read {i} ")
 
                 for index_name, index_data in indexer_data.items():
@@ -129,10 +144,6 @@ class FaissIndexer(IndexerPlugin):
                     index_data["index"].add(train_data)
 
                     indexer_data[index_name]["data"] = []
-            # if i > self.indexing_size:
-            #     break
-
-            # break
 
         output_indexer_data = {}
         for index_name, index_data in indexer_data.items():

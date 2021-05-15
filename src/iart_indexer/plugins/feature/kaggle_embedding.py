@@ -28,7 +28,7 @@ class KaggleResnetFeature(FeaturePlugin):
         "min_dim": 244,
     }
 
-    default_version = 1.0
+    default_version = 1.3
 
     def __init__(self, **kwargs):
         super(KaggleResnetFeature, self).__init__(**kwargs)

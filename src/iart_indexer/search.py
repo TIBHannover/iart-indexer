@@ -220,11 +220,29 @@ class Searcher:
                                                 "weight": p.weight * weight_mult,
                                             }
                                         )
+        sorting = None
+        if query.sorting == indexer_pb2.SearchRequest.SORTING_CLASSIFIER:
+            sorting = "classifier"
+        if query.sorting == indexer_pb2.SearchRequest.SORTING_FEATURE:
+            sorting = "feature"
+        if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM:
+            sorting = "random"
+
+        mapping = None
+        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
+            mapping = "umap"
+
+        extras = []
+        for extra in query.extras:
+            if extra == indexer_pb2.SearchRequest.EXTRA_FEATURES:
+                extras.append("features")
+
         result.update({"text_search": text_search})
         result.update({"feature_search": feature_search})
         result.update({"range_search": range_search})
-        result.update({"sorting": query.sorting.lower()})
-        result.update({"mapping": query.mapping.lower()})
+        result.update({"sorting": sorting})
+        result.update({"mapping": mapping})
+        result.update({"extras": extras})
 
         if len(query.aggregate.fields) and query.aggregate.size > 0:
             aggregate_fields = list(query.aggregate.fields)
@@ -482,5 +500,10 @@ class Searcher:
                 query=body["query"], field_names=query["aggregate"]["fields"], size=query["aggregate"]["size"]
             )
             result.update({"aggregations": aggregations})
+
+        # Clean outputs if not requested
+        for entry in entries:
+            if "features" not in query["extras"]:
+                del entry["feature"]
 
         return result

@@ -106,9 +106,6 @@ class KaggleResnetClassifier(ClassifierPlugin):
             probabilities_head1 = self.con.tensorget(f"probabilities_head1_{job_id}")
             probabilities_head2 = self.con.tensorget(f"probabilities_head2_{job_id}")
 
-            print("##################")
-            print(probabilities_head2.max())
-            print(probabilities_head1.max())
             concepts = []
 
             result_list = np.argwhere(probabilities_head1[0] > self.threshold)
