@@ -72,6 +72,7 @@ class Searcher:
 
         # Parse sorting args
         sorting = None
+        logging.info(f"Sorting: {query.sorting}")
         if query.sorting == indexer_pb2.SearchRequest.SORTING_CLASSIFIER:
             sorting = "classifier"
         if query.sorting == indexer_pb2.SearchRequest.SORTING_FEATURE:
@@ -79,6 +80,7 @@ class Searcher:
         if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM:
             sorting = "random"
         if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM_FEATURE:
+            logging.info("SORTING_RANDOM_FEATURE")
 
             # Add a random feature query to terms if
             entry = list(self.database.get_random_entries(seed=seed, size=1))[0]
@@ -87,6 +89,8 @@ class Searcher:
             random_term.feature.image.id = entry["id"]
             feature_exist = False
             for term in query.terms:
+                if term == random_term:
+                    continue
 
                 term_type = term.WhichOneof("term")
                 if term_type == "feature":
@@ -100,6 +104,13 @@ class Searcher:
                 plugins = random_term.feature.plugins.add()
                 plugins.name = "clip_embedding_feature"
                 plugins.weight = 1.0
+
+            logging.info("###############################")
+            logging.info("###############################")
+            logging.info("###############################")
+            logging.info(query)
+
+        logging.info(f"TERM length: {len(query.terms)}")
 
         # Parse mapping args
         mapping = None
