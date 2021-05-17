@@ -63,6 +63,55 @@ class Searcher:
         range_search = []
         feature_search = []
         aggregate_fields = []
+
+        # random seed
+        if query.random_seed is not None and str(query.random_seed) != "":
+            seed = str(query.random_seed)
+        else:
+            seed = uuid.uuid4().hex
+
+        # Parse sorting args
+        sorting = None
+        if query.sorting == indexer_pb2.SearchRequest.SORTING_CLASSIFIER:
+            sorting = "classifier"
+        if query.sorting == indexer_pb2.SearchRequest.SORTING_FEATURE:
+            sorting = "feature"
+        if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM:
+            sorting = "random"
+        if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM_FEATURE:
+
+            # Add a random feature query to terms if
+            entry = list(self.database.get_random_entries(seed=seed, size=1))[0]
+            sorting = "feature"
+            random_term = query.terms.add()
+            random_term.feature.image.id = entry["id"]
+            feature_exist = False
+            for term in query.terms:
+
+                term_type = term.WhichOneof("term")
+                if term_type == "feature":
+                    feature_exist = True
+                    for p in term.feature.plugins:
+                        plugins = random_term.feature.plugins.add()
+                        plugins.name = p.name
+                        plugins.weight = p.weight
+
+            if not feature_exist:
+                plugins = random_term.feature.plugins.add()
+                plugins.name = "clip_embedding_feature"
+                plugins.weight = 1.0
+
+        # Parse mapping args
+        mapping = None
+        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
+            mapping = "umap"
+
+        # Parse additional fields
+        extras = []
+        for extra in query.extras:
+            if extra == indexer_pb2.SearchRequest.EXTRA_FEATURES:
+                extras.append("features")
+
         for term in query.terms:
 
             term_type = term.WhichOneof("term")
@@ -220,22 +269,6 @@ class Searcher:
                                                 "weight": p.weight * weight_mult,
                                             }
                                         )
-        sorting = None
-        if query.sorting == indexer_pb2.SearchRequest.SORTING_CLASSIFIER:
-            sorting = "classifier"
-        if query.sorting == indexer_pb2.SearchRequest.SORTING_FEATURE:
-            sorting = "feature"
-        if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM:
-            sorting = "random"
-
-        mapping = None
-        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
-            mapping = "umap"
-
-        extras = []
-        for extra in query.extras:
-            if extra == indexer_pb2.SearchRequest.EXTRA_FEATURES:
-                extras.append("features")
 
         result.update({"text_search": text_search})
         result.update({"feature_search": feature_search})
@@ -243,6 +276,7 @@ class Searcher:
         result.update({"sorting": sorting})
         result.update({"mapping": mapping})
         result.update({"extras": extras})
+        result.update({"seed": seed})
 
         if len(query.aggregate.fields) and query.aggregate.size > 0:
             aggregate_fields = list(query.aggregate.fields)
@@ -257,7 +291,13 @@ class Searcher:
         feature_search: List = [],
         whitelist: List = [],
         sorting=None,
+        seed=None,
     ):
+        # Seed all random functions
+        if seed is not None and str(seed) != "":
+            seed = str(seed)
+        else:
+            seed = uuid.uuid4().hex
 
         must_terms = []
         should_terms = []
@@ -418,7 +458,7 @@ class Searcher:
             )
 
         if isinstance(sorting, str) and sorting.lower() == "random":
-            should_terms.append({"function_score": {"functions": [{"random_score": {"seed": uuid.uuid4().hex}}]}})
+            should_terms.append({"function_score": {"functions": [{"random_score": {"seed": seed}}]}})
 
         if whitelist is not None and len(whitelist) > 0:
             body = {
@@ -473,6 +513,7 @@ class Searcher:
             query["feature_search"],
             whitelist=entries_feature,
             sorting=query["sorting"],
+            seed=query["seed"],
         )
 
         # logging.info(json.dumps(body, indent=2))

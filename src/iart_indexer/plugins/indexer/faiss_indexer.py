@@ -40,12 +40,12 @@ class FaissIndexer(IndexerPlugin):
 
         self.indexer_data = {}
         if self.indexer_dir is not None and os.path.isfile(os.path.join(self.indexer_dir, "data.pkl")):
-            logging.info(f"FaissIndexer: Found index")
+            logging.info(f"[FaissIndexer] Found index")
             with open(os.path.join(self.indexer_dir, "data.pkl"), "rb") as f:
                 self.indexer_data = pickle.load(f)
 
             for key, index_data in self.indexer_data.items():
-                logging.info(f"FaissIndexer: Restore index {key}")
+                logging.info(f"[FaissIndexer] Restore index {key}")
                 self.indexer_data[key]["index"] = faiss.read_index(
                     os.path.join(self.indexer_dir, index_data["id"] + ".index")
                 )
@@ -57,7 +57,6 @@ class FaissIndexer(IndexerPlugin):
         index_names = set()
         for i, entry in enumerate(entries):
             id = entry["id"]
-            logging.info(id)
 
             for feature in entry["feature"]:
                 index_name = feature["plugin"] + "." + feature["type"]
@@ -72,27 +71,16 @@ class FaissIndexer(IndexerPlugin):
 
                 index_names.add(index_name)
 
-            sample_index_names = set()
-            for feature in entry["feature"]:
-                index_name = feature["plugin"] + "." + feature["type"]
-                sample_index_names.add(index_name)
-
-            logging.info(f"{index_names} {sample_index_names}")
-            for x in index_names:
-                if x not in sample_index_names:
-                    logging.info(entry)
-                    exit()
-
             if i % 1000 == 0 and i > 0:
-                logging.info(f"FaissIndexer: Read {i}")
+                logging.info(f"[FaissIndexer] Read {i}")
 
                 for index_name, index_data in data.items():
-                    logging.info(f"{index_name}:{len(data[index_name]['data'])}")
+                    logging.info(f"[FaissIndexer] {index_name}:{len(data[index_name]['data'])}")
             if i > self.train_size:
                 break
                 # break
 
-        logging.info(f"FaissIndexer: Start training")
+        logging.info(f"[FaissIndexer] Start training")
         indexer_data = {}
         for index_name, index_data in data.items():
             d = index_data["d"]
@@ -132,10 +120,10 @@ class FaissIndexer(IndexerPlugin):
                     indexer_data[index_name]["entries"][id] = len(indexer_data[index_name]["entries"])
 
             if i % 1000 == 0 and i > 0:
-                logging.info(f"FaissIndexer: Read {i} ")
+                logging.info(f"[FaissIndexer] Read {i} ")
 
                 for index_name, index_data in indexer_data.items():
-                    logging.info(f"{index_name}:{len(indexer_data[index_name]['data'])}")
+                    logging.info(f"[FaissIndexer] {index_name}:{len(indexer_data[index_name]['data'])}")
                     if len(indexer_data[index_name]["data"]) == 0:
                         continue
                     train_data = np.asarray(index_data["data"]).astype("float32")

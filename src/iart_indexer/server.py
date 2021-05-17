@@ -540,9 +540,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "database": database,
             "suggester": suggester,
             "field_names": list(request.field_names),
-            "progress": 0,
-            "status": 0,
-            "result": "",
             "future": None,
             "id": job_id,
         }
@@ -695,17 +692,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         job_id = uuid.uuid4().hex
         variable = {
             "config": self.config,
-            "progress": 0,
-            "status": 0,
-            "result": "",
             "future": None,
             "id": job_id,
         }
         future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
-
-        for x in range(20):
-            print(future)
-            time.sleep(0.1)
 
         variable["future"] = future
         self.futures.append(variable)
@@ -717,9 +707,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         job_id = uuid.uuid4().hex
         variable = {
             "config": self.config,
-            "progress": 0,
-            "status": 0,
-            "result": "",
             "future": None,
             "id": job_id,
         }
