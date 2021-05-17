@@ -314,7 +314,7 @@ class Searcher:
         should_terms = []
         for e in text_search:
             term = None
-            if "field" not in e or e["field"] is None:
+            if "field" not in e or e["field"] in [None, ""]:
                 term = {
                     "multi_match": {
                         "query": e["query"],
