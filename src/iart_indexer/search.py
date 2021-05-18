@@ -184,12 +184,14 @@ class Searcher:
                         [image_text.query]
                     )  # , plugins=[x.name.lower() for x in feature.plugins])
                 )[0]
-
+                logging.info(f"feature_results: {feature_results}")
                 if image_text.flag == indexer_pb2.ImageTextSearchTerm.NEGATIVE:
                     weight_mult = -1.0
                 else:
                     weight_mult = 1.0
 
+                for f in feature_results["plugins"]:
+                    logging.info(f._plugin.name.lower())
                 for p in image_text.plugins:
                     # feature_results
                     for f in feature_results["plugins"]:
@@ -291,7 +293,15 @@ class Searcher:
 
         if len(query.aggregate.fields) and query.aggregate.size > 0:
             aggregate_fields = list(query.aggregate.fields)
-            result.update({"aggregate": {"fields": aggregate_fields, "size": query.aggregate.size}})
+            result.update(
+                {
+                    "aggregate": {
+                        "fields": aggregate_fields,
+                        "size": query.aggregate.size,
+                        "use_query": query.aggregate.use_query,
+                    }
+                }
+            )
 
         return result
 
@@ -548,9 +558,15 @@ class Searcher:
         result.update({"entries": list(entries)[:100]})
 
         if self.aggregator and "aggregate" in query:
-            aggregations = self.aggregator(
-                query=body["query"], field_names=query["aggregate"]["fields"], size=query["aggregate"]["size"]
-            )
+            if query["aggregate"]["use_query"]:
+                aggregations = self.aggregator(
+                    query=body["query"], field_names=query["aggregate"]["fields"], size=query["aggregate"]["size"]
+                )
+            else:
+                aggregations = self.aggregator(
+                    query=None, field_names=query["aggregate"]["fields"], size=query["aggregate"]["size"]
+                )
+
             result.update({"aggregations": aggregations})
 
         # Clean outputs if not requested

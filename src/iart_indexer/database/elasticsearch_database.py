@@ -365,7 +365,6 @@ class ElasticSearchDatabase(Database):
     def raw_search(self, body, size=5):
         if not self.es.indices.exists(index=self.index):
             return []
-
         try:
             results = self.es.search(index=self.index, body=body, size=size)
             for x in results["hits"]["hits"]:
