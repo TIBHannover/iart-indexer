@@ -24,7 +24,8 @@ class FaissIndexer(IndexerPlugin):
         "indexer_dir": "",
         "train_size": 8 * 65536,
         "index_type": "cos",
-        "number_of_cluster": 100
+        "number_of_cluster": 100,
+        "number_of_probs": 8,
         # "indexing_size": 105536,
     }
 
@@ -36,6 +37,7 @@ class FaissIndexer(IndexerPlugin):
         self.indexer_dir = self.config["indexer_dir"]
         self.train_size = self.config["train_size"]
         self.number_of_cluster = self.config["number_of_cluster"]
+        self.number_of_probs = self.config["number_of_probs"]
         # self.indexing_size = self.config["indexing_size"]
 
         self.indexer_data = {}
@@ -49,6 +51,7 @@ class FaissIndexer(IndexerPlugin):
                 self.indexer_data[key]["index"] = faiss.read_index(
                     os.path.join(self.indexer_dir, index_data["id"] + ".index")
                 )
+                self.indexer_data[key]["index"].nprobe = self.number_of_probs
 
         os.makedirs(self.indexer_dir, exist_ok=True)
 
