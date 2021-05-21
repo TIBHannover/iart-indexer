@@ -7,9 +7,10 @@ import re
 import traceback
 from concurrent import futures
 
+import copy
 import numpy as np
 import grpc
-from google.protobuf.json_format import MessageToJson
+from google.protobuf.json_format import MessageToJson, MessageToDict, ParseDict
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
@@ -38,17 +39,22 @@ sp_de = spacy.load("de_core_news_sm")
 
 
 def search(args):
+    logging.info("Search: Start")
     try:
+
         start_time = time.time()
-        query = args["query"]
-        image_text_plugin_manager = args["image_text_manager"]
-        feature_plugin_manager = args["feature_manager"]
-        mapping_plugin_manager = args["mapping_manager"]
-        indexer_plugin_manager = args["indexer_manager"]
+        query = ParseDict(args["query"], indexer_pb2.SearchRequest())
+        config = args["config"]
+
+        database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
+
+        image_text_plugin_manager = globals().get("image_text_manager")
+        feature_plugin_manager = globals().get("feature_manager")
+        mapping_plugin_manager = globals().get("mapping_manager")
+        indexer_plugin_manager = globals().get("indexer_manager")
 
         classifier_plugin_manager = None
         # indexer_plugin_manager = None
-        database = args["database"]
 
         aggregator = Aggregator(database)
         searcher = Searcher(
@@ -90,11 +96,15 @@ def search(args):
                     value_field = aggr.entries.add()
                     value_field.key = y["name"]
                     value_field.int_val = y["value"]
+        result_dict = MessageToDict(result)
 
-        return result
+        return result_dict
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
-        logging.error(traceback.format_exc())
+        # logging.error(traceback.format_exc())
+
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
     return None
 
 
@@ -215,9 +225,10 @@ def build_suggestion_job(args):
 
 def build_indexer(args):
     try:
-        database = args["database"]
+        config = args.get("config")
         rebuild = args["rebuild"]
-        indexer = args["indexer_manager"]
+        database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
+        indexer = globals().get("indexer_manager")
 
         logging.info(f"Indexer: start")
 
@@ -256,9 +267,11 @@ def build_indexer(args):
 
 
 def build_feature_cache(args):
+
     try:
-        database = args["database"]
-        cache = args["cache"]
+        config = args["config"]
+        database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
+        cache = Cache(cache_dir=config.get("cache", {"cache_dir": None})["cache_dir"], mode="a")
         with cache as cache:
 
             class EntryReader:
@@ -269,7 +282,6 @@ def build_feature_cache(args):
                             classifiers = get_classifier_from_db_entry(entry)
                             yield {**features, **classifiers}
                         except Exception as e:
-
                             exc_type, exc_value, exc_traceback = sys.exc_info()
                             traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 
@@ -277,7 +289,6 @@ def build_feature_cache(args):
                 cache.write(entry)
 
     except Exception as e:
-
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 
@@ -392,22 +403,54 @@ def indexing_job(entry):
     # feature_chunk = list(feature_plugin_manager.run([image], filter_feature_plugins))
 
     # classification_chunk = list(classifier_plugin_manager.run(images_chunk, filter_classifier_plugins))
-
+    # logging.info(doc)
     return "ok", doc
 
 
+def init_plugins(config):
+    data_dict = {}
+
+    image_text_manager = ImageTextPluginManager(configs=config.get("image_text", []))
+    image_text_manager.find()
+
+    data_dict["image_text_manager"] = image_text_manager
+
+    feature_manager = FeaturePluginManager(configs=config.get("features", []))
+    feature_manager.find()
+
+    data_dict["feature_manager"] = feature_manager
+
+    classifier_manager = ClassifierPluginManager(configs=config.get("classifiers", []))
+    classifier_manager.find()
+
+    data_dict["classifier_manager"] = classifier_manager
+
+    indexer_manager = IndexerPluginManager(configs=config.get("indexes", []))
+    indexer_manager.find()
+
+    data_dict["indexer_manager"] = indexer_manager
+
+    mapping_manager = MappingPluginManager(configs=config.get("mappings", []))
+    mapping_manager.find()
+
+    data_dict["mapping_manager"] = mapping_manager
+
+    cache = Cache(cache_dir=config.get("cache", {"cache_dir": None})["cache_dir"], mode="r")
+
+    data_dict["cache"] = cache
+
+    return data_dict
+
+
+def init_process(config):
+    globals().update(init_plugins(config))
+
+
 class Commune(indexer_pb2_grpc.IndexerServicer):
-    def __init__(
-        self, config, feature_manager, image_text_manager, classifier_manager, indexer_manager, mapping_manager, cache
-    ):
+    def __init__(self, config):
         self.config = config
-        self.feature_manager = feature_manager
-        self.image_text_manager = image_text_manager
-        self.classifier_manager = classifier_manager
-        self.indexer_manager = indexer_manager
-        self.mapping_manager = mapping_manager
-        self.cache = cache
-        self.thread_pool = futures.ThreadPoolExecutor(max_workers=16)
+        self.managers = init_plugins(config)
+        self.process_pool = futures.ProcessPoolExecutor(max_workers=4, initializer=init_process, initargs=(config,))
         self.futures = []
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
@@ -415,12 +458,12 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
 
-        for plugin_name, plugin_class in self.feature_manager.plugins().items():
+        for plugin_name, plugin_class in self.managers["feature_manager"].plugins().items():
             pluginInfo = reply.plugins.add()
             pluginInfo.name = plugin_name
             pluginInfo.type = "feature"
 
-        for plugin_name, plugin_class in self.classifier_manager.plugins().items():
+        for plugin_name, plugin_class in self.managers["classifier_manager"].plugins().items():
             pluginInfo = reply.plugins.add()
             pluginInfo.name = plugin_name
             pluginInfo.type = "classifier"
@@ -506,13 +549,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "database": database,
             "suggester": suggester,
             "field_names": list(request.field_names),
-            "progress": 0,
-            "status": 0,
-            "result": "",
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(build_suggestion_job, variable)
+        future = self.process_pool.submit(build_suggestion_job, variable)
 
         variable["future"] = future
         self.futures.append(variable)
@@ -565,26 +605,17 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
     def search(self, request, context):
 
-        jsonObj = MessageToJson(request)
+        jsonObj = MessageToDict(request)
         logging.info(jsonObj)
-        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
         job_id = uuid.uuid4().hex
         variable = {
-            "feature_manager": self.feature_manager,
-            "image_text_manager": self.image_text_manager,
-            "mapping_manager": self.mapping_manager,
-            "indexer_manager": self.indexer_manager,
-            "database": database,
-            "query": request,
-            "progress": 0,
-            "status": 0,
-            "result": "",
+            "query": jsonObj,
+            "config": self.config,
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(search, variable)
-
+        future = self.process_pool.submit(search, copy.deepcopy(variable))
         variable["future"] = future
         self.futures.append(variable)
 
@@ -602,7 +633,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 context.set_details("Still running")
                 return indexer_pb2.ListSearchResultReply()
             try:
-                result = job_data["future"].result()
+                result = ParseDict(job_data["future"].result(), indexer_pb2.ListSearchResultReply())
+                # result = indexer_pb2.ListSearchResultReply.ParseFromString(job_data["future"].result())
 
             except Exception as e:
                 logging.error(f"Indexer: {repr(e)}")
@@ -669,23 +701,17 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def build_indexer(self, request, context):
-        logging.info("build_indexer")
-        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+        logging.info("BUILD_INDEXER")
 
         logging.info(f"rebuild {request.rebuild}")
         job_id = uuid.uuid4().hex
         variable = {
-            "database": database,
-            "feature_manager": self.feature_manager,
-            "indexer_manager": self.indexer_manager,
+            "config": self.config,
             "rebuild": request.rebuild,
-            "progress": 0,
-            "status": 0,
-            "result": "",
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(build_indexer, variable)
+        future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
 
         variable["future"] = future
         self.futures.append(variable)
@@ -694,19 +720,13 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def build_feature_cache(self, request, context):
-        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
         job_id = uuid.uuid4().hex
         variable = {
-            "database": database,
-            "cache": Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="a"),
-            "progress": 0,
-            "status": 0,
-            "result": "",
+            "config": self.config,
             "future": None,
             "id": job_id,
         }
-        future = self.thread_pool.submit(build_feature_cache, variable)
-
+        future = self.process_pool.submit(build_feature_cache, copy.deepcopy(variable))
         variable["future"] = future
         self.futures.append(variable)
         result = indexer_pb2.BuildFeatureCacheReply()
@@ -714,8 +734,34 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return result
 
     def dump(self, request, context):
+        if request.origin is not None and request.origin != "":
+            body = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "nested": {
+                                    "path": "origin",
+                                    "query": {
+                                        "bool": {
+                                            "must": [
+                                                {"match": {f"origin.name": "name"}},
+                                                {"match": {f"origin.value_str": request.origin}},
+                                            ]
+                                        }
+                                    },
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        else:
+            body = None
+        logging.info(body)
+        # return
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
-        for entry in database.all():
+        for entry in database.raw_all(body=body):
             yield indexer_pb2.DumpReply(entry=msgpack.packb(entry))
 
     def load(self, request_iterator, context):
@@ -780,6 +826,8 @@ class Server:
     def __init__(self, config):
         self.config = config
 
+        self.commune = Commune(config)
+
         self.server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=10),
             options=[
@@ -787,33 +835,8 @@ class Server:
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
             ],
         )
-        self.image_text_manager = ImageTextPluginManager(configs=self.config.get("image_text", []))
-        self.image_text_manager.find()
-
-        self.feature_manager = FeaturePluginManager(configs=self.config.get("features", []))
-        self.feature_manager.find()
-
-        self.classifier_manager = ClassifierPluginManager(configs=self.config.get("classifiers", []))
-        self.classifier_manager.find()
-
-        self.indexer_manager = IndexerPluginManager(configs=self.config.get("indexes", []))
-        self.indexer_manager.find()
-
-        self.mapping_manager = MappingPluginManager(configs=self.config.get("mappings", []))
-        self.mapping_manager.find()
-
-        self.cache = Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="r")
-
         indexer_pb2_grpc.add_IndexerServicer_to_server(
-            Commune(
-                config,
-                self.feature_manager,
-                self.image_text_manager,
-                self.classifier_manager,
-                self.indexer_manager,
-                self.mapping_manager,
-                self.cache,
-            ),
+            self.commune,
             self.server,
         )
         grpc_config = config.get("grpc", {})
@@ -826,6 +849,9 @@ class Server:
         logging.info("Server is now running.")
         try:
             while True:
-                time.sleep(_ONE_DAY_IN_SECONDS)
+                logging.info(
+                    f"[Debug] all:{len(self.commune.futures)} done:{len([x for x in self.commune.futures if x['future'].done()])}"
+                )
+                time.sleep(10)
         except KeyboardInterrupt:
             self.server.stop(0)

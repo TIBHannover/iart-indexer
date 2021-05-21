@@ -15,6 +15,8 @@ class ClassifierPluginManager(PluginManager):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.find()
+        self.plugin_list = self.init_plugins()
 
     @classmethod
     def export(cls, name):
@@ -39,7 +41,8 @@ class ClassifierPluginManager(PluginManager):
                     a.register(self)
 
     def run(self, images, filter_plugins=None, plugins=None, configs=None, batchsize=128):
-        plugin_list = self.init_plugins(plugins, configs)
+        if plugins is None and configs is None:
+            plugin_list = self.plugin_list
 
         if filter_plugins is None:
             filter_plugins = [] * len(images)
@@ -61,7 +64,7 @@ class ClassifierPluginManager(PluginManager):
                     continue
 
                 logging.info(f"Plugin start {plugin.name}:{plugin.version}")
-                
+
                 plugin_results = plugin([image])
                 plugin_result_list["plugins"].append(plugin_results)
 

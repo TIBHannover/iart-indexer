@@ -155,6 +155,25 @@ class ElasticSearchDatabase(Database):
         except exceptions.NotFoundError:
             return None
 
+    def get_random_entries(self, size=1, seed=None):
+        try:
+            if seed is not None:
+                seed = str(seed)
+            else:
+                seed = uuid.uuid4().hex
+            results = self.es.search(
+                index=self.index,
+                body={
+                    "query": {"bool": {"should": {"function_score": {"functions": [{"random_score": {"seed": seed}}]}}}}
+                },
+                size=size,
+            )
+
+            for x in results["hits"]["hits"]:
+                yield x["_source"]
+        except exceptions.NotFoundError:
+            return None
+
     def get_entries(self, hash_ids):
         try:
             body = {"query": {"ids": {"type": "_doc", "values": hash_ids}}}
@@ -341,7 +360,6 @@ class ElasticSearchDatabase(Database):
     def raw_search(self, body, size=5):
         if not self.es.indices.exists(index=self.index):
             return []
-
         try:
             results = self.es.search(index=self.index, body=body, size=size)
             for x in results["hits"]["hits"]:

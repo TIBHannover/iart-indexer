@@ -16,6 +16,17 @@ def parse_args():
     return args
 
 
+def merge_dict(origin, update):
+
+    for k, v in update.items():
+        if k in origin:
+            if isinstance(origin[k], dict):
+                update[k] = merge_dict(origin[k], v)
+
+    origin.update(update)
+    return origin
+
+
 def main():
     args = parse_args()
 
@@ -24,7 +35,8 @@ def main():
     with open(args.input_path, "r") as f_in, open(args.output_path, "w") as f_out:
         for line in f_in:
             d = json.loads(line)
-            d.update(update)
+            d = merge_dict(d, update)
+
             f_out.write(json.dumps(d) + "\n")
 
     return 0

@@ -26,7 +26,8 @@ class FaissIndexer(IndexerPlugin):
         "index_type": "cos",
         "number_of_cluster": 100,
         "one_index_per_collection": True,
-        "one_index_for_public": True
+        "one_index_for_public": True,
+        "number_of_probs": 8,
         # "indexing_size": 105536,
     }
 
@@ -42,6 +43,8 @@ class FaissIndexer(IndexerPlugin):
         self.number_of_cluster = self.config["number_of_cluster"]
         self.one_index_per_collection = self.config["one_index_per_collection"]
         self.one_index_for_public = self.config["one_index_for_public"]
+        self.number_of_probs = self.config["number_of_probs"]
+        # self.indexing_size = self.config["indexing_size"]
 
         os.makedirs(self.indexer_dir, exist_ok=True)
 
@@ -77,14 +80,17 @@ class FaissIndexer(IndexerPlugin):
                     self.indexer_data[v][key]["index"] = faiss.read_index(
                         os.path.join(self.indexer_dir, index_data["id"] + ".index")
                     )
+                    self.indexer_data[v][key]["index"].nprobe = self.number_of_probs
 
     def train(self, entries):
         data = {}
+        index_names = set()
         for i, entry in enumerate(entries):
             id = entry["id"]
 
             for feature in entry["feature"]:
                 index_name = feature["plugin"] + "." + feature["type"]
+
                 if index_name not in data:
                     data[index_name] = {"entries": {}, "data": [], "d": 0, "id": uuid.uuid4().hex}
                 data[index_name]["data"].append(feature["value"])
@@ -93,13 +99,18 @@ class FaissIndexer(IndexerPlugin):
                 if id not in data[index_name]["entries"]:
                     data[index_name]["entries"][id] = len(data[index_name]["entries"])
 
-            if i % 10000 == 0 and i > 0:
-                logging.info(f"FaissIndexer: Read {i}")
+                index_names.add(index_name)
+
+            if i % 1000 == 0 and i > 0:
+                logging.info(f"[FaissIndexer] Read {i}")
+
+                for index_name, index_data in data.items():
+                    logging.info(f"[FaissIndexer] {index_name}:{len(data[index_name]['data'])}")
             if i > self.train_size:
                 break
                 # break
 
-        logging.info(f"FaissIndexer: Start training")
+        logging.info(f"[FaissIndexer] Start training")
         indexer_data = {}
         for index_name, index_data in data.items():
             d = index_data["d"]
@@ -161,11 +172,11 @@ class FaissIndexer(IndexerPlugin):
                 if id not in indexer_data[index_name]["entries"]:
                     indexer_data[index_name]["entries"][id] = len(indexer_data[index_name]["entries"])
 
-            if i % 10000 == 0 and i > 0:
-                logging.info(f"FaissIndexer: Read {i} ")
+            if i % 1000 == 0 and i > 0:
+                logging.info(f"[FaissIndexer] Read {i} ")
 
                 for index_name, index_data in indexer_data.items():
-                    logging.info(f"{index_name}:{len(indexer_data[index_name]['data'])}")
+                    logging.info(f"[FaissIndexer] {index_name}:{len(indexer_data[index_name]['data'])}")
                     if len(indexer_data[index_name]["data"]) == 0:
                         continue
                     train_data = np.asarray(index_data["data"]).astype("float32")
@@ -174,10 +185,6 @@ class FaissIndexer(IndexerPlugin):
                     index_data["index"].add(train_data)
 
                     indexer_data[index_name]["data"] = []
-            # if i > self.indexing_size:
-            #     break
-
-            # break
 
         output_indexer_data = {}
         for index_name, index_data in indexer_data.items():

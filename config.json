@@ -48,9 +48,9 @@
                 "port": 6379,
                 "model_name": "imagenet_inception",
                 "model_device": "cpu",
-                "model_file": "/models/imagenet_inception/imagenet_retrieval.pt",
+                "model_file": "/models/imagenet_inception/imagenet_resnet_emb.pt",
                 "pca_model_name": "imagenet_inception_pca_256",
-                "pca_model_file": "/models/imagenet_inception/pca_256.onnx",
+                "pca_model_file": "/models/imagenet_inception/PCA_PARAMS.pkl",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244
@@ -96,6 +96,40 @@
         }
     ],
     "classifiers": [
+        {
+            "type": "IconclassCLIPClassifier",
+            "output": "IconclassCLIPClassifier",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "iconclass_clip",
+                "model_device": "cpu",
+                "model_file": "/models/iconclass_clip/clip_image.pt",
+                "txt_embedding_file": "/models/iconclass_clip/text_kw_txt_embedding.pl",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244,
+                "threshold": 1e-3,
+                "k": 25
+            }
+        },
+        {
+            "type": "IconclassLSTMClassifier",
+            "output": "IconclassLSTMClassifier",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "iconclass_lstm",
+                "model_device": "cpu",
+                "model_file": "/models/iconclass_lstm/iconclass_lstm.pt",
+                "mapping_file": "/models/iconclass_lstm/labels.jsonl",
+                "classifier_file": "/models/iconclass_lstm/classifiers.jsonl",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244,
+                "threshold": 1e-3
+            }
+        },
         {
             "type": "KaggleResnetClassifier",
             "output": "KaggleResnetClassifier",

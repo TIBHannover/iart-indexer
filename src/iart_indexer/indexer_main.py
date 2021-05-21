@@ -47,6 +47,7 @@ def parse_args():
     )
 
     parser.add_argument("--dump_path", help="path to image or folder to indexing")
+    parser.add_argument("--dump_origin", help="name of a collection to dump")
     parser.add_argument("--path", help="path to image or folder to indexing")
     parser.add_argument("--id", help="id for entry query")
     parser.add_argument("--field_name", nargs="+", help="id for entry query")
@@ -158,7 +159,7 @@ def main():
             client.build_feature_cache()
 
         elif args.task == "dump":
-            client.dump(args.dump_path)
+            client.dump(args.dump_path, args.dump_origin)
 
         elif args.task == "load":
             client.load(args.dump_path)

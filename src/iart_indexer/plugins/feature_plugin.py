@@ -17,6 +17,8 @@ class FeaturePluginManager(PluginManager):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.find()
+        self.plugin_list = self.init_plugins()
 
     @classmethod
     def export(cls, name):
@@ -42,7 +44,8 @@ class FeaturePluginManager(PluginManager):
 
     def run(self, images, filter_plugins=None, plugins=None, configs=None, batchsize=128):
 
-        plugin_list = self.init_plugins(plugins, configs)
+        if plugins is None and configs is None:
+            plugin_list = self.plugin_list
 
         # print(f"PLUGINS: {plugin_list}")
         if filter_plugins is None:
