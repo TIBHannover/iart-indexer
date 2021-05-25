@@ -241,6 +241,8 @@ message SearchRequest {
   enum Mapping {
     MAPPING_DEFAULT = 0;
     MAPPING_UMAP = 1;
+    MAPPING_UMAP_GRID_SCIPY = 2;
+    MAPPING_UMAP_GRID_RASTERFAIRY = 3;
   }
 
   Sorting sorting = 2;

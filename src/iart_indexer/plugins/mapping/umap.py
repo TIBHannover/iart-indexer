@@ -1,7 +1,14 @@
 import math
 import uuid
+import logging
 
 import numpy as np
+
+import math
+from scipy.spatial import distance_matrix
+from scipy.optimize import linear_sum_assignment
+
+import rasterfairy
 
 import umap
 import random
@@ -15,7 +22,7 @@ from iart_indexer.utils import image_from_proto, image_resize
 
 @MappingPluginManager.export("UMapMapping")
 class UMapMapping(MappingPlugin):
-    default_config = {"random_state": 42, "n_neighbors": 3, "min_dist": 0.1}
+    default_config = {"random_state": 42, "n_neighbors": 3, "min_dist": 0.1, "grid_method": None, "grid_square": True}
 
     default_version = 0.1
 
@@ -25,6 +32,20 @@ class UMapMapping(MappingPlugin):
         self.random_state = self.config["random_state"]
         self.n_neighbors = self.config["n_neighbors"]
         self.min_dist = self.config["min_dist"]
+        self.grid_method = self.config.get("grid_method", None)
+        self.grid_square = self.config.get("grid_square", False)
+        
+        if self.grid_method is None:
+            self.grid_method = None
+        elif self.grid_method.lower() == "rasterfairy":
+            self.grid_method = "rasterfairy"
+        elif self.grid_method.lower() == "scipy":
+            self.grid_method = "scipy"
+        else:
+            logging.warning('[UMapMapping]: Unknown grid_method')
+            self.grid_method = None
+
+        logging.info(f'GRID_METHOD {self.grid_method} {kwargs}')
 
         if self.random_state is None:
             self.random_state = random.randint()
@@ -32,6 +53,54 @@ class UMapMapping(MappingPlugin):
         self.reducer = umap.UMAP(random_state=self.random_state, n_neighbors=self.n_neighbors, min_dist=self.min_dist)
 
         self.scaler = MinMaxScaler()
+
+    def map_to_scipy_grid(self, entries):
+        points = np.asarray([x["coordinates"] for x in entries])
+
+        points = (points - np.amin(points))/(np.amax(points)- np.amin(points))
+
+        num_points = points.shape[0]
+
+        if self.grid_square:
+            grid_length = math.ceil(math.sqrt(num_points))
+            height = grid_length
+            width = grid_length
+        else:
+            height = math.floor(math.sqrt(num_points))
+            width = math.ceil(num_points/height)
+            grid_length = np.amax([height, width])
+        
+        X, Y = np.mgrid[0:width, 0:height]
+        positions = np.transpose(np.vstack([X.ravel(), Y.ravel()]))/grid_length
+        # mu_x, std_x = norm.fit(points[:,0])
+        # mu_y, std_y = norm.fit(points[:,1])
+
+        d = distance_matrix(points, positions)
+        a = linear_sum_assignment(d)
+        grid_points = positions[a[1]]
+
+        return [{**e, "coordinates": grid_points[i, :].tolist()} for i, e in enumerate(entries)]
+
+    def map_to_rasterfairy_grid(self, entries):
+        points = np.asarray([x["coordinates"] for x in entries])
+
+        points = (points - np.amin(points))/(np.amax(points)- np.amin(points))
+
+        num_points = points.shape[0]
+
+        if self.grid_square:
+            grid_length = math.ceil(math.sqrt(num_points))
+            height = grid_length
+            width = grid_length
+        else:
+            height = math.floor(math.sqrt(num_points))
+            width = math.ceil(num_points/height)
+            grid_length = np.amax([height, width])
+        grid_xy = rasterfairy.transformPointCloud2D(points, target= {'width':width,'height':height,'mask':np.zeros((height,width),dtype=int), 'count':width*height, 'hex': False})#, target=(grid_length,grid_length))[0]
+        grid_points = grid_xy[0]
+
+        return [{**e, "coordinates": grid_points[i, :].tolist()} for i, e in enumerate(entries)]
+
 
     def call(self, entries, query):
         ref_feature = "clip_embedding_feature"
@@ -48,5 +117,11 @@ class UMapMapping(MappingPlugin):
         embedding = self.reducer.fit_transform(features)
         normalize_embeddings = self.scaler.fit_transform(embedding)
         new_entries = [{**e, "coordinates": normalize_embeddings[i, :].tolist()} for i, e in enumerate(entries)]
+
+        if self.grid_method == "scipy":
+            new_entries = self.map_to_scipy_grid(new_entries)
+            
+        if self.grid_method == "rasterfairy":
+            new_entries = self.map_to_rasterfairy_grid(new_entries)
 
         return new_entries

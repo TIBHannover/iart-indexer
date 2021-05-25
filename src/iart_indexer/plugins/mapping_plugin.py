@@ -37,6 +37,7 @@ class MappingPluginManager(PluginManager):
                     a.register(self)
 
     def run(self, entries, query, plugins=None, configs=None, batchsize=128):
+        
         plugin_list = self.init_plugins(plugins, configs)
         if len(plugin_list) > 1:
             logging.error("Only one mapping plugin should excecuted")

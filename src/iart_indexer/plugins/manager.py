@@ -1,3 +1,5 @@
+import logging
+
 class PluginManager:
     def __init__(self, configs=None):
         self.configs = configs
@@ -24,13 +26,12 @@ class PluginManager:
 
             plugin_has_config = False
             plugin_config = {"params": {}}
-            for x in self.configs:
+            for x in configs:
                 if x["type"].lower() == plugin_name.lower():
                     plugin_config.update(x)
                     plugin_has_config = True
             if not plugin_has_config:
                 continue
-
             plugin = plugin_class(config=plugin_config["params"])
             plugin_list.append({"plugin": plugin, "plugin_cls": plugin_class, "config": plugin_config})
         return plugin_list

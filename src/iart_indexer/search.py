@@ -117,6 +117,11 @@ class Searcher:
         if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
             mapping = "umap"
 
+        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP_GRID_SCIPY:
+            mapping = "umap_grid_scipy"
+        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP_GRID_RASTERFAIRY:
+            mapping = "umap_grid_rasterfairy"
+
         # Parse additional fields
         extras = []
         for extra in query.extras:
@@ -552,6 +557,29 @@ class Searcher:
         logging.info(f"Entries 2 {len(entries)}")
         if query["mapping"] == "umap":
             entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"]))
+
+        elif query["mapping"] == "umap_grid_scipy":
+            logging.info('############################ GRID_scipy')
+            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"], configs = [{
+            "type": "UMapMapping",
+            "params": {
+                "random_state": 42,
+                "n_neighbors": 3,
+                "min_dist": 0.1,
+                "grid_method": "scipy"
+            }}]))
+        elif query["mapping"] == "umap_grid_rasterfairy":
+            logging.info('############################ GRID_raster')
+            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"], configs = [{
+            "type": "UMapMapping",
+            "params": {
+                "random_state": 42,
+                "n_neighbors": 3,
+                "min_dist": 0.1,
+                "grid_method": "rasterfairy"
+            }}]))
+
+
 
         logging.info(f"Entries 3 {len(entries)}")
 
