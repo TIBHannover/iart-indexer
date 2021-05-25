@@ -34,7 +34,7 @@ class UMapMapping(MappingPlugin):
         self.min_dist = self.config["min_dist"]
         self.grid_method = self.config.get("grid_method", None)
         self.grid_square = self.config.get("grid_square", False)
-        
+
         if self.grid_method is None:
             self.grid_method = None
         elif self.grid_method.lower() == "rasterfairy":
@@ -42,10 +42,10 @@ class UMapMapping(MappingPlugin):
         elif self.grid_method.lower() == "scipy":
             self.grid_method = "scipy"
         else:
-            logging.warning('[UMapMapping]: Unknown grid_method')
+            logging.warning("[UMapMapping]: Unknown grid_method")
             self.grid_method = None
 
-        logging.info(f'GRID_METHOD {self.grid_method} {kwargs}')
+        logging.info(f"GRID_METHOD {self.grid_method} {kwargs}")
 
         if self.random_state is None:
             self.random_state = random.randint()
@@ -57,7 +57,7 @@ class UMapMapping(MappingPlugin):
     def map_to_scipy_grid(self, entries):
         points = np.asarray([x["coordinates"] for x in entries])
 
-        points = (points - np.amin(points))/(np.amax(points)- np.amin(points))
+        points = (points - np.amin(points)) / (np.amax(points) - np.amin(points))
 
         num_points = points.shape[0]
 
@@ -67,24 +67,25 @@ class UMapMapping(MappingPlugin):
             width = grid_length
         else:
             height = math.floor(math.sqrt(num_points))
-            width = math.ceil(num_points/height)
+            width = math.ceil(num_points / height)
             grid_length = np.amax([height, width])
-        
+
         X, Y = np.mgrid[0:width, 0:height]
-        positions = np.transpose(np.vstack([X.ravel(), Y.ravel()]))/grid_length
+        positions = np.transpose(np.vstack([X.ravel(), Y.ravel()])) / grid_length
         # mu_x, std_x = norm.fit(points[:,0])
         # mu_y, std_y = norm.fit(points[:,1])
 
         d = distance_matrix(points, positions)
         a = linear_sum_assignment(d)
         grid_points = positions[a[1]]
+        grid_points = grid_points / np.amax(grid_points, axis=0)
 
         return [{**e, "coordinates": grid_points[i, :].tolist()} for i, e in enumerate(entries)]
 
     def map_to_rasterfairy_grid(self, entries):
         points = np.asarray([x["coordinates"] for x in entries])
 
-        points = (points - np.amin(points))/(np.amax(points)- np.amin(points))
+        points = (points - np.amin(points)) / (np.amax(points) - np.amin(points))
 
         num_points = points.shape[0]
 
@@ -94,13 +95,23 @@ class UMapMapping(MappingPlugin):
             width = grid_length
         else:
             height = math.floor(math.sqrt(num_points))
-            width = math.ceil(num_points/height)
+            width = math.ceil(num_points / height)
             grid_length = np.amax([height, width])
-        grid_xy = rasterfairy.transformPointCloud2D(points, target= {'width':width,'height':height,'mask':np.zeros((height,width),dtype=int), 'count':width*height, 'hex': False})#, target=(grid_length,grid_length))[0]
+        logging.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        grid_xy = rasterfairy.transformPointCloud2D(
+            points,
+            target={
+                "width": width,
+                "height": height,
+                "mask": np.zeros((height, width), dtype=int),
+                "count": width * height,
+                "hex": False,
+            },
+        )  # , target=(grid_length,grid_length))[0]
         grid_points = grid_xy[0]
+        grid_points = grid_points / np.amax(grid_points, axis=0)
 
         return [{**e, "coordinates": grid_points[i, :].tolist()} for i, e in enumerate(entries)]
-
 
     def call(self, entries, query):
         ref_feature = "clip_embedding_feature"
@@ -120,7 +131,7 @@ class UMapMapping(MappingPlugin):
 
         if self.grid_method == "scipy":
             new_entries = self.map_to_scipy_grid(new_entries)
-            
+
         if self.grid_method == "rasterfairy":
             new_entries = self.map_to_rasterfairy_grid(new_entries)
 
