@@ -556,8 +556,14 @@ class Searcher:
 
         logging.info(f"Entries 2 {len(entries)}")
         if query["mapping"] == "umap":
-            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"]))
-
+            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"], configs = [{
+            "type": "UMapMapping",
+            "params": {
+                "random_state": 42,
+                "n_neighbors": 3,
+                "min_dist": 0.1,
+                "grid_method": None
+            }}]))
         elif query["mapping"] == "umap_grid_scipy":
             logging.info('############################ GRID_scipy')
             entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"], configs = [{
