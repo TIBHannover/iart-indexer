@@ -589,7 +589,10 @@ class Searcher:
 
         logging.info(f"Entries 3 {len(entries)}")
 
-        result.update({"entries": list(entries)[:100]})
+        if query["mapping"] and query["mapping"].startswith("umap"):
+            result.update({"entries": list(entries)})
+        else:
+            result.update({"entries": list(entries)[:100]})
 
         if self.aggregator and "aggregate" in query:
             if query["aggregate"]["use_query"]:
