@@ -225,17 +225,16 @@ def build_suggestion_job(args):
 
 
 def build_indexer(args):
-    logging.info(f"Indexer: mfeomfwmfpw,mfp")
+    logging.info(f"[IndexerJob] Starting")
 
     try:
         config = args.get("config")
         rebuild = args.get("rebuild")
         collections = args.get("collections")
+        logging.info(f"[IndexerJob] Start parameters rebuild={rebuild} collections={collections}")
 
         database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
         indexer = globals().get("indexer_manager")
-
-        logging.info(f"Indexer: start")
 
         class TrainEntryReader:
             def __iter__(self):
@@ -286,8 +285,6 @@ def build_indexer(args):
 
                 for entry in database.raw_all(query):
                     yield get_features_from_db_entry(entry, return_collection=True)
-
-        e = EntryReader(collections)
 
         indexer.indexing(train_entries=TrainEntryReader(), index_entries=EntryReader(collections), rebuild=rebuild)
 
@@ -366,15 +363,13 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
     def __init__(self, config):
         self.config = config
         self.managers = init_plugins(config)
-        self.process_pool = futures.ProcessPoolExecutor(max_workers=4, initializer=init_process, initargs=(config,))
+        self.process_pool = futures.ProcessPoolExecutor(max_workers=1, initializer=init_process, initargs=(config,))
         self.indexing_process_pool = futures.ProcessPoolExecutor(
-            max_workers=2, initializer=IndexingJob().init_worker, initargs=(config,)
+            max_workers=8, initializer=IndexingJob().init_worker, initargs=(config,)
         )
         self.futures = []
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
-
-        self.indexing_lock = threading.Lock()
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
@@ -457,34 +452,24 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
 
         if len(db_bulk_cache) > 0:
-            logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
+            logging.info(f"[Server] Indexing flush results to database (count:{i} {len(db_bulk_cache)})")
             database.bulk_insert(db_bulk_cache)
             db_bulk_cache = []
 
-        # mark collection as not index
-        with self.indexing_lock:
-            tmp_dir = self.config.get("global", {"tmp_dir": "/tmp"}).get("tmp_dir", "/tmp")
-            collection_dir = os.path.join(tmp_dir, "collections")
-            os.makedirs(collection_dir, exist_ok=True)
-            for x in collections:
-                open(
-                    os.path.join(collection_dir, x),
-                    "a",
-                ).close()
-
-                logging.info(f"[Server] Indexing collection {x}")
-                job_id = uuid.uuid4().hex
-                variable = {
-                    "config": self.config,
-                    "rebuild": False,
-                    "collection": x,
-                    "future": None,
-                    "id": job_id,
-                }
-                future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
-
-                variable["future"] = future
-                self.futures.append(variable)
+        # submit collection indexing job
+        logging.info(f"[Server] Indexing collection {list(collections)}")
+        job_id = uuid.uuid4().hex
+        variable = {
+            "config": self.config,
+            "rebuild": False,
+            "collections": [c for c in collections],
+            "future": None,
+            "id": job_id,
+        }
+        logging.info(f"[Server] Submit job (build_indexer) ({variable})")
+        future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
+        variable["future"] = future
+        self.futures.append(variable)
 
     def build_suggester(self, request, context):
 
@@ -780,13 +765,14 @@ class Server:
 
     def run(self):
         self.server.start()
-        logging.info("Server is now running.")
+        logging.info("[Server] Ready")
         try:
             while True:
                 num_jobs = len(self.commune.futures)
                 num_jobs_done = len([x for x in self.commune.futures if x["future"].done()])
                 logging.info(f"[Server] num_jobs:{num_jobs} num_jobs_done:{num_jobs_done}")
+                logging.info(f"[Server] {[x['future'] for x in self.commune.futures]}")
 
-                time.sleep(10)
+                time.sleep(2)
         except KeyboardInterrupt:
             self.server.stop(0)

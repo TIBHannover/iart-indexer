@@ -68,25 +68,24 @@ def main():
             if newest_index["timestamp"] < data["timestamp"]:
                 newest_index = data
 
-    print("####################")
-
-    print()
     if "trained_collection" in newest_index:
         print("trained_collections: " + newest_index["trained_collection"])
         trained_collection = load_collection(collections_dir, indexes_dir, newest_index["trained_collection"])
         for index in trained_collection["indexes"]:
             print("\t" + index["id"] + " " + str(len(index["entries"])))
+        print()
+
         print("default_collection: " + newest_index["default_collection"])
+        print()
         # default_collection = load_collection(collections_dir, indexes_dir, newest_index["default_collection"])
         for collection in newest_index["collections"]:
             try:
-                print("collection: " + str(collection))
                 collection = load_collection(collections_dir, indexes_dir, collection)
-                print(collection.keys())
+
+                print(f"collection: {collection['id']} {collection['collection_id']}")
                 # print("collection: " + str(]) + " " + str(collection["timestamp"]))
                 for index in collection["indexes"]:
-                    print(index.keys())
-                    print("\t\t" + index["id"] + " " + str(len(index["entries"])))
+                    print(f"\t\t {index['id']} {index['type']} {len(index['entries'])}")
             except Exception as e:
                 print(e)
 

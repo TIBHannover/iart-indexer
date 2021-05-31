@@ -41,9 +41,8 @@ class IndexerPluginManager(PluginManager):
     def indexing(self, train_entries, index_entries, rebuild=False, plugins=None, configs=None):
         # TODO add lock here
         logging.info("IndexerPluginManager: indexing")
-        plugin_list = self.init_plugins(plugins, configs)
-        logging.info(f"IndexerPluginManager: {len(plugin_list)}")
-        for plugin in plugin_list:
+        logging.info(f"IndexerPluginManager: {len(self.plugin_list)}")
+        for plugin in self.plugin_list:
             plugin = plugin["plugin"]
             logging.info(f"IndexerPluginManager: {plugin.name}")
             plugin.indexing(train_entries, index_entries, rebuild=rebuild)

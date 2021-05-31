@@ -54,41 +54,50 @@ class FaissIndexer(IndexerPlugin):
         os.makedirs(self.collections_dir, exist_ok=True)
         self.indexes_dir = os.path.join(self.indexer_dir, "indexes")
         os.makedirs(self.indexes_dir, exist_ok=True)
-
+        self.collections = {}
         self.load()
-
-    def check_changes(self):
-        pass
+        logging.info(
+            f"[FaissIndexer] Latest snapshot loaded ({datetime.fromtimestamp(self.timestamp)}) with {len(self.collections)} collections"
+        )
 
     def load(self):
         indexers = [
             os.path.join(self.indexer_dir, x) for x in os.listdir(self.indexer_dir) if re.match(r"^.*?\.msg$", x)
         ]
-        logging.info(indexers)
-        logging.info(os.listdir(self.indexer_dir))
         newest_index = {"timestamp": 0.0}
         for x in indexers:
-            logging.info(x)
             with open(x, "rb") as f:
                 data = msgpack.unpackb(f.read())
                 if newest_index["timestamp"] < data["timestamp"]:
                     newest_index = data
 
-        logging.info(newest_index)
-        logging.info("####################")
         if "trained_collection" not in newest_index:
-            self.not_init = True
+            self.timestamp = 0
         else:
             self.trained_collection = self.load_collection(newest_index["trained_collection"])
-            self.default_collection = self.load_collection(newest_index["default_collection"])
-            self.collections = {}
+            self.timestamp = newest_index["timestamp"]
+            self.default_collection = newest_index["default_collection"]
+
+            collections_to_delete = []
+            for k, v in self.collections:
+                if v["id"] not in newest_index["collections"]:
+                    collections_to_delete.append(k)
+
+            for x in collections_to_delete:
+                del self.collections[k]
+
+            collections_to_load = []
             for collection in newest_index["collections"]:
+                if collection not in [x["id"] for x in self.collections.values()]:
+                    collections_to_load.append(collection)
+
+            logging.info(f"[FaissIndexer] Loading {collections_to_load} unloading {collections_to_delete}")
+            for collection in collections_to_load:
                 collection = self.load_collection(collection)
                 self.collections[collection["collection_id"]] = collection
-            self.not_init = False
 
     @staticmethod
-    def copy_collection(collection, new_ids=True):
+    def copy_collection(collection, new_ids=False):
         new_collection = copy.deepcopy({k: v for k, v in collection.items() if k != "indexes"})
         if "indexes" in collection:
             new_indexes = []
@@ -102,7 +111,7 @@ class FaissIndexer(IndexerPlugin):
         return new_collection
 
     @staticmethod
-    def copy_index(index, new_ids=True):
+    def copy_index(index, new_ids=False):
         new_index = copy.deepcopy({k: v for k, v in index.items() if k != "index"})
         if "index" in index:
             new_index["index"] = faiss.clone_index(index["index"])
@@ -126,6 +135,7 @@ class FaissIndexer(IndexerPlugin):
             index = msgpack.unpackb(f.read())
 
         index["index"] = faiss.read_index(os.path.join(self.indexes_dir, index_id + ".index"))
+
         return index
 
     def save_collection(self, collection):
@@ -235,16 +245,13 @@ class FaissIndexer(IndexerPlugin):
             trained_collection_id = trained_collection["id"]
             collections = {k: FaissIndexer.copy_collection(v) for k, v in self.collections.items()}
             # deafult collection should be part of collections
-            default_collection = FaissIndexer.copy_collection(self.default_collection)
-            default_collection_id = default_collection["id"]
-            default_collection["collection_id"] = default_collection_id
-            collections[default_collection_id] = default_collection
+            default_collection_id = self.default_collection
 
         # only update collections
         collections_to_update = set()
         # rebuild collections
         feature_cache = {}
-
+        logging.info(f"[FaissIndexer] Reading features")
         for i, entry in enumerate(index_entries):
             id = entry["id"]
             collection_id = get_element(entry, "collection.id")
@@ -304,6 +311,8 @@ class FaissIndexer(IndexerPlugin):
                 for _, c in collections.items():
                     logging.info(f"{c['id']} {[len(x['entries']) for x in c['indexes']]}")
         # empty the last samples
+
+        logging.info(f"[FaissIndexer] Write features to faiss indexes")
         for k, v in feature_cache.items():
 
             collection_id, plugin, type = k.split(".")
@@ -331,7 +340,9 @@ class FaissIndexer(IndexerPlugin):
                 self.save_collection(renamed_collection)
                 if collection["id"] == default_collection_id:
                     default_collection_id = renamed_collection["id"]
-            new_collections[k] = renamed_collection
+                new_collections[k] = renamed_collection
+            else:
+                new_collections[k] = collection
         collections = new_collections
 
         if new_trained_collection:
@@ -357,21 +368,27 @@ class FaissIndexer(IndexerPlugin):
             }
         )
 
-    def search(self, queries, size=100):
+    def search(self, queries, collections=None, size=100):
         result = []
-        for q in queries:
+        if collections is None:
+            collections = [self.default_collection]
+        if isinstance(collections, str):
+            collections = [collections]
 
-            index_name = q["plugin"] + "." + q["type"]
-            if index_name not in self.indexer_data:
-                continue
+        for collection in collections:
+            for q in queries:
 
-            # TODO load it ones
-            index_data = self.indexer_data[index_name]
-            index = index_data["index"]
-            feature = np.asarray([q["value"]]).astype("float32")
-            faiss.normalize_L2(feature)
-            q_result = index.search(feature, k=size)
+                index_name = collection + "." + q["plugin"] + "." + q["type"]
+                if index_name not in self.indexer_data:
+                    continue
 
-            result.extend([index_data["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
+                # TODO load it ones
+                index_data = self.indexer_data[index_name]
+                index = index_data["index"]
+                feature = np.asarray([q["value"]]).astype("float32")
+                faiss.normalize_L2(feature)
+                q_result = index.search(feature, k=size)
+
+                result.extend([index_data["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
 
         return result
