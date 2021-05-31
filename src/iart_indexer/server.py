@@ -20,6 +20,7 @@ from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin, ImageTextPlugi
 from iart_indexer.plugins import IndexerPluginManager
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
 from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry
+from iart_indexer.jobs import IndexingJob
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 from iart_indexer.search import Searcher
@@ -224,9 +225,13 @@ def build_suggestion_job(args):
 
 
 def build_indexer(args):
+    logging.info(f"Indexer: mfeomfwmfpw,mfp")
+
     try:
         config = args.get("config")
-        rebuild = args["rebuild"]
+        rebuild = args.get("rebuild")
+        collections = args.get("collections")
+
         database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
         indexer = globals().get("indexer_manager")
 
@@ -250,16 +255,41 @@ def build_indexer(args):
                     yield get_features_from_db_entry(entry, return_collection=True)
 
         class EntryReader:
+            def __init__(self, collections=None):
+                self.collections = collections
+
             def __iter__(self):
-                for entry in database.raw_all(
-                    {
-                        "query": {"function_score": {"random_score": {"seed": 42}}},
+                if self.collections is not None:
+                    query = {
+                        "query": {
+                            "function_score": {
+                                "query": {
+                                    "nested": {
+                                        "path": "collection",
+                                        "query": {"terms": {"collection.id": self.collections}},
+                                    }
+                                },
+                                "random_score": {"seed": 42},
+                            }
+                        },
                         "size": 1000,
                     }
-                ):
+                else:
+                    query = {
+                        "query": {
+                            "function_score": {
+                                "random_score": {"seed": 42},
+                            }
+                        },
+                        "size": 1000,
+                    }
+
+                for entry in database.raw_all(query):
                     yield get_features_from_db_entry(entry, return_collection=True)
 
-        indexer.indexing(train_entries=TrainEntryReader(), index_entries=EntryReader(), rebuild=rebuild)
+        e = EntryReader(collections)
+
+        indexer.indexing(train_entries=TrainEntryReader(), index_entries=EntryReader(collections), rebuild=rebuild)
 
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
@@ -291,120 +321,6 @@ def build_feature_cache(args):
     except Exception as e:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-
-
-def indexing_job(entry):
-    try:
-        image = imageio.imread(entry["image_data"])
-        image = image_normalize(image)
-    except Exception as e:
-        logging.error(traceback.format_exc())
-        return "error", {"id": entry["id"]}
-    plugins = []
-    for c in entry["cache"]["classifier"]:
-        plugins.append({"plugin": c["plugin"], "version": c["version"]})
-
-    classifications = list(indexing_job.classifier_manager.run([image], [plugins]))[0]
-
-    plugins = []
-    for c in entry["cache"]["feature"]:
-        plugins.append({"plugin": c["plugin"], "version": c["version"]})
-    features = list(indexing_job.feature_manager.run([image], [plugins]))[0]
-
-    doc = {"id": entry["id"], "meta": entry["meta"], "origin": entry["origin"], "collection": entry["collection"]}
-
-    annotations = []
-    for f in features["plugins"]:
-
-        for anno in f._annotations:
-
-            for result in anno:
-                plugin_annotations = []
-
-                binary_vec = result.feature.binary
-                feature_vec = list(result.feature.feature)
-
-                plugin_annotations.append(
-                    {
-                        "type": result.feature.type,
-                        "value": feature_vec,
-                    }
-                )
-
-                feature_result = {
-                    "plugin": result.plugin,
-                    "version": result.version,
-                    "annotations": plugin_annotations,
-                }
-                annotations.append(feature_result)
-
-    if len(annotations) > 0:
-        doc["feature"] = annotations
-
-    annotations = []
-    for c in classifications["plugins"]:
-
-        for anno in c._annotations:
-
-            for result in anno:
-                plugin_annotations = []
-                for concept in result.classifier.concepts:
-                    plugin_annotations.append({"name": concept.concept, "type": concept.type, "value": concept.prob})
-
-                classifier_result = {
-                    "plugin": result.plugin,
-                    "version": result.version,
-                    "annotations": plugin_annotations,
-                }
-                annotations.append(classifier_result)
-
-    if len(annotations) > 0:
-        doc["classifier"] = annotations
-
-    # copy predictions from cache
-    for exist_c in entry["cache"]["classifier"]:
-        if "classifier" not in doc:
-            doc["classifier"] = []
-
-        founded = False
-        for computed_c in doc["classifier"]:
-            if computed_c["plugin"] == exist_c["plugin"] and version.parse(str(computed_c["version"])) > version.parse(
-                str(exist_c["version"])
-            ):
-                founded = True
-
-        if not founded:
-            doc["classifier"].append(exist_c)
-
-    for exist_f in entry["cache"]["feature"]:
-        if "feature" not in doc:
-            doc["feature"] = []
-        exist_f_version = version.parse(str(exist_f["version"]))
-
-        founded = False
-        for computed_f in doc["feature"]:
-            computed_f_version = version.parse(str(computed_f["version"]))
-            if computed_f["plugin"] == exist_f["plugin"] and computed_f_version >= exist_f_version:
-                founded = True
-        if not founded:
-            exist_f = {
-                "plugin": exist_f["plugin"],
-                "version": exist_f["version"],
-                "annotations": [
-                    {
-                        "type": exist_f["type"],
-                        "value": exist_f["value"],
-                    }
-                ],
-            }
-            doc["feature"].append(exist_f)
-    # print(f"FEATURE: {features}")
-    # exit()
-    # feature_chunk = list(feature_plugin_manager.run([image], filter_feature_plugins))
-
-    # classification_chunk = list(classifier_plugin_manager.run(images_chunk, filter_classifier_plugins))
-    # logging.info(doc)
-    return "ok", doc
 
 
 def init_plugins(config):
@@ -451,9 +367,14 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         self.config = config
         self.managers = init_plugins(config)
         self.process_pool = futures.ProcessPoolExecutor(max_workers=4, initializer=init_process, initargs=(config,))
+        self.indexing_process_pool = futures.ProcessPoolExecutor(
+            max_workers=2, initializer=IndexingJob().init_worker, initargs=(config,)
+        )
         self.futures = []
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
+
+        self.indexing_lock = threading.Lock()
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
@@ -496,49 +417,74 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                         "cache": cache_data,
                     }
 
-        def init_worker(function, config):
-            function.feature_manager = FeaturePluginManager(configs=config.get("features", []))
-            function.feature_manager.find()
+        db_bulk_cache = []
+        logging.info(f"Indexing: start indexing")
 
-            function.classifier_manager = ClassifierPluginManager(configs=config.get("classifiers", []))
-            function.classifier_manager.find()
+        # compute features and classifiers and write them to the database
+        collections = set()
+        for i, (status, entry) in enumerate(
+            self.indexing_process_pool.map(IndexingJob(), filter_and_translate(request_iterator))
+        ):
+            if status != "ok":
+                logging.error(f"Indexing: {entry['id']}")
+                yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
+                continue
 
-        with Pool(16, initializer=init_worker, initargs=[indexing_job, self.config]) as p:
-            db_bulk_cache = []
-            logging.info(f"Indexing: start indexing")
-            for i, (status, entry) in enumerate(p.imap(indexing_job, filter_and_translate(request_iterator))):
-                if status != "ok":
-                    logging.error(f"Indexing: {entry['id']}")
-                    yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
-                    continue
+            collection = entry.get("collection")
+            if collection:
+                collection_id = collection.get("id")
+                if collection_id:
+                    collections.add(collection_id)
 
-                # print(entry)
-                # logging.info("##########")
-                # logging.info(entry)
-                db_bulk_cache.append(entry)
+            db_bulk_cache.append(entry)
 
-                if len(db_bulk_cache) > 1000:
+            if len(db_bulk_cache) > 1000:
 
-                    logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
-                    try_count = 20
-                    while try_count > 0:
-                        try:
-                            database.bulk_insert(db_bulk_cache)
-                            db_bulk_cache = []
-                            try_count = 0
-                        except KeyboardInterrupt:
-                            raise
-                        except:
-                            logging.error(f"Indexing: database error (try count: {try_count})")
-                            time.sleep(1)
-                            try_count -= 1
-
-                yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
-
-            if len(db_bulk_cache) > 0:
                 logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
-                database.bulk_insert(db_bulk_cache)
-                db_bulk_cache = []
+                try_count = 20
+                while try_count > 0:
+                    try:
+                        database.bulk_insert(db_bulk_cache)
+                        db_bulk_cache = []
+                        try_count = 0
+                    except KeyboardInterrupt:
+                        raise
+                    except:
+                        logging.error(f"Indexing: database error (try count: {try_count})")
+                        time.sleep(1)
+                        try_count -= 1
+
+            yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
+
+        if len(db_bulk_cache) > 0:
+            logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
+            database.bulk_insert(db_bulk_cache)
+            db_bulk_cache = []
+
+        # mark collection as not index
+        with self.indexing_lock:
+            tmp_dir = self.config.get("global", {"tmp_dir": "/tmp"}).get("tmp_dir", "/tmp")
+            collection_dir = os.path.join(tmp_dir, "collections")
+            os.makedirs(collection_dir, exist_ok=True)
+            for x in collections:
+                open(
+                    os.path.join(collection_dir, x),
+                    "a",
+                ).close()
+
+                logging.info(f"[Server] Indexing collection {x}")
+                job_id = uuid.uuid4().hex
+                variable = {
+                    "config": self.config,
+                    "rebuild": False,
+                    "collection": x,
+                    "future": None,
+                    "id": job_id,
+                }
+                future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
+
+                variable["future"] = future
+                self.futures.append(variable)
 
     def build_suggester(self, request, context):
 
@@ -703,14 +649,16 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
     def build_indexer(self, request, context):
         logging.info("BUILD_INDEXER")
 
-        logging.info(f"rebuild {request.rebuild}")
+        logging.info(f"rebuild {request.rebuild} {request.collections}")
         job_id = uuid.uuid4().hex
         variable = {
             "config": self.config,
             "rebuild": request.rebuild,
+            "collections": list(request.collections),
             "future": None,
             "id": job_id,
         }
+        logging.info(variable)
         future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
 
         variable["future"] = future
@@ -808,20 +756,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             db_bulk_cache = []
 
 
-def update_database(database, plugin_results):
-    for entry, annotations in zip(plugin_results._entries, plugin_results._annotations):
-
-        hash_id = entry.id
-
-        database.update_plugin(
-            hash_id,
-            plugin_name=plugin_results._plugin.name,
-            plugin_version=plugin_results._plugin.version,
-            plugin_type=plugin_results._plugin.type,
-            annotations=annotations,
-        )
-
-
 class Server:
     def __init__(self, config):
         self.config = config
@@ -849,9 +783,10 @@ class Server:
         logging.info("Server is now running.")
         try:
             while True:
-                logging.info(
-                    f"[Debug] all:{len(self.commune.futures)} done:{len([x for x in self.commune.futures if x['future'].done()])}"
-                )
+                num_jobs = len(self.commune.futures)
+                num_jobs_done = len([x for x in self.commune.futures if x["future"].done()])
+                logging.info(f"[Server] num_jobs:{num_jobs} num_jobs_done:{num_jobs_done}")
+
                 time.sleep(10)
         except KeyboardInterrupt:
             self.server.stop(0)

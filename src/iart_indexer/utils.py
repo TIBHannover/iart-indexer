@@ -297,3 +297,28 @@ def numpy_from_proto(proto):
     # content = np.frombuffer(proto.proto_content, dtype=DECODE_DTYPE_LUP[proto.dtype])
     content.reshape(proto.shape)
     return proto.name, content, proto.frame_number, proto.timestamp
+
+
+def get_element(data_dict: dict, path: str, split_element: str = "."):
+    if path is None:
+        return data_dict
+
+    if callable(path):
+        elem = path(data_dict)
+
+    if isinstance(path, str):
+        elem = data_dict
+        try:
+            for x in path.strip(split_element).split(split_element):
+                try:
+                    x = int(x)
+                    elem = elem[x]
+                except ValueError:
+                    elem = elem.get(x)
+        except:
+            pass
+
+    if isinstance(path, (list, set)):
+        elem = [get_element(data_dict, x) for x in path]
+
+    return elem
