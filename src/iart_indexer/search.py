@@ -8,7 +8,7 @@ from iart_indexer import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
-from iart_indexer.utils import image_from_proto
+from iart_indexer.utils import image_from_proto, dict_from_proto
 
 
 class Searcher:
@@ -116,11 +116,12 @@ class Searcher:
         mapping = None
         if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
             mapping = "umap"
+        if query.mapping == indexer_pb2.SearchRequest.MAPPING_KMEANS:
+            mapping = "kmeans"
+        if query.mapping == indexer_pb2.SearchRequest.MAPPING_AGGLOMERATIVE:
+            mapping = "agglomerative"
 
-        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP_GRID_SCIPY:
-            mapping = "umap_grid_scipy"
-        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP_GRID_RASTERFAIRY:
-            mapping = "umap_grid_rasterfairy"
+        mapping_options = dict_from_proto(query.mapping_options)
 
         # Parse additional fields
         extras = []
@@ -293,6 +294,7 @@ class Searcher:
         result.update({"range_search": range_search})
         result.update({"sorting": sorting})
         result.update({"mapping": mapping})
+        result.update({"mapping_options": mapping_options})
         result.update({"extras": extras})
         result.update({"seed": seed})
 
@@ -556,36 +558,33 @@ class Searcher:
 
         logging.info(f"Entries 2 {len(entries)}")
         if query["mapping"] == "umap":
-            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"], configs = [{
-            "type": "UMapMapping",
-            "params": {
-                "random_state": 42,
-                "n_neighbors": 3,
-                "min_dist": 0.1,
-                "grid_method": None
-            }}]))
-        elif query["mapping"] == "umap_grid_scipy":
-            logging.info('############################ GRID_scipy')
-            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"], configs = [{
-            "type": "UMapMapping",
-            "params": {
-                "random_state": 42,
-                "n_neighbors": 3,
-                "min_dist": 0.1,
-                "grid_method": "scipy"
-            }}]))
-        elif query["mapping"] == "umap_grid_rasterfairy":
-            logging.info('############################ GRID_raster')
-            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"], configs = [{
-            "type": "UMapMapping",
-            "params": {
-                "random_state": 42,
-                "n_neighbors": 3,
-                "min_dist": 0.1,
-                "grid_method": "rasterfairy"
-            }}]))
-
-
+            entries = list(
+                self.mapping_plugin_manager.run(
+                    entries,
+                    query["feature_search"],
+                    ["UMapMapping"],
+                    configs=[
+                        {
+                            "type": "UMapMapping",
+                            "params": query["mapping_options"],
+                        }
+                    ],
+                )
+            )
+        elif query["mapping"] == "kmeans":
+            entries = list(
+                self.mapping_plugin_manager.run(
+                    entries,
+                    query["feature_search"],
+                    ["KMeansMapping"],
+                    configs=[
+                        {
+                            "type": "KMeansMapping",
+                            "params": query["mapping_options"],
+                        }
+                    ],
+                )
+            )
 
         logging.info(f"Entries 3 {len(entries)}")
 

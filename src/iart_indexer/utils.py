@@ -120,14 +120,6 @@ def image_resize(image, max_dim=None, min_dim=None, size=None):
     return np.array(img)
 
 
-def prediction_to_proto(prediction):
-    result = indexer_pb2.PluginResult()
-
-
-def prediction_from_proto(proto):
-    pass
-
-
 def meta_from_proto_old(proto):
     result_dict = {}
     for m in proto:
@@ -168,6 +160,19 @@ def meta_from_proto(proto):
         if field == "float_val":
             result_list.append({"name": m.key, "value_float": m.float_val, "value_str": str(m.float_val)})
     return result_list
+
+
+def dict_from_proto(proto):
+    result = {}
+    for m in proto:
+        field = m.WhichOneof("value")
+        if field == "string_val":
+            result.update({m.key: m.string_val})
+        if field == "int_val":
+            result.update({m.key: m.int_val})
+        if field == "float_val":
+            result.append({m.key: m.float_val})
+    return result
 
 
 def meta_to_proto(proto, data):

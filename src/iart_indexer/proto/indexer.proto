@@ -241,12 +241,13 @@ message SearchRequest {
   enum Mapping {
     MAPPING_DEFAULT = 0;
     MAPPING_UMAP = 1;
-    MAPPING_UMAP_GRID_SCIPY = 2;
-    MAPPING_UMAP_GRID_RASTERFAIRY = 3;
+    MAPPING_KMEANS = 2;
+    MAPPING_AGGLOMERATIVE = 3;
   }
 
   Sorting sorting = 2;
   Mapping mapping = 3;
+  
   AggregateRequest aggregate = 4;
   string random_seed = 5;
 
@@ -255,6 +256,8 @@ message SearchRequest {
   }
 
   repeated Extra extras = 6;
+
+  repeated ValueField mapping_options = 7;
 }
 
 message SearchReply { string id = 1; }
@@ -266,6 +269,8 @@ message SearchResultEntry {
   repeated ClassifierResult classifier = 4;
   repeated FeatureResult feature = 5;
   repeated float coordinates = 6;
+  int64 cluster = 7;
+  float distance = 8;
 }
 
 message AggregateResult {
