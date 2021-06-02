@@ -116,12 +116,14 @@ class Searcher:
         mapping = None
         if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
             mapping = "umap"
-        if query.mapping == indexer_pb2.SearchRequest.MAPPING_KMEANS:
-            mapping = "kmeans"
-        if query.mapping == indexer_pb2.SearchRequest.MAPPING_AGGLOMERATIVE:
-            mapping = "agglomerative"
-
         mapping_options = dict_from_proto(query.mapping_options)
+
+        clustering = None
+        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_KMEANS:
+            clustering = "kmeans"
+        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_AGGLOMERATIVE:
+            clustering = "agglomerative"
+        clustering_options = dict_from_proto(query.clustering_options)
 
         # Parse additional fields
         extras = []
@@ -295,6 +297,8 @@ class Searcher:
         result.update({"sorting": sorting})
         result.update({"mapping": mapping})
         result.update({"mapping_options": mapping_options})
+        result.update({"clustering": clustering})
+        result.update({"clustering_options": clustering_options})
         result.update({"extras": extras})
         result.update({"seed": seed})
 
@@ -571,7 +575,8 @@ class Searcher:
                     ],
                 )
             )
-        elif query["mapping"] == "kmeans":
+
+        if query["clustering"] == "kmeans":
             entries = list(
                 self.mapping_plugin_manager.run(
                     entries,
@@ -580,7 +585,7 @@ class Searcher:
                     configs=[
                         {
                             "type": "KMeansMapping",
-                            "params": query["mapping_options"],
+                            "params": query["clustering_options"],
                         }
                     ],
                 )

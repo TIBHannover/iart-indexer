@@ -241,8 +241,12 @@ message SearchRequest {
   enum Mapping {
     MAPPING_DEFAULT = 0;
     MAPPING_UMAP = 1;
-    MAPPING_KMEANS = 2;
-    MAPPING_AGGLOMERATIVE = 3;
+  }
+
+  enum Clustering {
+    CLUSTERING_DEFAULT = 0;
+    CLUSTERING_KMEANS = 2;
+    CLUSTERING_AGGLOMERATIVE = 3;
   }
 
   Sorting sorting = 2;
@@ -258,6 +262,9 @@ message SearchRequest {
   repeated Extra extras = 6;
 
   repeated ValueField mapping_options = 7;
+
+  Clustering clustering = 8;
+  repeated ValueField clustering_options = 9;
 }
 
 message SearchReply { string id = 1; }
