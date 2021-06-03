@@ -5,6 +5,8 @@ option java_multiple_files = true;
 // ../web/tunnel.proto python -m grpc_tools.protoc -I../backend --python_out=.
 // --grpc_python_out=. ../backend/tunnel.proto create json stringds
 
+package iart.indexer;
+
 service Indexer {
   rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
   rpc status(StatusRequest) returns (StatusReply) {}

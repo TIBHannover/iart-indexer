@@ -16,6 +16,7 @@ import random
 import msgpack
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
+from iart_indexer import faiss_indexer_pb2, faiss_indexer_pb2_grpc
 from iart_indexer.utils import image_resize
 
 
@@ -430,6 +431,39 @@ class Client:
         response = stub.build_indexer(request)
         print(response)
         return response
+
+    def faiss_train(self, collections):
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
+        request = faiss_indexer_pb2.TrainRequest(collections=collections)
+
+        response = stub.train(request)
+        return response
+
+    def faiss_indexing(self, collections):
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+        stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
+        request = faiss_indexer_pb2.IndexingRequest(collections=collections)
+
+        response = stub.indexing(request)
+        return response
+
+    def faiss_delete(self, collections):
+        pass
 
     def build_feature_cache(self):
 

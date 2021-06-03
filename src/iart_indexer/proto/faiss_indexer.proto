@@ -1,0 +1,54 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+// python -m grpc_tools.protoc -I../web --python_out=. --grpc_python_out=.
+// ../web/tunnel.proto python -m grpc_tools.protoc -I../backend --python_out=.
+// --grpc_python_out=. ../backend/tunnel.proto create json stringds
+package iart.faiss_indexer;
+
+service FaissIndexer {
+    rpc search(SearchRequest) returns (SearchReply) {}
+    rpc indexing(IndexingRequest) returns (IndexingReply) {}
+    rpc train(TrainRequest) returns (TrainReply) {}
+    rpc delete(DeleteRequest) returns (DeleteReply) {}
+}
+
+message Query {
+    repeated float value = 1;
+    string plugin = 2;
+    string type = 3;
+}
+
+message SearchRequest {
+    repeated string collections = 1;
+    repeated Query queries = 2;
+}
+
+message SearchReply { 
+    repeated string ids = 1; 
+}
+
+message IndexingRequest{
+    repeated string collections = 1;
+}
+
+message IndexingReply{
+
+}
+
+message TrainRequest{
+    repeated string collections = 1;
+}
+
+message TrainReply{
+
+}
+
+message DeleteRequest{ 
+    repeated string collections = 1;
+    repeated string ids = 2;
+}
+
+message DeleteReply{
+
+}

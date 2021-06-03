@@ -188,7 +188,10 @@
             "type": "FaissIndexer",
             "params": {
                 "indexer_dir": "/faiss/",
-                "train_size": 10000
+                "train_size": 50000,
+                "grpc": {
+                    "port": 50151
+                }
             }
         }
     ],

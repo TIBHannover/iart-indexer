@@ -15,18 +15,18 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='indexer.proto',
-  package='',
+  package='iart.indexer',
   syntax='proto3',
   serialized_options=b'P\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rindexer.proto\"9\n\nCollection\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tis_public\x18\x03 \x01(\x08\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\xab\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x11\n\x03roi\x18\x04 \x01(\x0b\x32\x04.RoI\x12\x19\n\x04meta\x18\x05 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x06 \x03(\x0b\x32\x0b.ValueField\x12\x1f\n\ncollection\x18\x07 \x01(\x0b\x32\x0b.CollectionB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\">\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x1a\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x08.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\x93\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\'\n\nclassifier\x18\x04 \x01(\x0b\x32\x11.ClassifierResultH\x00\x12!\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x0e.FeatureResultH\x00\x42\x08\n\x06result\"D\n\x0bImageResult\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x1e\n\x07results\x18\x02 \x03(\x0b\x32\r.PluginResult\"/\n\x0eIndexingResult\x12\x1d\n\x07results\x18\x01 \x03(\x0b\x32\x0c.ImageResult\"I\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x1f\n\x08settings\x18\x03 \x03(\x0b\x32\r.PluginConfig\"\x14\n\x12ListPluginsRequest\"0\n\x10ListPluginsReply\x12\x1c\n\x07plugins\x18\x01 \x03(\x0b\x32\x0b.PluginInfo\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"L\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12#\n\x08indexing\x18\x02 \x01(\x0b\x32\x0f.IndexingResultH\x00\x42\x08\n\x06result\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xb7\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\x12\x1f\n\ncollection\x18\x07 \x01(\x0b\x32\x0b.Collection\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x92\x01\n\x11\x46\x65\x61tureSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\x15\n\x05image\x18\x02 \x01(\x0b\x32\x06.Image\x12%\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x17.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"p\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12\"\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x14.TextSearchTerm.Flag\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\"\x8e\x01\n\x13ImageTextSearchTerm\x12\x1b\n\x07plugins\x18\x01 \x03(\x0b\x32\n.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\'\n\x04\x66lag\x18\x03 \x01(\x0e\x32\x19.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xa8\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12,\n\x08relation\x18\x05 \x01(\x0e\x32\x1a.NumberSearchTerm.Relation\x12$\n\x04\x66lag\x18\x06 \x01(\x0e\x32\x16.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x06\n\x02\x45Q\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x0e\n\nGREATER_EQ\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x42\x07\n\x05query\"\xad\x01\n\nSearchTerm\x12\x1f\n\x04text\x18\x01 \x01(\x0b\x32\x0f.TextSearchTermH\x00\x12#\n\x06number\x18\x02 \x01(\x0b\x32\x11.NumberSearchTermH\x00\x12*\n\nimage_text\x18\x03 \x01(\x0b\x32\x14.ImageTextSearchTermH\x00\x12%\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x12.FeatureSearchTermH\x00\x42\x06\n\x04term\"C\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\x12\x11\n\tuse_query\x18\x03 \x01(\x08\"\xc7\x03\n\rSearchRequest\x12\x1a\n\x05terms\x18\x01 \x03(\x0b\x32\x0b.SearchTerm\x12\'\n\x07sorting\x18\x02 \x01(\x0e\x32\x16.SearchRequest.Sorting\x12\'\n\x07mapping\x18\x03 \x01(\x0e\x32\x16.SearchRequest.Mapping\x12$\n\taggregate\x18\x04 \x01(\x0b\x32\x11.AggregateRequest\x12\x13\n\x0brandom_seed\x18\x05 \x01(\t\x12$\n\x06\x65xtras\x18\x06 \x03(\x0e\x32\x14.SearchRequest.Extra\"\x97\x01\n\x07Sorting\x12\x13\n\x0fSORTING_DEFAULT\x10\x00\x12\x16\n\x12SORTING_CLASSIFIER\x10\x01\x12\x13\n\x0fSORTING_FEATURE\x10\x02\x12\x12\n\x0eSORTING_RANDOM\x10\x03\x12\x1a\n\x16SORTING_RANDOM_FEATURE\x10\x04\x12\x1a\n\x16SORTING_RANDOM_CLUSTER\x10\x05\"0\n\x07Mapping\x12\x13\n\x0fMAPPING_DEFAULT\x10\x00\x12\x10\n\x0cMAPPING_UMAP\x10\x01\"\x1b\n\x05\x45xtra\x12\x12\n\x0e\x45XTRA_FEATURES\x10\x00\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xd5\x01\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12\x19\n\x04meta\x18\x02 \x03(\x0b\x32\x0b.ValueField\x12\x1b\n\x06origin\x18\x03 \x03(\x0b\x32\x0b.ValueField\x12\x1f\n\ncollection\x18\x07 \x01(\x0b\x32\x0b.Collection\x12%\n\nclassifier\x18\x04 \x03(\x0b\x32\x11.ClassifierResult\x12\x1f\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x0e.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\"C\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12\x1c\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x0b.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"a\n\x15ListSearchResultReply\x12#\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x12.SearchResultEntry\x12#\n\taggregate\x18\x02 \x03(\x0b\x32\x10.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\"-\n\x0cSuggestReply\x12\x1d\n\x06groups\x18\x01 \x03(\x0b\x32\r.SuggestGroup\";\n\x13\x42uildIndexerRequest\x12\x0f\n\x07rebuild\x18\x01 \x01(\x08\x12\x13\n\x0b\x63ollections\x18\x02 \x03(\t\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\x1d\n\x0b\x44umpRequest\x12\x0e\n\x06origin\x18\x01 \x01(\t\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"(\n\x0fIndexingRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\",\n\x0e\x41ggregateReply\x12\x1a\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x0b.ValueField2\xa7\x05\n\x07Indexer\x12\x38\n\x0clist_plugins\x12\x13.ListPluginsRequest\x1a\x11.ListPluginsReply\"\x00\x12(\n\x06status\x12\x0e.StatusRequest\x1a\x0c.StatusReply\"\x00\x12\x37\n\x0f\x62uild_suggester\x12\x11.SuggesterRequest\x1a\x0f.SuggesterReply\"\x00\x12\x1f\n\x03get\x12\x0b.GetRequest\x1a\t.GetReply\"\x00\x12(\n\x06search\x12\x0e.SearchRequest\x1a\x0c.SearchReply\"\x00\x12H\n\x12list_search_result\x12\x18.ListSearchResultRequest\x1a\x16.ListSearchResultReply\"\x00\x12\x31\n\taggregate\x12\x11.AggregateRequest\x1a\x0f.AggregateReply\"\x00\x12+\n\x07suggest\x12\x0f.SuggestRequest\x1a\r.SuggestReply\"\x00\x12;\n\rbuild_indexer\x12\x14.BuildIndexerRequest\x1a\x12.BuildIndexerReply\"\x00\x12K\n\x13\x62uild_feature_cache\x12\x19.BuildFeatureCacheRequest\x1a\x17.BuildFeatureCacheReply\"\x00\x12\x32\n\x08indexing\x12\x10.IndexingRequest\x1a\x0e.IndexingReply\"\x00(\x01\x30\x01\x12$\n\x04\x64ump\x12\x0c.DumpRequest\x1a\n.DumpReply\"\x00\x30\x01\x12&\n\x04load\x12\x0c.LoadRequest\x1a\n.LoadReply\"\x00(\x01\x30\x01\x42\x02P\x01\x62\x06proto3'
+  serialized_pb=b'\n\rindexer.proto\x12\x0ciart.indexer\"9\n\nCollection\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tis_public\x18\x03 \x01(\x08\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\xdf\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x1e\n\x03roi\x18\x04 \x01(\x0b\x32\x11.iart.indexer.RoI\x12&\n\x04meta\x18\x05 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x06 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.CollectionB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\"K\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\'\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x15.iart.indexer.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\xad\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x34\n\nclassifier\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.ClassifierResultH\x00\x12.\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x1b.iart.indexer.FeatureResultH\x00\x42\x08\n\x06result\"^\n\x0bImageResult\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\x12+\n\x07results\x18\x02 \x03(\x0b\x32\x1a.iart.indexer.PluginResult\"<\n\x0eIndexingResult\x12*\n\x07results\x18\x01 \x03(\x0b\x32\x19.iart.indexer.ImageResult\"V\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12,\n\x08settings\x18\x03 \x03(\x0b\x32\x1a.iart.indexer.PluginConfig\"\x14\n\x12ListPluginsRequest\"=\n\x10ListPluginsReply\x12)\n\x07plugins\x18\x01 \x03(\x0b\x32\x18.iart.indexer.PluginInfo\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"Y\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x30\n\x08indexing\x18\x02 \x01(\x0b\x32\x1c.iart.indexer.IndexingResultH\x00\x42\x08\n\x06result\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xf8\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.Collection\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb9\x01\n\x11\x46\x65\x61tureSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\"\n\x05image\x18\x02 \x01(\x0b\x32\x13.iart.indexer.Image\x12\x32\n\x04\x66lag\x18\x03 \x01(\x0e\x32$.iart.indexer.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"}\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12/\n\x04\x66lag\x18\x03 \x01(\x0e\x32!.iart.indexer.TextSearchTerm.Flag\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\"\xa8\x01\n\x13ImageTextSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\x34\n\x04\x66lag\x18\x03 \x01(\x0e\x32&.iart.indexer.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xc2\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12\x39\n\x08relation\x18\x05 \x01(\x0e\x32\'.iart.indexer.NumberSearchTerm.Relation\x12\x31\n\x04\x66lag\x18\x06 \x01(\x0e\x32#.iart.indexer.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x06\n\x02\x45Q\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x0e\n\nGREATER_EQ\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"\x1c\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x42\x07\n\x05query\"\xe1\x01\n\nSearchTerm\x12,\n\x04text\x18\x01 \x01(\x0b\x32\x1c.iart.indexer.TextSearchTermH\x00\x12\x30\n\x06number\x18\x02 \x01(\x0b\x32\x1e.iart.indexer.NumberSearchTermH\x00\x12\x37\n\nimage_text\x18\x03 \x01(\x0b\x32!.iart.indexer.ImageTextSearchTermH\x00\x12\x32\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x1f.iart.indexer.FeatureSearchTermH\x00\x42\x06\n\x04term\"C\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\x12\x11\n\tuse_query\x18\x03 \x01(\x08\"\x88\x04\n\rSearchRequest\x12\'\n\x05terms\x18\x01 \x03(\x0b\x32\x18.iart.indexer.SearchTerm\x12\x34\n\x07sorting\x18\x02 \x01(\x0e\x32#.iart.indexer.SearchRequest.Sorting\x12\x34\n\x07mapping\x18\x03 \x01(\x0e\x32#.iart.indexer.SearchRequest.Mapping\x12\x31\n\taggregate\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.AggregateRequest\x12\x13\n\x0brandom_seed\x18\x05 \x01(\t\x12\x31\n\x06\x65xtras\x18\x06 \x03(\x0e\x32!.iart.indexer.SearchRequest.Extra\"\x97\x01\n\x07Sorting\x12\x13\n\x0fSORTING_DEFAULT\x10\x00\x12\x16\n\x12SORTING_CLASSIFIER\x10\x01\x12\x13\n\x0fSORTING_FEATURE\x10\x02\x12\x12\n\x0eSORTING_RANDOM\x10\x03\x12\x1a\n\x16SORTING_RANDOM_FEATURE\x10\x04\x12\x1a\n\x16SORTING_RANDOM_CLUSTER\x10\x05\"0\n\x07Mapping\x12\x13\n\x0fMAPPING_DEFAULT\x10\x00\x12\x10\n\x0cMAPPING_UMAP\x10\x01\"\x1b\n\x05\x45xtra\x12\x12\n\x0e\x45XTRA_FEATURES\x10\x00\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\x96\x02\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.Collection\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\"P\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12)\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"{\n\x15ListSearchResultReply\x12\x30\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1f.iart.indexer.SearchResultEntry\x12\x30\n\taggregate\x18\x02 \x03(\x0b\x32\x1d.iart.indexer.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\":\n\x0cSuggestReply\x12*\n\x06groups\x18\x01 \x03(\x0b\x32\x1a.iart.indexer.SuggestGroup\";\n\x13\x42uildIndexerRequest\x12\x0f\n\x07rebuild\x18\x01 \x01(\x08\x12\x13\n\x0b\x63ollections\x18\x02 \x03(\t\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\x1d\n\x0b\x44umpRequest\x12\x0e\n\x06origin\x18\x01 \x01(\t\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"5\n\x0fIndexingRequest\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"9\n\x0e\x41ggregateReply\x12\'\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x18.iart.indexer.ValueField2\xf9\x07\n\x07Indexer\x12R\n\x0clist_plugins\x12 .iart.indexer.ListPluginsRequest\x1a\x1e.iart.indexer.ListPluginsReply\"\x00\x12\x42\n\x06status\x12\x1b.iart.indexer.StatusRequest\x1a\x19.iart.indexer.StatusReply\"\x00\x12Q\n\x0f\x62uild_suggester\x12\x1e.iart.indexer.SuggesterRequest\x1a\x1c.iart.indexer.SuggesterReply\"\x00\x12\x39\n\x03get\x12\x18.iart.indexer.GetRequest\x1a\x16.iart.indexer.GetReply\"\x00\x12\x42\n\x06search\x12\x1b.iart.indexer.SearchRequest\x1a\x19.iart.indexer.SearchReply\"\x00\x12\x62\n\x12list_search_result\x12%.iart.indexer.ListSearchResultRequest\x1a#.iart.indexer.ListSearchResultReply\"\x00\x12K\n\taggregate\x12\x1e.iart.indexer.AggregateRequest\x1a\x1c.iart.indexer.AggregateReply\"\x00\x12\x45\n\x07suggest\x12\x1c.iart.indexer.SuggestRequest\x1a\x1a.iart.indexer.SuggestReply\"\x00\x12U\n\rbuild_indexer\x12!.iart.indexer.BuildIndexerRequest\x1a\x1f.iart.indexer.BuildIndexerReply\"\x00\x12\x65\n\x13\x62uild_feature_cache\x12&.iart.indexer.BuildFeatureCacheRequest\x1a$.iart.indexer.BuildFeatureCacheReply\"\x00\x12L\n\x08indexing\x12\x1d.iart.indexer.IndexingRequest\x1a\x1b.iart.indexer.IndexingReply\"\x00(\x01\x30\x01\x12>\n\x04\x64ump\x12\x19.iart.indexer.DumpRequest\x1a\x17.iart.indexer.DumpReply\"\x00\x30\x01\x12@\n\x04load\x12\x19.iart.indexer.LoadRequest\x1a\x17.iart.indexer.LoadReply\"\x00(\x01\x30\x01\x42\x02P\x01\x62\x06proto3'
 )
 
 
 
 _FEATURESEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   name='Flag',
-  full_name='FeatureSearchTerm.Flag',
+  full_name='iart.indexer.FeatureSearchTerm.Flag',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -44,14 +44,14 @@ _FEATURESEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1646,
-  serialized_end=1680,
+  serialized_start=1933,
+  serialized_end=1967,
 )
 _sym_db.RegisterEnumDescriptor(_FEATURESEARCHTERM_FLAG)
 
 _TEXTSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   name='Flag',
-  full_name='TextSearchTerm.Flag',
+  full_name='iart.indexer.TextSearchTerm.Flag',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -69,14 +69,14 @@ _TEXTSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1766,
-  serialized_end=1794,
+  serialized_start=2066,
+  serialized_end=2094,
 )
 _sym_db.RegisterEnumDescriptor(_TEXTSEARCHTERM_FLAG)
 
 _IMAGETEXTSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   name='Flag',
-  full_name='ImageTextSearchTerm.Flag',
+  full_name='iart.indexer.ImageTextSearchTerm.Flag',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -94,14 +94,14 @@ _IMAGETEXTSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1646,
-  serialized_end=1680,
+  serialized_start=1933,
+  serialized_end=1967,
 )
 _sym_db.RegisterEnumDescriptor(_IMAGETEXTSEARCHTERM_FLAG)
 
 _NUMBERSEARCHTERM_RELATION = _descriptor.EnumDescriptor(
   name='Relation',
-  full_name='NumberSearchTerm.Relation',
+  full_name='iart.indexer.NumberSearchTerm.Relation',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -134,14 +134,14 @@ _NUMBERSEARCHTERM_RELATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2129,
-  serialized_end=2199,
+  serialized_start=2481,
+  serialized_end=2551,
 )
 _sym_db.RegisterEnumDescriptor(_NUMBERSEARCHTERM_RELATION)
 
 _NUMBERSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   name='Flag',
-  full_name='NumberSearchTerm.Flag',
+  full_name='iart.indexer.NumberSearchTerm.Flag',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -159,14 +159,14 @@ _NUMBERSEARCHTERM_FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1766,
-  serialized_end=1794,
+  serialized_start=2066,
+  serialized_end=2094,
 )
 _sym_db.RegisterEnumDescriptor(_NUMBERSEARCHTERM_FLAG)
 
 _SEARCHREQUEST_SORTING = _descriptor.EnumDescriptor(
   name='Sorting',
-  full_name='SearchRequest.Sorting',
+  full_name='iart.indexer.SearchRequest.Sorting',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -204,14 +204,14 @@ _SEARCHREQUEST_SORTING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2711,
-  serialized_end=2862,
+  serialized_start=3180,
+  serialized_end=3331,
 )
 _sym_db.RegisterEnumDescriptor(_SEARCHREQUEST_SORTING)
 
 _SEARCHREQUEST_MAPPING = _descriptor.EnumDescriptor(
   name='Mapping',
-  full_name='SearchRequest.Mapping',
+  full_name='iart.indexer.SearchRequest.Mapping',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -229,14 +229,14 @@ _SEARCHREQUEST_MAPPING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2864,
-  serialized_end=2912,
+  serialized_start=3333,
+  serialized_end=3381,
 )
 _sym_db.RegisterEnumDescriptor(_SEARCHREQUEST_MAPPING)
 
 _SEARCHREQUEST_EXTRA = _descriptor.EnumDescriptor(
   name='Extra',
-  full_name='SearchRequest.Extra',
+  full_name='iart.indexer.SearchRequest.Extra',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -249,36 +249,36 @@ _SEARCHREQUEST_EXTRA = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2914,
-  serialized_end=2941,
+  serialized_start=3383,
+  serialized_end=3410,
 )
 _sym_db.RegisterEnumDescriptor(_SEARCHREQUEST_EXTRA)
 
 
 _COLLECTION = _descriptor.Descriptor(
   name='Collection',
-  full_name='Collection',
+  full_name='iart.indexer.Collection',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='Collection.id', index=0,
+      name='id', full_name='iart.indexer.Collection.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='name', full_name='Collection.name', index=1,
+      name='name', full_name='iart.indexer.Collection.name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='is_public', full_name='Collection.is_public', index=2,
+      name='is_public', full_name='iart.indexer.Collection.is_public', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -296,28 +296,28 @@ _COLLECTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17,
-  serialized_end=74,
+  serialized_start=31,
+  serialized_end=88,
 )
 
 
 _PLUGINRUN = _descriptor.Descriptor(
   name='PluginRun',
-  full_name='PluginRun',
+  full_name='iart.indexer.PluginRun',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='PluginRun.name', index=0,
+      name='name', full_name='iart.indexer.PluginRun.name', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='weight', full_name='PluginRun.weight', index=1,
+      name='weight', full_name='iart.indexer.PluginRun.weight', index=1,
       number=2, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -335,42 +335,42 @@ _PLUGINRUN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=76,
-  serialized_end=117,
+  serialized_start=90,
+  serialized_end=131,
 )
 
 
 _ROI = _descriptor.Descriptor(
   name='RoI',
-  full_name='RoI',
+  full_name='iart.indexer.RoI',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='x', full_name='RoI.x', index=0,
+      name='x', full_name='iart.indexer.RoI.x', index=0,
       number=1, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='y', full_name='RoI.y', index=1,
+      name='y', full_name='iart.indexer.RoI.y', index=1,
       number=2, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='width', full_name='RoI.width', index=2,
+      name='width', full_name='iart.indexer.RoI.width', index=2,
       number=3, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='height', full_name='RoI.height', index=3,
+      name='height', full_name='iart.indexer.RoI.height', index=3,
       number=4, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -388,42 +388,42 @@ _ROI = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=119,
-  serialized_end=177,
+  serialized_start=133,
+  serialized_end=191,
 )
 
 
 _VALUEFIELD = _descriptor.Descriptor(
   name='ValueField',
-  full_name='ValueField',
+  full_name='iart.indexer.ValueField',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='ValueField.key', index=0,
+      name='key', full_name='iart.indexer.ValueField.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='string_val', full_name='ValueField.string_val', index=1,
+      name='string_val', full_name='iart.indexer.ValueField.string_val', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='int_val', full_name='ValueField.int_val', index=2,
+      name='int_val', full_name='iart.indexer.ValueField.int_val', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='float_val', full_name='ValueField.float_val', index=3,
+      name='float_val', full_name='iart.indexer.ValueField.float_val', index=3,
       number=4, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -441,68 +441,68 @@ _VALUEFIELD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='value', full_name='ValueField.value',
+      name='value', full_name='iart.indexer.ValueField.value',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=179,
-  serialized_end=275,
+  serialized_start=193,
+  serialized_end=289,
 )
 
 
 _IMAGE = _descriptor.Descriptor(
   name='Image',
-  full_name='Image',
+  full_name='iart.indexer.Image',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='Image.id', index=0,
+      name='id', full_name='iart.indexer.Image.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='path', full_name='Image.path', index=1,
+      name='path', full_name='iart.indexer.Image.path', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='encoded', full_name='Image.encoded', index=2,
+      name='encoded', full_name='iart.indexer.Image.encoded', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='roi', full_name='Image.roi', index=3,
+      name='roi', full_name='iart.indexer.Image.roi', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='meta', full_name='Image.meta', index=4,
+      name='meta', full_name='iart.indexer.Image.meta', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='origin', full_name='Image.origin', index=5,
+      name='origin', full_name='iart.indexer.Image.origin', index=5,
       number=6, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='collection', full_name='Image.collection', index=6,
+      name='collection', full_name='iart.indexer.Image.collection', index=6,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -520,47 +520,47 @@ _IMAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='image', full_name='Image.image',
+      name='image', full_name='iart.indexer.Image.image',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=278,
-  serialized_end=449,
+  serialized_start=292,
+  serialized_end=515,
 )
 
 
 _PLUGINCONFIG = _descriptor.Descriptor(
   name='PluginConfig',
-  full_name='PluginConfig',
+  full_name='iart.indexer.PluginConfig',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='PluginConfig.name', index=0,
+      name='name', full_name='iart.indexer.PluginConfig.name', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='default', full_name='PluginConfig.default', index=1,
+      name='default', full_name='iart.indexer.PluginConfig.default', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='type', full_name='PluginConfig.type', index=2,
+      name='type', full_name='iart.indexer.PluginConfig.type', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='state', full_name='PluginConfig.state', index=3,
+      name='state', full_name='iart.indexer.PluginConfig.state', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -578,35 +578,35 @@ _PLUGINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=451,
-  serialized_end=525,
+  serialized_start=517,
+  serialized_end=591,
 )
 
 
 _CONCEPT = _descriptor.Descriptor(
   name='Concept',
-  full_name='Concept',
+  full_name='iart.indexer.Concept',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='concept', full_name='Concept.concept', index=0,
+      name='concept', full_name='iart.indexer.Concept.concept', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='type', full_name='Concept.type', index=1,
+      name='type', full_name='iart.indexer.Concept.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='prob', full_name='Concept.prob', index=2,
+      name='prob', full_name='iart.indexer.Concept.prob', index=2,
       number=3, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -624,28 +624,28 @@ _CONCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=527,
-  serialized_end=581,
+  serialized_start=593,
+  serialized_end=647,
 )
 
 
 _CLASSIFIERRESULT = _descriptor.Descriptor(
   name='ClassifierResult',
-  full_name='ClassifierResult',
+  full_name='iart.indexer.ClassifierResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='plugin', full_name='ClassifierResult.plugin', index=0,
+      name='plugin', full_name='iart.indexer.ClassifierResult.plugin', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='concepts', full_name='ClassifierResult.concepts', index=1,
+      name='concepts', full_name='iart.indexer.ClassifierResult.concepts', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -663,42 +663,42 @@ _CLASSIFIERRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=583,
-  serialized_end=645,
+  serialized_start=649,
+  serialized_end=724,
 )
 
 
 _FEATURERESULT = _descriptor.Descriptor(
   name='FeatureResult',
-  full_name='FeatureResult',
+  full_name='iart.indexer.FeatureResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='plugin', full_name='FeatureResult.plugin', index=0,
+      name='plugin', full_name='iart.indexer.FeatureResult.plugin', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='type', full_name='FeatureResult.type', index=1,
+      name='type', full_name='iart.indexer.FeatureResult.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='binary', full_name='FeatureResult.binary', index=2,
+      name='binary', full_name='iart.indexer.FeatureResult.binary', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='feature', full_name='FeatureResult.feature', index=3,
+      name='feature', full_name='iart.indexer.FeatureResult.feature', index=3,
       number=4, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -716,49 +716,49 @@ _FEATURERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=647,
-  serialized_end=725,
+  serialized_start=726,
+  serialized_end=804,
 )
 
 
 _PLUGINRESULT = _descriptor.Descriptor(
   name='PluginResult',
-  full_name='PluginResult',
+  full_name='iart.indexer.PluginResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='plugin', full_name='PluginResult.plugin', index=0,
+      name='plugin', full_name='iart.indexer.PluginResult.plugin', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='type', full_name='PluginResult.type', index=1,
+      name='type', full_name='iart.indexer.PluginResult.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='version', full_name='PluginResult.version', index=2,
+      name='version', full_name='iart.indexer.PluginResult.version', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='classifier', full_name='PluginResult.classifier', index=3,
+      name='classifier', full_name='iart.indexer.PluginResult.classifier', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='feature', full_name='PluginResult.feature', index=4,
+      name='feature', full_name='iart.indexer.PluginResult.feature', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -776,33 +776,33 @@ _PLUGINRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='result', full_name='PluginResult.result',
+      name='result', full_name='iart.indexer.PluginResult.result',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=728,
-  serialized_end=875,
+  serialized_start=807,
+  serialized_end=980,
 )
 
 
 _IMAGERESULT = _descriptor.Descriptor(
   name='ImageResult',
-  full_name='ImageResult',
+  full_name='iart.indexer.ImageResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='image', full_name='ImageResult.image', index=0,
+      name='image', full_name='iart.indexer.ImageResult.image', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='results', full_name='ImageResult.results', index=1,
+      name='results', full_name='iart.indexer.ImageResult.results', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -820,21 +820,21 @@ _IMAGERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=877,
-  serialized_end=945,
+  serialized_start=982,
+  serialized_end=1076,
 )
 
 
 _INDEXINGRESULT = _descriptor.Descriptor(
   name='IndexingResult',
-  full_name='IndexingResult',
+  full_name='iart.indexer.IndexingResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='results', full_name='IndexingResult.results', index=0,
+      name='results', full_name='iart.indexer.IndexingResult.results', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -852,35 +852,35 @@ _INDEXINGRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=947,
-  serialized_end=994,
+  serialized_start=1078,
+  serialized_end=1138,
 )
 
 
 _PLUGININFO = _descriptor.Descriptor(
   name='PluginInfo',
-  full_name='PluginInfo',
+  full_name='iart.indexer.PluginInfo',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='PluginInfo.name', index=0,
+      name='name', full_name='iart.indexer.PluginInfo.name', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='type', full_name='PluginInfo.type', index=1,
+      name='type', full_name='iart.indexer.PluginInfo.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='settings', full_name='PluginInfo.settings', index=2,
+      name='settings', full_name='iart.indexer.PluginInfo.settings', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -898,14 +898,14 @@ _PLUGININFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=996,
-  serialized_end=1069,
+  serialized_start=1140,
+  serialized_end=1226,
 )
 
 
 _LISTPLUGINSREQUEST = _descriptor.Descriptor(
   name='ListPluginsRequest',
-  full_name='ListPluginsRequest',
+  full_name='iart.indexer.ListPluginsRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -923,21 +923,21 @@ _LISTPLUGINSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1071,
-  serialized_end=1091,
+  serialized_start=1228,
+  serialized_end=1248,
 )
 
 
 _LISTPLUGINSREPLY = _descriptor.Descriptor(
   name='ListPluginsReply',
-  full_name='ListPluginsReply',
+  full_name='iart.indexer.ListPluginsReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='plugins', full_name='ListPluginsReply.plugins', index=0,
+      name='plugins', full_name='iart.indexer.ListPluginsReply.plugins', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -955,21 +955,21 @@ _LISTPLUGINSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1093,
-  serialized_end=1141,
+  serialized_start=1250,
+  serialized_end=1311,
 )
 
 
 _STATUSREQUEST = _descriptor.Descriptor(
   name='StatusRequest',
-  full_name='StatusRequest',
+  full_name='iart.indexer.StatusRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='StatusRequest.id', index=0,
+      name='id', full_name='iart.indexer.StatusRequest.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -987,28 +987,28 @@ _STATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1143,
-  serialized_end=1170,
+  serialized_start=1313,
+  serialized_end=1340,
 )
 
 
 _STATUSREPLY = _descriptor.Descriptor(
   name='StatusReply',
-  full_name='StatusReply',
+  full_name='iart.indexer.StatusReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='status', full_name='StatusReply.status', index=0,
+      name='status', full_name='iart.indexer.StatusReply.status', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='indexing', full_name='StatusReply.indexing', index=1,
+      name='indexing', full_name='iart.indexer.StatusReply.indexing', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -1026,26 +1026,26 @@ _STATUSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='result', full_name='StatusReply.result',
+      name='result', full_name='iart.indexer.StatusReply.result',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1172,
-  serialized_end=1248,
+  serialized_start=1342,
+  serialized_end=1431,
 )
 
 
 _GETREQUEST = _descriptor.Descriptor(
   name='GetRequest',
-  full_name='GetRequest',
+  full_name='iart.indexer.GetRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='GetRequest.id', index=0,
+      name='id', full_name='iart.indexer.GetRequest.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1063,56 +1063,56 @@ _GETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1250,
-  serialized_end=1274,
+  serialized_start=1433,
+  serialized_end=1457,
 )
 
 
 _GETREPLY = _descriptor.Descriptor(
   name='GetReply',
-  full_name='GetReply',
+  full_name='iart.indexer.GetReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='GetReply.id', index=0,
+      name='id', full_name='iart.indexer.GetReply.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='meta', full_name='GetReply.meta', index=1,
+      name='meta', full_name='iart.indexer.GetReply.meta', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='origin', full_name='GetReply.origin', index=2,
+      name='origin', full_name='iart.indexer.GetReply.origin', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='classifier', full_name='GetReply.classifier', index=3,
+      name='classifier', full_name='iart.indexer.GetReply.classifier', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='feature', full_name='GetReply.feature', index=4,
+      name='feature', full_name='iart.indexer.GetReply.feature', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='collection', full_name='GetReply.collection', index=5,
+      name='collection', full_name='iart.indexer.GetReply.collection', index=5,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -1130,21 +1130,21 @@ _GETREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1277,
-  serialized_end=1460,
+  serialized_start=1460,
+  serialized_end=1708,
 )
 
 
 _SUGGESTERREQUEST = _descriptor.Descriptor(
   name='SuggesterRequest',
-  full_name='SuggesterRequest',
+  full_name='iart.indexer.SuggesterRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='field_names', full_name='SuggesterRequest.field_names', index=0,
+      name='field_names', full_name='iart.indexer.SuggesterRequest.field_names', index=0,
       number=1, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1162,21 +1162,21 @@ _SUGGESTERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1462,
-  serialized_end=1501,
+  serialized_start=1710,
+  serialized_end=1749,
 )
 
 
 _SUGGESTERREPLY = _descriptor.Descriptor(
   name='SuggesterReply',
-  full_name='SuggesterReply',
+  full_name='iart.indexer.SuggesterReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='SuggesterReply.id', index=0,
+      name='id', full_name='iart.indexer.SuggesterReply.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1194,35 +1194,35 @@ _SUGGESTERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1503,
-  serialized_end=1531,
+  serialized_start=1751,
+  serialized_end=1779,
 )
 
 
 _FEATURESEARCHTERM = _descriptor.Descriptor(
   name='FeatureSearchTerm',
-  full_name='FeatureSearchTerm',
+  full_name='iart.indexer.FeatureSearchTerm',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='plugins', full_name='FeatureSearchTerm.plugins', index=0,
+      name='plugins', full_name='iart.indexer.FeatureSearchTerm.plugins', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image', full_name='FeatureSearchTerm.image', index=1,
+      name='image', full_name='iart.indexer.FeatureSearchTerm.image', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='flag', full_name='FeatureSearchTerm.flag', index=2,
+      name='flag', full_name='iart.indexer.FeatureSearchTerm.flag', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1241,35 +1241,35 @@ _FEATURESEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1534,
-  serialized_end=1680,
+  serialized_start=1782,
+  serialized_end=1967,
 )
 
 
 _TEXTSEARCHTERM = _descriptor.Descriptor(
   name='TextSearchTerm',
-  full_name='TextSearchTerm',
+  full_name='iart.indexer.TextSearchTerm',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='query', full_name='TextSearchTerm.query', index=0,
+      name='query', full_name='iart.indexer.TextSearchTerm.query', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='field', full_name='TextSearchTerm.field', index=1,
+      name='field', full_name='iart.indexer.TextSearchTerm.field', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='flag', full_name='TextSearchTerm.flag', index=2,
+      name='flag', full_name='iart.indexer.TextSearchTerm.flag', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1288,35 +1288,35 @@ _TEXTSEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1682,
-  serialized_end=1794,
+  serialized_start=1969,
+  serialized_end=2094,
 )
 
 
 _IMAGETEXTSEARCHTERM = _descriptor.Descriptor(
   name='ImageTextSearchTerm',
-  full_name='ImageTextSearchTerm',
+  full_name='iart.indexer.ImageTextSearchTerm',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='plugins', full_name='ImageTextSearchTerm.plugins', index=0,
+      name='plugins', full_name='iart.indexer.ImageTextSearchTerm.plugins', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='query', full_name='ImageTextSearchTerm.query', index=1,
+      name='query', full_name='iart.indexer.ImageTextSearchTerm.query', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='flag', full_name='ImageTextSearchTerm.flag', index=2,
+      name='flag', full_name='iart.indexer.ImageTextSearchTerm.flag', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1335,56 +1335,56 @@ _IMAGETEXTSEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1797,
-  serialized_end=1939,
+  serialized_start=2097,
+  serialized_end=2265,
 )
 
 
 _NUMBERSEARCHTERM = _descriptor.Descriptor(
   name='NumberSearchTerm',
-  full_name='NumberSearchTerm',
+  full_name='iart.indexer.NumberSearchTerm',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='field', full_name='NumberSearchTerm.field', index=0,
+      name='field', full_name='iart.indexer.NumberSearchTerm.field', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='string_query', full_name='NumberSearchTerm.string_query', index=1,
+      name='string_query', full_name='iart.indexer.NumberSearchTerm.string_query', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='int_query', full_name='NumberSearchTerm.int_query', index=2,
+      name='int_query', full_name='iart.indexer.NumberSearchTerm.int_query', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='float_query', full_name='NumberSearchTerm.float_query', index=3,
+      name='float_query', full_name='iart.indexer.NumberSearchTerm.float_query', index=3,
       number=4, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='relation', full_name='NumberSearchTerm.relation', index=4,
+      name='relation', full_name='iart.indexer.NumberSearchTerm.relation', index=4,
       number=5, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='flag', full_name='NumberSearchTerm.flag', index=5,
+      name='flag', full_name='iart.indexer.NumberSearchTerm.flag', index=5,
       number=6, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1404,47 +1404,47 @@ _NUMBERSEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='query', full_name='NumberSearchTerm.query',
+      name='query', full_name='iart.indexer.NumberSearchTerm.query',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1942,
-  serialized_end=2238,
+  serialized_start=2268,
+  serialized_end=2590,
 )
 
 
 _SEARCHTERM = _descriptor.Descriptor(
   name='SearchTerm',
-  full_name='SearchTerm',
+  full_name='iart.indexer.SearchTerm',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='text', full_name='SearchTerm.text', index=0,
+      name='text', full_name='iart.indexer.SearchTerm.text', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='number', full_name='SearchTerm.number', index=1,
+      name='number', full_name='iart.indexer.SearchTerm.number', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image_text', full_name='SearchTerm.image_text', index=2,
+      name='image_text', full_name='iart.indexer.SearchTerm.image_text', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='feature', full_name='SearchTerm.feature', index=3,
+      name='feature', full_name='iart.indexer.SearchTerm.feature', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -1462,40 +1462,40 @@ _SEARCHTERM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='term', full_name='SearchTerm.term',
+      name='term', full_name='iart.indexer.SearchTerm.term',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2241,
-  serialized_end=2414,
+  serialized_start=2593,
+  serialized_end=2818,
 )
 
 
 _AGGREGATEREQUEST = _descriptor.Descriptor(
   name='AggregateRequest',
-  full_name='AggregateRequest',
+  full_name='iart.indexer.AggregateRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='fields', full_name='AggregateRequest.fields', index=0,
+      name='fields', full_name='iart.indexer.AggregateRequest.fields', index=0,
       number=1, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='size', full_name='AggregateRequest.size', index=1,
+      name='size', full_name='iart.indexer.AggregateRequest.size', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='use_query', full_name='AggregateRequest.use_query', index=2,
+      name='use_query', full_name='iart.indexer.AggregateRequest.use_query', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -1513,56 +1513,56 @@ _AGGREGATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2416,
-  serialized_end=2483,
+  serialized_start=2820,
+  serialized_end=2887,
 )
 
 
 _SEARCHREQUEST = _descriptor.Descriptor(
   name='SearchRequest',
-  full_name='SearchRequest',
+  full_name='iart.indexer.SearchRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='terms', full_name='SearchRequest.terms', index=0,
+      name='terms', full_name='iart.indexer.SearchRequest.terms', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='sorting', full_name='SearchRequest.sorting', index=1,
+      name='sorting', full_name='iart.indexer.SearchRequest.sorting', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='mapping', full_name='SearchRequest.mapping', index=2,
+      name='mapping', full_name='iart.indexer.SearchRequest.mapping', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='aggregate', full_name='SearchRequest.aggregate', index=3,
+      name='aggregate', full_name='iart.indexer.SearchRequest.aggregate', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='random_seed', full_name='SearchRequest.random_seed', index=4,
+      name='random_seed', full_name='iart.indexer.SearchRequest.random_seed', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='extras', full_name='SearchRequest.extras', index=5,
+      name='extras', full_name='iart.indexer.SearchRequest.extras', index=5,
       number=6, type=14, cpp_type=8, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1583,21 +1583,21 @@ _SEARCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2486,
-  serialized_end=2941,
+  serialized_start=2890,
+  serialized_end=3410,
 )
 
 
 _SEARCHREPLY = _descriptor.Descriptor(
   name='SearchReply',
-  full_name='SearchReply',
+  full_name='iart.indexer.SearchReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='SearchReply.id', index=0,
+      name='id', full_name='iart.indexer.SearchReply.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1615,63 +1615,63 @@ _SEARCHREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2943,
-  serialized_end=2968,
+  serialized_start=3412,
+  serialized_end=3437,
 )
 
 
 _SEARCHRESULTENTRY = _descriptor.Descriptor(
   name='SearchResultEntry',
-  full_name='SearchResultEntry',
+  full_name='iart.indexer.SearchResultEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='SearchResultEntry.id', index=0,
+      name='id', full_name='iart.indexer.SearchResultEntry.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='meta', full_name='SearchResultEntry.meta', index=1,
+      name='meta', full_name='iart.indexer.SearchResultEntry.meta', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='origin', full_name='SearchResultEntry.origin', index=2,
+      name='origin', full_name='iart.indexer.SearchResultEntry.origin', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='collection', full_name='SearchResultEntry.collection', index=3,
+      name='collection', full_name='iart.indexer.SearchResultEntry.collection', index=3,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='classifier', full_name='SearchResultEntry.classifier', index=4,
+      name='classifier', full_name='iart.indexer.SearchResultEntry.classifier', index=4,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='feature', full_name='SearchResultEntry.feature', index=5,
+      name='feature', full_name='iart.indexer.SearchResultEntry.feature', index=5,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='coordinates', full_name='SearchResultEntry.coordinates', index=6,
+      name='coordinates', full_name='iart.indexer.SearchResultEntry.coordinates', index=6,
       number=6, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1689,414 +1689,30 @@ _SEARCHRESULTENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2971,
-  serialized_end=3184,
+  serialized_start=3440,
+  serialized_end=3718,
 )
 
 
 _AGGREGATERESULT = _descriptor.Descriptor(
   name='AggregateResult',
-  full_name='AggregateResult',
+  full_name='iart.indexer.AggregateResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='field_name', full_name='AggregateResult.field_name', index=0,
+      name='field_name', full_name='iart.indexer.AggregateResult.field_name', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='entries', full_name='AggregateResult.entries', index=1,
+      name='entries', full_name='iart.indexer.AggregateResult.entries', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3186,
-  serialized_end=3253,
-)
-
-
-_LISTSEARCHRESULTREQUEST = _descriptor.Descriptor(
-  name='ListSearchResultRequest',
-  full_name='ListSearchResultRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='ListSearchResultRequest.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3255,
-  serialized_end=3292,
-)
-
-
-_LISTSEARCHRESULTREPLY = _descriptor.Descriptor(
-  name='ListSearchResultReply',
-  full_name='ListSearchResultReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='entries', full_name='ListSearchResultReply.entries', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='aggregate', full_name='ListSearchResultReply.aggregate', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3294,
-  serialized_end=3391,
-)
-
-
-_SUGGESTGROUP = _descriptor.Descriptor(
-  name='SuggestGroup',
-  full_name='SuggestGroup',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='group', full_name='SuggestGroup.group', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='suggestions', full_name='SuggestGroup.suggestions', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3393,
-  serialized_end=3443,
-)
-
-
-_SUGGESTREQUEST = _descriptor.Descriptor(
-  name='SuggestRequest',
-  full_name='SuggestRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='query', full_name='SuggestRequest.query', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3445,
-  serialized_end=3476,
-)
-
-
-_SUGGESTREPLY = _descriptor.Descriptor(
-  name='SuggestReply',
-  full_name='SuggestReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='groups', full_name='SuggestReply.groups', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3478,
-  serialized_end=3523,
-)
-
-
-_BUILDINDEXERREQUEST = _descriptor.Descriptor(
-  name='BuildIndexerRequest',
-  full_name='BuildIndexerRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='rebuild', full_name='BuildIndexerRequest.rebuild', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='collections', full_name='BuildIndexerRequest.collections', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3525,
-  serialized_end=3584,
-)
-
-
-_BUILDINDEXERREPLY = _descriptor.Descriptor(
-  name='BuildIndexerReply',
-  full_name='BuildIndexerReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3586,
-  serialized_end=3605,
-)
-
-
-_BUILDFEATURECACHEREQUEST = _descriptor.Descriptor(
-  name='BuildFeatureCacheRequest',
-  full_name='BuildFeatureCacheRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3607,
-  serialized_end=3633,
-)
-
-
-_BUILDFEATURECACHEREPLY = _descriptor.Descriptor(
-  name='BuildFeatureCacheReply',
-  full_name='BuildFeatureCacheReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3635,
-  serialized_end=3659,
-)
-
-
-_DUMPREQUEST = _descriptor.Descriptor(
-  name='DumpRequest',
-  full_name='DumpRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='origin', full_name='DumpRequest.origin', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3661,
-  serialized_end=3690,
-)
-
-
-_DUMPREPLY = _descriptor.Descriptor(
-  name='DumpReply',
-  full_name='DumpReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='entry', full_name='DumpReply.entry', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3692,
-  serialized_end=3718,
-)
-
-
-_LOADREQUEST = _descriptor.Descriptor(
-  name='LoadRequest',
-  full_name='LoadRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='entry', full_name='LoadRequest.entry', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -2113,27 +1729,411 @@ _LOADREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=3720,
-  serialized_end=3748,
+  serialized_end=3800,
 )
 
 
-_LOADREPLY = _descriptor.Descriptor(
-  name='LoadReply',
-  full_name='LoadReply',
+_LISTSEARCHRESULTREQUEST = _descriptor.Descriptor(
+  name='ListSearchResultRequest',
+  full_name='iart.indexer.ListSearchResultRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='status', full_name='LoadReply.status', index=0,
+      name='id', full_name='iart.indexer.ListSearchResultRequest.id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3802,
+  serialized_end=3839,
+)
+
+
+_LISTSEARCHRESULTREPLY = _descriptor.Descriptor(
+  name='ListSearchResultReply',
+  full_name='iart.indexer.ListSearchResultReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='entries', full_name='iart.indexer.ListSearchResultReply.entries', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='aggregate', full_name='iart.indexer.ListSearchResultReply.aggregate', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3841,
+  serialized_end=3964,
+)
+
+
+_SUGGESTGROUP = _descriptor.Descriptor(
+  name='SuggestGroup',
+  full_name='iart.indexer.SuggestGroup',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='group', full_name='iart.indexer.SuggestGroup.group', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='id', full_name='LoadReply.id', index=1,
+      name='suggestions', full_name='iart.indexer.SuggestGroup.suggestions', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3966,
+  serialized_end=4016,
+)
+
+
+_SUGGESTREQUEST = _descriptor.Descriptor(
+  name='SuggestRequest',
+  full_name='iart.indexer.SuggestRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='query', full_name='iart.indexer.SuggestRequest.query', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4018,
+  serialized_end=4049,
+)
+
+
+_SUGGESTREPLY = _descriptor.Descriptor(
+  name='SuggestReply',
+  full_name='iart.indexer.SuggestReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='groups', full_name='iart.indexer.SuggestReply.groups', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4051,
+  serialized_end=4109,
+)
+
+
+_BUILDINDEXERREQUEST = _descriptor.Descriptor(
+  name='BuildIndexerRequest',
+  full_name='iart.indexer.BuildIndexerRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='rebuild', full_name='iart.indexer.BuildIndexerRequest.rebuild', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='collections', full_name='iart.indexer.BuildIndexerRequest.collections', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4111,
+  serialized_end=4170,
+)
+
+
+_BUILDINDEXERREPLY = _descriptor.Descriptor(
+  name='BuildIndexerReply',
+  full_name='iart.indexer.BuildIndexerReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4172,
+  serialized_end=4191,
+)
+
+
+_BUILDFEATURECACHEREQUEST = _descriptor.Descriptor(
+  name='BuildFeatureCacheRequest',
+  full_name='iart.indexer.BuildFeatureCacheRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4193,
+  serialized_end=4219,
+)
+
+
+_BUILDFEATURECACHEREPLY = _descriptor.Descriptor(
+  name='BuildFeatureCacheReply',
+  full_name='iart.indexer.BuildFeatureCacheReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4221,
+  serialized_end=4245,
+)
+
+
+_DUMPREQUEST = _descriptor.Descriptor(
+  name='DumpRequest',
+  full_name='iart.indexer.DumpRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='origin', full_name='iart.indexer.DumpRequest.origin', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4247,
+  serialized_end=4276,
+)
+
+
+_DUMPREPLY = _descriptor.Descriptor(
+  name='DumpReply',
+  full_name='iart.indexer.DumpReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='entry', full_name='iart.indexer.DumpReply.entry', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4278,
+  serialized_end=4304,
+)
+
+
+_LOADREQUEST = _descriptor.Descriptor(
+  name='LoadRequest',
+  full_name='iart.indexer.LoadRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='entry', full_name='iart.indexer.LoadRequest.entry', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4306,
+  serialized_end=4334,
+)
+
+
+_LOADREPLY = _descriptor.Descriptor(
+  name='LoadReply',
+  full_name='iart.indexer.LoadReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='status', full_name='iart.indexer.LoadReply.status', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='id', full_name='iart.indexer.LoadReply.id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -2151,21 +2151,21 @@ _LOADREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3750,
-  serialized_end=3789,
+  serialized_start=4336,
+  serialized_end=4375,
 )
 
 
 _INDEXINGREQUEST = _descriptor.Descriptor(
   name='IndexingRequest',
-  full_name='IndexingRequest',
+  full_name='iart.indexer.IndexingRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='image', full_name='IndexingRequest.image', index=0,
+      name='image', full_name='iart.indexer.IndexingRequest.image', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -2183,28 +2183,28 @@ _INDEXINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3791,
-  serialized_end=3831,
+  serialized_start=4377,
+  serialized_end=4430,
 )
 
 
 _INDEXINGREPLY = _descriptor.Descriptor(
   name='IndexingReply',
-  full_name='IndexingReply',
+  full_name='iart.indexer.IndexingReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='status', full_name='IndexingReply.status', index=0,
+      name='status', full_name='iart.indexer.IndexingReply.status', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='id', full_name='IndexingReply.id', index=1,
+      name='id', full_name='iart.indexer.IndexingReply.id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -2222,21 +2222,21 @@ _INDEXINGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3833,
-  serialized_end=3876,
+  serialized_start=4432,
+  serialized_end=4475,
 )
 
 
 _AGGREGATEREPLY = _descriptor.Descriptor(
   name='AggregateReply',
-  full_name='AggregateReply',
+  full_name='iart.indexer.AggregateReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='field', full_name='AggregateReply.field', index=0,
+      name='field', full_name='iart.indexer.AggregateReply.field', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -2254,8 +2254,8 @@ _AGGREGATEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3878,
-  serialized_end=3922,
+  serialized_start=4477,
+  serialized_end=4534,
 )
 
 _VALUEFIELD.oneofs_by_name['value'].fields.append(
@@ -2409,329 +2409,329 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 Collection = _reflection.GeneratedProtocolMessageType('Collection', (_message.Message,), {
   'DESCRIPTOR' : _COLLECTION,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:Collection)
+  # @@protoc_insertion_point(class_scope:iart.indexer.Collection)
   })
 _sym_db.RegisterMessage(Collection)
 
 PluginRun = _reflection.GeneratedProtocolMessageType('PluginRun', (_message.Message,), {
   'DESCRIPTOR' : _PLUGINRUN,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:PluginRun)
+  # @@protoc_insertion_point(class_scope:iart.indexer.PluginRun)
   })
 _sym_db.RegisterMessage(PluginRun)
 
 RoI = _reflection.GeneratedProtocolMessageType('RoI', (_message.Message,), {
   'DESCRIPTOR' : _ROI,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:RoI)
+  # @@protoc_insertion_point(class_scope:iart.indexer.RoI)
   })
 _sym_db.RegisterMessage(RoI)
 
 ValueField = _reflection.GeneratedProtocolMessageType('ValueField', (_message.Message,), {
   'DESCRIPTOR' : _VALUEFIELD,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ValueField)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ValueField)
   })
 _sym_db.RegisterMessage(ValueField)
 
 Image = _reflection.GeneratedProtocolMessageType('Image', (_message.Message,), {
   'DESCRIPTOR' : _IMAGE,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:Image)
+  # @@protoc_insertion_point(class_scope:iart.indexer.Image)
   })
 _sym_db.RegisterMessage(Image)
 
 PluginConfig = _reflection.GeneratedProtocolMessageType('PluginConfig', (_message.Message,), {
   'DESCRIPTOR' : _PLUGINCONFIG,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:PluginConfig)
+  # @@protoc_insertion_point(class_scope:iart.indexer.PluginConfig)
   })
 _sym_db.RegisterMessage(PluginConfig)
 
 Concept = _reflection.GeneratedProtocolMessageType('Concept', (_message.Message,), {
   'DESCRIPTOR' : _CONCEPT,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:Concept)
+  # @@protoc_insertion_point(class_scope:iart.indexer.Concept)
   })
 _sym_db.RegisterMessage(Concept)
 
 ClassifierResult = _reflection.GeneratedProtocolMessageType('ClassifierResult', (_message.Message,), {
   'DESCRIPTOR' : _CLASSIFIERRESULT,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ClassifierResult)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ClassifierResult)
   })
 _sym_db.RegisterMessage(ClassifierResult)
 
 FeatureResult = _reflection.GeneratedProtocolMessageType('FeatureResult', (_message.Message,), {
   'DESCRIPTOR' : _FEATURERESULT,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:FeatureResult)
+  # @@protoc_insertion_point(class_scope:iart.indexer.FeatureResult)
   })
 _sym_db.RegisterMessage(FeatureResult)
 
 PluginResult = _reflection.GeneratedProtocolMessageType('PluginResult', (_message.Message,), {
   'DESCRIPTOR' : _PLUGINRESULT,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:PluginResult)
+  # @@protoc_insertion_point(class_scope:iart.indexer.PluginResult)
   })
 _sym_db.RegisterMessage(PluginResult)
 
 ImageResult = _reflection.GeneratedProtocolMessageType('ImageResult', (_message.Message,), {
   'DESCRIPTOR' : _IMAGERESULT,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ImageResult)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ImageResult)
   })
 _sym_db.RegisterMessage(ImageResult)
 
 IndexingResult = _reflection.GeneratedProtocolMessageType('IndexingResult', (_message.Message,), {
   'DESCRIPTOR' : _INDEXINGRESULT,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:IndexingResult)
+  # @@protoc_insertion_point(class_scope:iart.indexer.IndexingResult)
   })
 _sym_db.RegisterMessage(IndexingResult)
 
 PluginInfo = _reflection.GeneratedProtocolMessageType('PluginInfo', (_message.Message,), {
   'DESCRIPTOR' : _PLUGININFO,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:PluginInfo)
+  # @@protoc_insertion_point(class_scope:iart.indexer.PluginInfo)
   })
 _sym_db.RegisterMessage(PluginInfo)
 
 ListPluginsRequest = _reflection.GeneratedProtocolMessageType('ListPluginsRequest', (_message.Message,), {
   'DESCRIPTOR' : _LISTPLUGINSREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ListPluginsRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ListPluginsRequest)
   })
 _sym_db.RegisterMessage(ListPluginsRequest)
 
 ListPluginsReply = _reflection.GeneratedProtocolMessageType('ListPluginsReply', (_message.Message,), {
   'DESCRIPTOR' : _LISTPLUGINSREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ListPluginsReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ListPluginsReply)
   })
 _sym_db.RegisterMessage(ListPluginsReply)
 
 StatusRequest = _reflection.GeneratedProtocolMessageType('StatusRequest', (_message.Message,), {
   'DESCRIPTOR' : _STATUSREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:StatusRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.StatusRequest)
   })
 _sym_db.RegisterMessage(StatusRequest)
 
 StatusReply = _reflection.GeneratedProtocolMessageType('StatusReply', (_message.Message,), {
   'DESCRIPTOR' : _STATUSREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:StatusReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.StatusReply)
   })
 _sym_db.RegisterMessage(StatusReply)
 
 GetRequest = _reflection.GeneratedProtocolMessageType('GetRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:GetRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.GetRequest)
   })
 _sym_db.RegisterMessage(GetRequest)
 
 GetReply = _reflection.GeneratedProtocolMessageType('GetReply', (_message.Message,), {
   'DESCRIPTOR' : _GETREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:GetReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.GetReply)
   })
 _sym_db.RegisterMessage(GetReply)
 
 SuggesterRequest = _reflection.GeneratedProtocolMessageType('SuggesterRequest', (_message.Message,), {
   'DESCRIPTOR' : _SUGGESTERREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SuggesterRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SuggesterRequest)
   })
 _sym_db.RegisterMessage(SuggesterRequest)
 
 SuggesterReply = _reflection.GeneratedProtocolMessageType('SuggesterReply', (_message.Message,), {
   'DESCRIPTOR' : _SUGGESTERREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SuggesterReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SuggesterReply)
   })
 _sym_db.RegisterMessage(SuggesterReply)
 
 FeatureSearchTerm = _reflection.GeneratedProtocolMessageType('FeatureSearchTerm', (_message.Message,), {
   'DESCRIPTOR' : _FEATURESEARCHTERM,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:FeatureSearchTerm)
+  # @@protoc_insertion_point(class_scope:iart.indexer.FeatureSearchTerm)
   })
 _sym_db.RegisterMessage(FeatureSearchTerm)
 
 TextSearchTerm = _reflection.GeneratedProtocolMessageType('TextSearchTerm', (_message.Message,), {
   'DESCRIPTOR' : _TEXTSEARCHTERM,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:TextSearchTerm)
+  # @@protoc_insertion_point(class_scope:iart.indexer.TextSearchTerm)
   })
 _sym_db.RegisterMessage(TextSearchTerm)
 
 ImageTextSearchTerm = _reflection.GeneratedProtocolMessageType('ImageTextSearchTerm', (_message.Message,), {
   'DESCRIPTOR' : _IMAGETEXTSEARCHTERM,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ImageTextSearchTerm)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ImageTextSearchTerm)
   })
 _sym_db.RegisterMessage(ImageTextSearchTerm)
 
 NumberSearchTerm = _reflection.GeneratedProtocolMessageType('NumberSearchTerm', (_message.Message,), {
   'DESCRIPTOR' : _NUMBERSEARCHTERM,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:NumberSearchTerm)
+  # @@protoc_insertion_point(class_scope:iart.indexer.NumberSearchTerm)
   })
 _sym_db.RegisterMessage(NumberSearchTerm)
 
 SearchTerm = _reflection.GeneratedProtocolMessageType('SearchTerm', (_message.Message,), {
   'DESCRIPTOR' : _SEARCHTERM,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SearchTerm)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SearchTerm)
   })
 _sym_db.RegisterMessage(SearchTerm)
 
 AggregateRequest = _reflection.GeneratedProtocolMessageType('AggregateRequest', (_message.Message,), {
   'DESCRIPTOR' : _AGGREGATEREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:AggregateRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.AggregateRequest)
   })
 _sym_db.RegisterMessage(AggregateRequest)
 
 SearchRequest = _reflection.GeneratedProtocolMessageType('SearchRequest', (_message.Message,), {
   'DESCRIPTOR' : _SEARCHREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SearchRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SearchRequest)
   })
 _sym_db.RegisterMessage(SearchRequest)
 
 SearchReply = _reflection.GeneratedProtocolMessageType('SearchReply', (_message.Message,), {
   'DESCRIPTOR' : _SEARCHREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SearchReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SearchReply)
   })
 _sym_db.RegisterMessage(SearchReply)
 
 SearchResultEntry = _reflection.GeneratedProtocolMessageType('SearchResultEntry', (_message.Message,), {
   'DESCRIPTOR' : _SEARCHRESULTENTRY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SearchResultEntry)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SearchResultEntry)
   })
 _sym_db.RegisterMessage(SearchResultEntry)
 
 AggregateResult = _reflection.GeneratedProtocolMessageType('AggregateResult', (_message.Message,), {
   'DESCRIPTOR' : _AGGREGATERESULT,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:AggregateResult)
+  # @@protoc_insertion_point(class_scope:iart.indexer.AggregateResult)
   })
 _sym_db.RegisterMessage(AggregateResult)
 
 ListSearchResultRequest = _reflection.GeneratedProtocolMessageType('ListSearchResultRequest', (_message.Message,), {
   'DESCRIPTOR' : _LISTSEARCHRESULTREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ListSearchResultRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ListSearchResultRequest)
   })
 _sym_db.RegisterMessage(ListSearchResultRequest)
 
 ListSearchResultReply = _reflection.GeneratedProtocolMessageType('ListSearchResultReply', (_message.Message,), {
   'DESCRIPTOR' : _LISTSEARCHRESULTREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:ListSearchResultReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.ListSearchResultReply)
   })
 _sym_db.RegisterMessage(ListSearchResultReply)
 
 SuggestGroup = _reflection.GeneratedProtocolMessageType('SuggestGroup', (_message.Message,), {
   'DESCRIPTOR' : _SUGGESTGROUP,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SuggestGroup)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SuggestGroup)
   })
 _sym_db.RegisterMessage(SuggestGroup)
 
 SuggestRequest = _reflection.GeneratedProtocolMessageType('SuggestRequest', (_message.Message,), {
   'DESCRIPTOR' : _SUGGESTREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SuggestRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SuggestRequest)
   })
 _sym_db.RegisterMessage(SuggestRequest)
 
 SuggestReply = _reflection.GeneratedProtocolMessageType('SuggestReply', (_message.Message,), {
   'DESCRIPTOR' : _SUGGESTREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:SuggestReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.SuggestReply)
   })
 _sym_db.RegisterMessage(SuggestReply)
 
 BuildIndexerRequest = _reflection.GeneratedProtocolMessageType('BuildIndexerRequest', (_message.Message,), {
   'DESCRIPTOR' : _BUILDINDEXERREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:BuildIndexerRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.BuildIndexerRequest)
   })
 _sym_db.RegisterMessage(BuildIndexerRequest)
 
 BuildIndexerReply = _reflection.GeneratedProtocolMessageType('BuildIndexerReply', (_message.Message,), {
   'DESCRIPTOR' : _BUILDINDEXERREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:BuildIndexerReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.BuildIndexerReply)
   })
 _sym_db.RegisterMessage(BuildIndexerReply)
 
 BuildFeatureCacheRequest = _reflection.GeneratedProtocolMessageType('BuildFeatureCacheRequest', (_message.Message,), {
   'DESCRIPTOR' : _BUILDFEATURECACHEREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:BuildFeatureCacheRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.BuildFeatureCacheRequest)
   })
 _sym_db.RegisterMessage(BuildFeatureCacheRequest)
 
 BuildFeatureCacheReply = _reflection.GeneratedProtocolMessageType('BuildFeatureCacheReply', (_message.Message,), {
   'DESCRIPTOR' : _BUILDFEATURECACHEREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:BuildFeatureCacheReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.BuildFeatureCacheReply)
   })
 _sym_db.RegisterMessage(BuildFeatureCacheReply)
 
 DumpRequest = _reflection.GeneratedProtocolMessageType('DumpRequest', (_message.Message,), {
   'DESCRIPTOR' : _DUMPREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:DumpRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.DumpRequest)
   })
 _sym_db.RegisterMessage(DumpRequest)
 
 DumpReply = _reflection.GeneratedProtocolMessageType('DumpReply', (_message.Message,), {
   'DESCRIPTOR' : _DUMPREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:DumpReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.DumpReply)
   })
 _sym_db.RegisterMessage(DumpReply)
 
 LoadRequest = _reflection.GeneratedProtocolMessageType('LoadRequest', (_message.Message,), {
   'DESCRIPTOR' : _LOADREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:LoadRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.LoadRequest)
   })
 _sym_db.RegisterMessage(LoadRequest)
 
 LoadReply = _reflection.GeneratedProtocolMessageType('LoadReply', (_message.Message,), {
   'DESCRIPTOR' : _LOADREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:LoadReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.LoadReply)
   })
 _sym_db.RegisterMessage(LoadReply)
 
 IndexingRequest = _reflection.GeneratedProtocolMessageType('IndexingRequest', (_message.Message,), {
   'DESCRIPTOR' : _INDEXINGREQUEST,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:IndexingRequest)
+  # @@protoc_insertion_point(class_scope:iart.indexer.IndexingRequest)
   })
 _sym_db.RegisterMessage(IndexingRequest)
 
 IndexingReply = _reflection.GeneratedProtocolMessageType('IndexingReply', (_message.Message,), {
   'DESCRIPTOR' : _INDEXINGREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:IndexingReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.IndexingReply)
   })
 _sym_db.RegisterMessage(IndexingReply)
 
 AggregateReply = _reflection.GeneratedProtocolMessageType('AggregateReply', (_message.Message,), {
   'DESCRIPTOR' : _AGGREGATEREPLY,
   '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:AggregateReply)
+  # @@protoc_insertion_point(class_scope:iart.indexer.AggregateReply)
   })
 _sym_db.RegisterMessage(AggregateReply)
 
@@ -2740,17 +2740,17 @@ DESCRIPTOR._options = None
 
 _INDEXER = _descriptor.ServiceDescriptor(
   name='Indexer',
-  full_name='Indexer',
+  full_name='iart.indexer.Indexer',
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=3925,
-  serialized_end=4604,
+  serialized_start=4537,
+  serialized_end=5554,
   methods=[
   _descriptor.MethodDescriptor(
     name='list_plugins',
-    full_name='Indexer.list_plugins',
+    full_name='iart.indexer.Indexer.list_plugins',
     index=0,
     containing_service=None,
     input_type=_LISTPLUGINSREQUEST,
@@ -2760,7 +2760,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='status',
-    full_name='Indexer.status',
+    full_name='iart.indexer.Indexer.status',
     index=1,
     containing_service=None,
     input_type=_STATUSREQUEST,
@@ -2770,7 +2770,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='build_suggester',
-    full_name='Indexer.build_suggester',
+    full_name='iart.indexer.Indexer.build_suggester',
     index=2,
     containing_service=None,
     input_type=_SUGGESTERREQUEST,
@@ -2780,7 +2780,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='get',
-    full_name='Indexer.get',
+    full_name='iart.indexer.Indexer.get',
     index=3,
     containing_service=None,
     input_type=_GETREQUEST,
@@ -2790,7 +2790,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='search',
-    full_name='Indexer.search',
+    full_name='iart.indexer.Indexer.search',
     index=4,
     containing_service=None,
     input_type=_SEARCHREQUEST,
@@ -2800,7 +2800,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='list_search_result',
-    full_name='Indexer.list_search_result',
+    full_name='iart.indexer.Indexer.list_search_result',
     index=5,
     containing_service=None,
     input_type=_LISTSEARCHRESULTREQUEST,
@@ -2810,7 +2810,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='aggregate',
-    full_name='Indexer.aggregate',
+    full_name='iart.indexer.Indexer.aggregate',
     index=6,
     containing_service=None,
     input_type=_AGGREGATEREQUEST,
@@ -2820,7 +2820,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='suggest',
-    full_name='Indexer.suggest',
+    full_name='iart.indexer.Indexer.suggest',
     index=7,
     containing_service=None,
     input_type=_SUGGESTREQUEST,
@@ -2830,7 +2830,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='build_indexer',
-    full_name='Indexer.build_indexer',
+    full_name='iart.indexer.Indexer.build_indexer',
     index=8,
     containing_service=None,
     input_type=_BUILDINDEXERREQUEST,
@@ -2840,7 +2840,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='build_feature_cache',
-    full_name='Indexer.build_feature_cache',
+    full_name='iart.indexer.Indexer.build_feature_cache',
     index=9,
     containing_service=None,
     input_type=_BUILDFEATURECACHEREQUEST,
@@ -2850,7 +2850,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='indexing',
-    full_name='Indexer.indexing',
+    full_name='iart.indexer.Indexer.indexing',
     index=10,
     containing_service=None,
     input_type=_INDEXINGREQUEST,
@@ -2860,7 +2860,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='dump',
-    full_name='Indexer.dump',
+    full_name='iart.indexer.Indexer.dump',
     index=11,
     containing_service=None,
     input_type=_DUMPREQUEST,
@@ -2870,7 +2870,7 @@ _INDEXER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='load',
-    full_name='Indexer.load',
+    full_name='iart.indexer.Indexer.load',
     index=12,
     containing_service=None,
     input_type=_LOADREQUEST,

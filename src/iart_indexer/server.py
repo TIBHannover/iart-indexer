@@ -773,6 +773,6 @@ class Server:
                 logging.info(f"[Server] num_jobs:{num_jobs} num_jobs_done:{num_jobs_done}")
                 logging.info(f"[Server] {[x['future'] for x in self.commune.futures]}")
 
-                time.sleep(2)
+                time.sleep(10)
         except KeyboardInterrupt:
             self.server.stop(0)

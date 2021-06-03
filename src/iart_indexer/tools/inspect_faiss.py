@@ -64,9 +64,12 @@ def main():
     newest_index = {"timestamp": 0.0}
     for x in indexers:
         with open(x, "rb") as f:
-            data = msgpack.unpackb(f.read())
-            if newest_index["timestamp"] < data["timestamp"]:
-                newest_index = data
+            try:
+                data = msgpack.unpackb(f.read())
+                if newest_index["timestamp"] < data["timestamp"]:
+                    newest_index = data
+            except:
+                pass
 
     if "trained_collection" in newest_index:
         print("trained_collections: " + newest_index["trained_collection"])
