@@ -12,6 +12,8 @@ from iart_indexer import indexer_pb2
 from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
 from iart_indexer.utils import image_from_proto, image_resize, image_crop
 
+import time
+
 
 @FeaturePluginManager.export("ImageNetInceptionFeature")
 class ImageNetInceptionFeature(FeaturePlugin):
@@ -26,6 +28,7 @@ class ImageNetInceptionFeature(FeaturePlugin):
         "multicrop": True,
         "max_dim": None,
         "min_dim": 224,
+        "max_tries": 5,
     }
 
     default_version = 1.1
@@ -49,9 +52,19 @@ class ImageNetInceptionFeature(FeaturePlugin):
         with open(self.pca_model_file, "rb") as f:
             self.pca_params = pickle.load(f)
 
-        self.con = rai.Client(host=self.host, port=self.port)
-        if not self.check_rai():
-            self.register_rai()
+        self.max_tries = self.config["max_tries"]
+
+        try_count = self.max_tries
+        while try_count > 0:
+            try:
+                self.con = rai.Client(host=self.host, port=self.port)
+
+                if not self.check_rai():
+                    self.register_rai()
+                return
+            except:
+                try_count -= 1
+                time.sleep(4)
 
     def register_rai(self):
         model = ml2rt.load_model(self.model_file)
