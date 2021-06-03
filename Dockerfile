@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.8
 
 COPY /pyproject.toml /src /indexer/
 RUN pip install /indexer

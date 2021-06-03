@@ -87,6 +87,10 @@ def search(args):
                 feature_to_proto(entry.feature, e["feature"])
             if "coordinates" in e:
                 entry.coordinates.extend(e["coordinates"])
+            if "distance" in e:
+                entry.distance = e["distance"]
+            if "cluster" in e:
+                entry.cluster = e["cluster"]
 
         if "aggregations" in search_result:
             for e in search_result["aggregations"]:

@@ -247,8 +247,15 @@ message SearchRequest {
     MAPPING_UMAP = 1;
   }
 
+  enum Clustering {
+    CLUSTERING_DEFAULT = 0;
+    CLUSTERING_KMEANS = 2;
+    CLUSTERING_AGGLOMERATIVE = 3;
+  }
+
   Sorting sorting = 2;
   Mapping mapping = 3;
+  
   AggregateRequest aggregate = 4;
   string random_seed = 5;
 
@@ -257,6 +264,11 @@ message SearchRequest {
   }
 
   repeated Extra extras = 6;
+
+  repeated ValueField mapping_options = 7;
+
+  Clustering clustering = 8;
+  repeated ValueField clustering_options = 9;
 }
 
 message SearchReply { string id = 1; }
@@ -266,10 +278,12 @@ message SearchResultEntry {
   string id = 1;
   repeated ValueField meta = 2;
   repeated ValueField origin = 3;
-  Collection collection = 7;
   repeated ClassifierResult classifier = 4;
   repeated FeatureResult feature = 5;
   repeated float coordinates = 6;
+  int64 cluster = 7;
+  float distance = 8;
+  Collection collection = 9;
 }
 
 message AggregateResult {

@@ -8,7 +8,7 @@ from iart_indexer import indexer_pb2
 from typing import Dict, List
 from iart_indexer.utils import get_features_from_db_entry
 
-from iart_indexer.utils import image_from_proto
+from iart_indexer.utils import image_from_proto, dict_from_proto
 
 
 class Searcher:
@@ -116,6 +116,14 @@ class Searcher:
         mapping = None
         if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
             mapping = "umap"
+        mapping_options = dict_from_proto(query.mapping_options)
+
+        clustering = None
+        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_KMEANS:
+            clustering = "kmeans"
+        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_AGGLOMERATIVE:
+            clustering = "agglomerative"
+        clustering_options = dict_from_proto(query.clustering_options)
 
         # Parse additional fields
         extras = []
@@ -288,6 +296,9 @@ class Searcher:
         result.update({"range_search": range_search})
         result.update({"sorting": sorting})
         result.update({"mapping": mapping})
+        result.update({"mapping_options": mapping_options})
+        result.update({"clustering": clustering})
+        result.update({"clustering_options": clustering_options})
         result.update({"extras": extras})
         result.update({"seed": seed})
 
@@ -551,11 +562,38 @@ class Searcher:
 
         logging.info(f"Entries 2 {len(entries)}")
         if query["mapping"] == "umap":
-            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["UMapMapping"]))
+            entries = list(
+                self.mapping_plugin_manager.run(
+                    entries,
+                    query["feature_search"],
+                    ["UMapMapping"],
+                    configs=[
+                        {
+                            "type": "UMapMapping",
+                            "params": query["mapping_options"],
+                        }
+                    ],
+                )
+            )
+
+        if query["clustering"] == "kmeans":
+            entries = list(
+                self.mapping_plugin_manager.run(
+                    entries,
+                    query["feature_search"],
+                    ["KMeansMapping"],
+                    configs=[
+                        {
+                            "type": "KMeansMapping",
+                            "params": query["clustering_options"],
+                        }
+                    ],
+                )
+            )
 
         logging.info(f"Entries 3 {len(entries)}")
 
-        result.update({"entries": list(entries)[:100]})
+        result.update({"entries": list(entries)})
 
         if self.aggregator and "aggregate" in query:
             if query["aggregate"]["use_query"]:
