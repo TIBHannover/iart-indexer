@@ -1,18 +1,11 @@
 import math
 import uuid
+import random
 import logging
 
 import numpy as np
 
-import math
-
-import rasterfairy
-
-import umap
-import random
-
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import MinMaxScaler
 
 from iart_indexer import indexer_pb2
 from iart_indexer.plugins import MappingPlugin, MappingPluginManager, PluginResult
@@ -21,15 +14,17 @@ from iart_indexer.utils import image_from_proto, image_resize
 
 @MappingPluginManager.export("KMeansMapping")
 class KMeansMapping(MappingPlugin):
-    default_config = {
-        "k": 5,
-    }
+    default_config = {"random_state": 42, "k": 5}
 
     default_version = 0.1
 
     def __init__(self, **kwargs):
         super(KMeansMapping, self).__init__(**kwargs)
+        self.random_state = self.config["random_state"]
         self.default_k = self.config.get("k", 5)
+
+        if self.random_state is None:
+            self.random_state = random.randint()
 
     def call(self, entries, query, config: dict = None):
         k = self.default_k
@@ -42,7 +37,7 @@ class KMeansMapping(MappingPlugin):
         k = max(2, min(k, len(entries) - 1))
         logging.info(f"[KMeansMapping] Starting k={k}")
 
-        kmeans = KMeans(n_clusters=k)
+        kmeans = KMeans(n_clusters=k, random_state=self.random_state)
         ref_feature = "clip_embedding_feature"
         features = []
         entries = list(entries)
