@@ -269,6 +269,8 @@ message SearchRequest {
 
   Clustering clustering = 8;
   repeated ValueField clustering_options = 9;
+  repeated string collections = 10;
+  bool include_default_collection = 11;
 }
 
 message SearchReply { string id = 1; }

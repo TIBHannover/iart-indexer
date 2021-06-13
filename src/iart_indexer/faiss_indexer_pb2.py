@@ -11,6 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+import indexer_pb2 as indexer__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,8 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'P\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13\x66\x61iss_indexer.proto\x12\x12iart.faiss_indexer\"4\n\x05Query\x12\r\n\x05value\x18\x01 \x03(\x02\x12\x0e\n\x06plugin\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\"P\n\rSearchRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12*\n\x07queries\x18\x02 \x03(\x0b\x32\x19.iart.faiss_indexer.Query\"\x1a\n\x0bSearchReply\x12\x0b\n\x03ids\x18\x01 \x03(\t\"&\n\x0fIndexingRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\"\x0f\n\rIndexingReply\"#\n\x0cTrainRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\"\x0c\n\nTrainReply\"1\n\rDeleteRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t\"\r\n\x0b\x44\x65leteReply2\xd1\x02\n\x0c\x46\x61issIndexer\x12N\n\x06search\x12!.iart.faiss_indexer.SearchRequest\x1a\x1f.iart.faiss_indexer.SearchReply\"\x00\x12T\n\x08indexing\x12#.iart.faiss_indexer.IndexingRequest\x1a!.iart.faiss_indexer.IndexingReply\"\x00\x12K\n\x05train\x12 .iart.faiss_indexer.TrainRequest\x1a\x1e.iart.faiss_indexer.TrainReply\"\x00\x12N\n\x06\x64\x65lete\x12!.iart.faiss_indexer.DeleteRequest\x1a\x1f.iart.faiss_indexer.DeleteReply\"\x00\x42\x02P\x01\x62\x06proto3'
-)
+  serialized_pb=b'\n\x13\x66\x61iss_indexer.proto\x12\x12iart.faiss_indexer\x1a\rindexer.proto\"4\n\x05Query\x12\r\n\x05value\x18\x01 \x03(\x02\x12\x0e\n\x06plugin\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\"t\n\rSearchRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\"\n\x1ainclude_default_collection\x18\x03 \x01(\x08\x12*\n\x07queries\x18\x02 \x03(\x0b\x32\x19.iart.faiss_indexer.Query\"\x1a\n\x0bSearchReply\x12\x0b\n\x03ids\x18\x01 \x03(\t\"&\n\x0fIndexingRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\"\x0f\n\rIndexingReply\"#\n\x0cTrainRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\"\x0c\n\nTrainReply\"1\n\rDeleteRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t\"\r\n\x0b\x44\x65leteReply\"\r\n\x0bListRequest\":\n\tListReply\x12-\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x18.iart.indexer.Collection2\x9b\x03\n\x0c\x46\x61issIndexer\x12N\n\x06search\x12!.iart.faiss_indexer.SearchRequest\x1a\x1f.iart.faiss_indexer.SearchReply\"\x00\x12T\n\x08indexing\x12#.iart.faiss_indexer.IndexingRequest\x1a!.iart.faiss_indexer.IndexingReply\"\x00\x12K\n\x05train\x12 .iart.faiss_indexer.TrainRequest\x1a\x1e.iart.faiss_indexer.TrainReply\"\x00\x12N\n\x06\x64\x65lete\x12!.iart.faiss_indexer.DeleteRequest\x1a\x1f.iart.faiss_indexer.DeleteReply\"\x00\x12H\n\x04list\x12\x1f.iart.faiss_indexer.ListRequest\x1a\x1d.iart.faiss_indexer.ListReply\"\x00\x42\x02P\x01\x62\x06proto3'
+  ,
+  dependencies=[indexer__pb2.DESCRIPTOR,])
 
 
 
@@ -66,8 +68,8 @@ _QUERY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=43,
-  serialized_end=95,
+  serialized_start=58,
+  serialized_end=110,
 )
 
 
@@ -87,7 +89,14 @@ _SEARCHREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='queries', full_name='iart.faiss_indexer.SearchRequest.queries', index=1,
+      name='include_default_collection', full_name='iart.faiss_indexer.SearchRequest.include_default_collection', index=1,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='queries', full_name='iart.faiss_indexer.SearchRequest.queries', index=2,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -105,8 +114,8 @@ _SEARCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=97,
-  serialized_end=177,
+  serialized_start=112,
+  serialized_end=228,
 )
 
 
@@ -137,8 +146,8 @@ _SEARCHREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=179,
-  serialized_end=205,
+  serialized_start=230,
+  serialized_end=256,
 )
 
 
@@ -169,8 +178,8 @@ _INDEXINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=207,
-  serialized_end=245,
+  serialized_start=258,
+  serialized_end=296,
 )
 
 
@@ -194,8 +203,8 @@ _INDEXINGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=247,
-  serialized_end=262,
+  serialized_start=298,
+  serialized_end=313,
 )
 
 
@@ -226,8 +235,8 @@ _TRAINREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=264,
-  serialized_end=299,
+  serialized_start=315,
+  serialized_end=350,
 )
 
 
@@ -251,8 +260,8 @@ _TRAINREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=301,
-  serialized_end=313,
+  serialized_start=352,
+  serialized_end=364,
 )
 
 
@@ -290,8 +299,8 @@ _DELETEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=315,
-  serialized_end=364,
+  serialized_start=366,
+  serialized_end=415,
 )
 
 
@@ -315,11 +324,69 @@ _DELETEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=366,
-  serialized_end=379,
+  serialized_start=417,
+  serialized_end=430,
+)
+
+
+_LISTREQUEST = _descriptor.Descriptor(
+  name='ListRequest',
+  full_name='iart.faiss_indexer.ListRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=432,
+  serialized_end=445,
+)
+
+
+_LISTREPLY = _descriptor.Descriptor(
+  name='ListReply',
+  full_name='iart.faiss_indexer.ListReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='collections', full_name='iart.faiss_indexer.ListReply.collections', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=447,
+  serialized_end=505,
 )
 
 _SEARCHREQUEST.fields_by_name['queries'].message_type = _QUERY
+_LISTREPLY.fields_by_name['collections'].message_type = indexer__pb2._COLLECTION
 DESCRIPTOR.message_types_by_name['Query'] = _QUERY
 DESCRIPTOR.message_types_by_name['SearchRequest'] = _SEARCHREQUEST
 DESCRIPTOR.message_types_by_name['SearchReply'] = _SEARCHREPLY
@@ -329,6 +396,8 @@ DESCRIPTOR.message_types_by_name['TrainRequest'] = _TRAINREQUEST
 DESCRIPTOR.message_types_by_name['TrainReply'] = _TRAINREPLY
 DESCRIPTOR.message_types_by_name['DeleteRequest'] = _DELETEREQUEST
 DESCRIPTOR.message_types_by_name['DeleteReply'] = _DELETEREPLY
+DESCRIPTOR.message_types_by_name['ListRequest'] = _LISTREQUEST
+DESCRIPTOR.message_types_by_name['ListReply'] = _LISTREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Query = _reflection.GeneratedProtocolMessageType('Query', (_message.Message,), {
@@ -394,6 +463,20 @@ DeleteReply = _reflection.GeneratedProtocolMessageType('DeleteReply', (_message.
   })
 _sym_db.RegisterMessage(DeleteReply)
 
+ListRequest = _reflection.GeneratedProtocolMessageType('ListRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LISTREQUEST,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.ListRequest)
+  })
+_sym_db.RegisterMessage(ListRequest)
+
+ListReply = _reflection.GeneratedProtocolMessageType('ListReply', (_message.Message,), {
+  'DESCRIPTOR' : _LISTREPLY,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.ListReply)
+  })
+_sym_db.RegisterMessage(ListReply)
+
 
 DESCRIPTOR._options = None
 
@@ -404,8 +487,8 @@ _FAISSINDEXER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=382,
-  serialized_end=719,
+  serialized_start=508,
+  serialized_end=919,
   methods=[
   _descriptor.MethodDescriptor(
     name='search',
@@ -444,6 +527,16 @@ _FAISSINDEXER = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_DELETEREQUEST,
     output_type=_DELETEREPLY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='list',
+    full_name='iart.faiss_indexer.FaissIndexer.list',
+    index=4,
+    containing_service=None,
+    input_type=_LISTREQUEST,
+    output_type=_LISTREPLY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

@@ -290,7 +290,12 @@ def build_indexer(args):
                 for entry in database.raw_all(query):
                     yield get_features_from_db_entry(entry, return_collection=True)
 
-        indexer.indexing(train_entries=TrainEntryReader(), index_entries=EntryReader(collections), rebuild=rebuild)
+        indexer.indexing(
+            train_entries=TrainEntryReader(),
+            index_entries=EntryReader(collections),
+            collections=collections,
+            rebuild=rebuild,
+        )
 
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
@@ -417,13 +422,15 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                     }
 
         db_bulk_cache = []
-        logging.info(f"Indexing: start indexing")
+        logging.info(f"[Server] Indexing: start indexing")
 
         # compute features and classifiers and write them to the database
         collections = set()
         for i, (status, entry) in enumerate(
             self.indexing_process_pool.map(IndexingJob(), filter_and_translate(request_iterator))
         ):
+            logging.info(f"############### {i}")
+            logging.info(f"############### {status}")
             if status != "ok":
                 logging.error(f"Indexing: {entry['id']}")
                 yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
@@ -439,7 +446,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
             if len(db_bulk_cache) > 1000:
 
-                logging.info(f"Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
+                logging.info(f"[Server] Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
                 try_count = 20
                 while try_count > 0:
                     try:
@@ -449,7 +456,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                     except KeyboardInterrupt:
                         raise
                     except:
-                        logging.error(f"Indexing: database error (try count: {try_count})")
+                        logging.error(f"[Server] Indexing: database error (try count: {try_count})")
                         time.sleep(1)
                         try_count -= 1
 
