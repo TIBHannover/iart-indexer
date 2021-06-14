@@ -38,21 +38,36 @@ class IndexerPluginManager(PluginManager):
                 if "register" in function_dir:
                     a.register(self)
 
-    def indexing(self, entries, plugins=None, configs=None):
-        print("IndexerPluginManager: START")
-        plugin_list = self.init_plugins(plugins, configs)
-        print(f"IndexerPluginManager: {len(plugin_list)}")
-        for plugin in plugin_list:
+    def indexing(
+        self,
+        train_entries,
+        index_entries,
+        collections=None,
+        rebuild=False,
+        plugins=None,
+        configs=None,
+    ):
+        # TODO add lock here
+        logging.info("IndexerPluginManager: indexing")
+        logging.info(f"IndexerPluginManager: {len(self.plugin_list)} {collections}")
+        for plugin in self.plugin_list:
             plugin = plugin["plugin"]
-            print(f"IndexerPluginManager: {plugin.name}")
-            plugin.indexing(entries)
-            # print(x)
+            logging.info(f"IndexerPluginManager: {plugin.name}")
+            plugin.indexing(
+                train_entries,
+                index_entries,
+                rebuild=rebuild,
+                collections=collections,
+            )
+        # TODO force reloading of other processes
 
-    def search(self, queries, size=100):
+    def search(self, queries, collections=None, include_default_collection=True, size=100):
         result_list = []
         for plugin in self.plugin_list:
             plugin = plugin["plugin"]
-            entries = plugin.search(queries, size=size)
+            entries = plugin.search(
+                queries, collections=collections, include_default_collection=include_default_collection, size=size
+            )
             result_list.extend(entries)
 
         return result_list
@@ -64,7 +79,7 @@ class IndexerPlugin(Plugin):
     def __init__(self, **kwargs):
         super(IndexerPlugin, self).__init__(**kwargs)
 
-    def indexing(self, images):
+    def indexing(self, train_entries, index_entries):
         pass
 
     def search(self, queries, size=100):

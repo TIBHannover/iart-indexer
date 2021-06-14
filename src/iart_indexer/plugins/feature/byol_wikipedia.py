@@ -10,6 +10,8 @@ from iart_indexer import indexer_pb2
 from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
 from iart_indexer.utils import image_from_proto, image_resize
 
+import time
+
 
 @FeaturePluginManager.export("ByolEmbeddingFeature")
 class ByolEmbeddingFeature(FeaturePlugin):
@@ -22,6 +24,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
         "multicrop": True,
         "max_dim": None,
         "min_dim": 244,
+        "max_tries": 5,
     }
 
     default_version = 0.1
@@ -35,17 +38,29 @@ class ByolEmbeddingFeature(FeaturePlugin):
         self.model_file = self.config["model_file"]
         self.max_dim = self.config["max_dim"]
         self.min_dim = self.config["min_dim"]
+        self.max_tries = self.config["max_tries"]
 
-        self.con = rai.Client(host=self.host, port=self.port)
+        try_count = self.max_tries
+        while try_count > 0:
+            try:
+                self.con = rai.Client(host=self.host, port=self.port)
 
-        if not self.check_rai():
-            self.register_rai()
+                if not self.check_rai():
+                    self.register_rai()
+                return
+            except:
+                try_count -= 1
+                time.sleep(4)
 
     def register_rai(self):
         model = ml2rt.load_model(self.model_file)
 
         self.con.modelset(
-            self.model_name, backend="torch", device=self.model_device, data=model, batch=16,
+            self.model_name,
+            backend="torch",
+            device=self.model_device,
+            data=model,
+            batch=16,
         )
 
     def check_rai(self):

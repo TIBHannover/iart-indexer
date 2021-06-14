@@ -11,12 +11,14 @@ import imageio
 
 from iart_indexer.client import Client
 from iart_indexer.server import Server
+from iart_indexer.plugins.indexer.faiss_indexer import FaissServer
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Indexing a set of images")
 
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
+    parser.add_argument("-d", "--debug", action="store_true", help="verbose output")
     # parser.add_argument('-l', '--list', help='list all plugins')
 
     parser.add_argument("--host", help="")
@@ -35,7 +37,9 @@ def parse_args():
             "bulk_indexing",
             "build_suggester",
             "get",
-            "build_indexer",
+            "faiss_train",
+            "faiss_indexing",
+            "faiss_delete",
             "search",
             "aggregate",
             "build_feature_cache",
@@ -59,8 +63,13 @@ def parse_args():
     parser.add_argument("--aggr_field_name", help="id for entry query")
     parser.add_argument("--aggr_size", type=int, help="id for entry query")
 
+    parser.add_argument("--rebuild", action="store_true", help="verbose output")
+    parser.add_argument("--collections", nargs="+", help="id for entry query")
+
     parser.add_argument("-c", "--config", help="config path")
-    parser.add_argument("-m", "--mode", choices=["client", "server"], default="local", help="verbose output")
+    parser.add_argument(
+        "-m", "--mode", choices=["client", "server", "faiss_server"], default="client", help="verbose output"
+    )
     args = parser.parse_args()
     return args
 
@@ -74,7 +83,9 @@ def read_config(path):
 def main():
     args = parse_args()
     level = logging.ERROR
-    if args.verbose:
+    if args.debug:
+        level = logging.DEBUG
+    elif args.verbose:
         level = logging.INFO
 
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt="%d-%m-%Y %H:%M:%S", level=level)
@@ -92,8 +103,8 @@ def main():
             config["port"] = args.port
 
         client = Client(config)
-        available_plugins = client.plugin_list()
         if args.task == "list_plugins":
+            available_plugins = client.plugin_list()
             print(available_plugins)
         elif args.task == "copy_images":
             entries = client.copy_images(paths=args.path, image_paths=args.image_paths, image_output=args.image_output)
@@ -148,13 +159,10 @@ def main():
             print(time_stop - time_start)
 
         elif args.task == "build_indexer":
-            client.build_indexer()
+            client.build_indexer(rebuild=args.rebuild, collections=args.collections)
 
         elif args.task == "build_feature_cache":
             client.build_feature_cache()
-
-        elif args.task == "build_indexer":
-            client.build_indexer()
 
         elif args.task == "build_feature_cache":
             client.build_feature_cache()
@@ -172,8 +180,19 @@ def main():
                 )
             )
 
+        elif args.task == "faiss_train":
+            client.faiss_train(args.collections)
+        elif args.task == "faiss_indexing":
+            client.faiss_indexing(args.collections)
+        elif args.task == "faiss_delete":
+            client.faiss_delete(args.collections)
+
     elif args.mode == "server":
         server = Server(config)
+        server.run()
+
+    elif args.mode == "faiss_server":
+        server = FaissServer(config)
         server.run()
     return 0
 

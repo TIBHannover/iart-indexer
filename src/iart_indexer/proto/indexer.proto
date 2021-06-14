@@ -5,12 +5,12 @@ option java_multiple_files = true;
 // ../web/tunnel.proto python -m grpc_tools.protoc -I../backend --python_out=.
 // --grpc_python_out=. ../backend/tunnel.proto create json stringds
 
+package iart.indexer;
+
 service Indexer {
   rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
-  rpc bulk_indexing(BulkIndexingRequest) returns (BulkIndexingReply) {}
   rpc status(StatusRequest) returns (StatusReply) {}
   rpc build_suggester(SuggesterRequest) returns (SuggesterReply) {}
-  rpc get(GetRequest) returns (GetReply) {}
 
   rpc search(SearchRequest) returns (SearchReply) {}
   rpc list_search_result(ListSearchResultRequest)
@@ -30,6 +30,19 @@ service Indexer {
 
   rpc dump(DumpRequest) returns (stream DumpReply) {}
   rpc load(stream LoadRequest) returns (stream LoadReply) {}
+
+  // entry services
+  rpc get(GetRequest) returns (GetReply) {}
+  rpc delete(DeleteRequest) returns (DeleteReply) {}
+  // collection services
+  rpc collection_delete(CollectionDeleteRequest) returns (CollectionDeleteReply) {}
+  rpc collection_list(CollectionListRequest) returns (CollectionListReply) {}
+}
+
+message Collection {
+  string id = 1;
+  string name = 2;
+  bool is_public = 3;
 }
 
 message PluginRun {
@@ -63,6 +76,8 @@ message Image {
   RoI roi = 4;
   repeated ValueField meta = 5;
   repeated ValueField origin = 6;
+
+  Collection collection = 7;
 }
 
 message PluginConfig {
@@ -117,12 +132,6 @@ message PluginInfo {
 message ListPluginsRequest {}
 message ListPluginsReply { repeated PluginInfo plugins = 1; }
 
-message BulkIndexingRequest {
-  repeated PluginRun plugins = 1;
-  repeated Image images = 2;
-  bool update_database = 3;
-}
-message BulkIndexingReply { string id = 1; }
 
 message StatusRequest { string id = 1; }
 message StatusReply {
@@ -131,14 +140,6 @@ message StatusReply {
   // Tensor video = 3;
 }
 
-message GetRequest { string id = 1; }
-message GetReply {
-  string id = 1;
-  repeated ValueField meta = 2;
-  repeated ValueField origin = 3;
-  repeated ClassifierResult classifier = 4;
-  repeated FeatureResult feature = 5;
-}
 
 message SuggesterRequest {repeated string field_names = 1;}
 message SuggesterReply { string id = 1; }
@@ -265,9 +266,12 @@ message SearchRequest {
 
   Clustering clustering = 8;
   repeated ValueField clustering_options = 9;
+  repeated string collections = 10;
+  bool include_default_collection = 11;
 }
 
 message SearchReply { string id = 1; }
+
 
 message SearchResultEntry {
   string id = 1;
@@ -278,6 +282,7 @@ message SearchResultEntry {
   repeated float coordinates = 6;
   int64 cluster = 7;
   float distance = 8;
+  Collection collection = 9;
 }
 
 message AggregateResult {
@@ -297,7 +302,7 @@ message SuggestGroup {
 message SuggestRequest { string query = 1; }
 message SuggestReply { repeated SuggestGroup groups = 1; }
 
-message BuildIndexerRequest {}
+message BuildIndexerRequest { bool rebuild=1; repeated string collections = 2;}
 message BuildIndexerReply {}
 
 message BuildFeatureCacheRequest {}
@@ -305,6 +310,7 @@ message BuildFeatureCacheReply {}
 
 message DumpRequest {string origin = 1;}
 message DumpReply { bytes entry = 1; }
+
 message LoadRequest { bytes entry = 1; }
 message LoadReply {string status = 1; string id = 2; }
 
@@ -327,3 +333,33 @@ message IndexingReply { string status = 1; string id = 2; }
 message AggregateReply {
   repeated ValueField field = 1;
 }
+
+
+message GetRequest { string id = 1; }
+message GetReply {
+  string id = 1;
+  repeated ValueField meta = 2;
+  repeated ValueField origin = 3;
+  repeated ClassifierResult classifier = 4;
+  repeated FeatureResult feature = 5;
+  Collection collection = 7;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+message DeleteReply {}
+
+message CollectionDeleteRequest {
+  string id = 1;
+}
+message CollectionDeleteReply {
+  repeated string collections = 1;
+  repeated string ids = 2;
+}
+
+message CollectionListRequest {}
+message CollectionListReply {
+  repeated Collection collections = 1;
+}
+   

@@ -9,6 +9,8 @@ from iart_indexer import indexer_pb2
 from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
 from iart_indexer.utils import image_from_proto, image_resize
 
+import time
+
 
 @FeaturePluginManager.export("YUVHistogramFeature")
 class YUVHistogramFeature(FeaturePlugin):
@@ -19,6 +21,7 @@ class YUVHistogramFeature(FeaturePlugin):
         "model_file": "/home/matthias/yuv_histogram.pt",
         "max_dim": 244,
         "min_dim": 244,
+        "max_tries": 5,
     }
 
     default_version = 0.1
@@ -33,16 +36,28 @@ class YUVHistogramFeature(FeaturePlugin):
         self.max_dim = self.config["max_dim"]
         self.min_dim = self.config["min_dim"]
 
-        self.con = rai.Client(host=self.host, port=self.port)
+        self.max_tries = self.config["max_tries"]
 
-        if not self.check_rai():
-            self.register_rai()
+        try_count = self.max_tries
+        while try_count > 0:
+            try:
+                self.con = rai.Client(host=self.host, port=self.port)
+
+                if not self.check_rai():
+                    self.register_rai()
+                return
+            except:
+                try_count -= 1
+                time.sleep(4)
 
     def register_rai(self):
         model = ml2rt.load_model(self.model_file)
 
         self.con.modelset(
-            self.model_name, backend="torch", device="cpu", data=model,
+            self.model_name,
+            backend="torch",
+            device="cpu",
+            data=model,
         )
 
     def check_rai(self):

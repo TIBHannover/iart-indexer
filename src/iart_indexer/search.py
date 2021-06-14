@@ -10,6 +10,10 @@ from iart_indexer.utils import get_features_from_db_entry
 
 from iart_indexer.utils import image_from_proto, dict_from_proto
 
+import faulthandler
+
+import time
+
 
 class Searcher:
     def __init__(
@@ -70,6 +74,11 @@ class Searcher:
         else:
             seed = uuid.uuid4().hex
 
+        # parsing collection
+
+        collections = query.collections
+        include_default_collection = query.include_default_collection
+
         # Parse sorting args
         sorting = None
         logging.info(f"Sorting: {query.sorting}")
@@ -105,13 +114,6 @@ class Searcher:
                 plugins.name = "clip_embedding_feature"
                 plugins.weight = 1.0
 
-            logging.info("###############################")
-            logging.info("###############################")
-            logging.info("###############################")
-            logging.info(query)
-
-        logging.info(f"TERM length: {len(query.terms)}")
-
         # Parse mapping args
         mapping = None
         if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
@@ -137,7 +139,6 @@ class Searcher:
             if term_type == "text":
                 text = term.text
                 field = text.field.lower()
-                logging.info(text.flag)
                 if text.flag == indexer_pb2.TextSearchTerm.MUST:
                     flag = "must"
                 if text.flag == indexer_pb2.TextSearchTerm.SHOULD:
@@ -186,20 +187,16 @@ class Searcher:
             if term_type == "image_text":
 
                 image_text = term.image_text
-                logging.info(image_text)
                 feature_results = list(
                     self.image_text_plugin_manager.run(
                         [image_text.query]
                     )  # , plugins=[x.name.lower() for x in feature.plugins])
                 )[0]
-                logging.info(f"feature_results: {feature_results}")
                 if image_text.flag == indexer_pb2.ImageTextSearchTerm.NEGATIVE:
                     weight_mult = -1.0
                 else:
                     weight_mult = 1.0
 
-                for f in feature_results["plugins"]:
-                    logging.info(f._plugin.name.lower())
                 for p in image_text.plugins:
                     # feature_results
                     for f in feature_results["plugins"]:
@@ -256,9 +253,6 @@ class Searcher:
 
                 # TODO add example search here
                 else:
-                    logging.info("Feature")
-
-                    logging.info(feature.image)
 
                     image = image_from_proto(feature.image)
 
@@ -301,6 +295,9 @@ class Searcher:
         result.update({"clustering_options": clustering_options})
         result.update({"extras": extras})
         result.update({"seed": seed})
+
+        result.update({"collections": collections})
+        result.update({"include_default_collection": include_default_collection})
 
         if len(query.aggregate.fields) and query.aggregate.size > 0:
             aggregate_fields = list(query.aggregate.fields)
@@ -525,20 +522,34 @@ class Searcher:
         return self.database.get_entries(entries)
 
     def __call__(self, query: Dict):
+        faulthandler.enable()
+        PYTHONFAULTHANDLER = 1
+
         result = {}
-        logging.info("Start searching")
+        start_time = time.time()
+        logging.info(f"[Searcher] Start searching")
 
         query = self.parse_query(query)
-        logging.info("Query parsed")
+        logging.info(f"[Searcher] Parsing query done time={time.time()-start_time}")
 
         query["feature_search"] = self.merge_feature(query["feature_search"])
+        logging.info(f"[Searcher] Merged features time={time.time()-start_time}")
 
         # query = self.parse_query(query)
         # logging.info("Query parsed")
 
-        entries_feature = self.indexer_plugin_manager.search(query["feature_search"], size=1000)
+        entries_feature = list(
+            self.indexer_plugin_manager.search(
+                query["feature_search"],
+                collections=query["collections"],
+                include_default_collection=query["include_default_collection"],
+                size=1000,
+            )
+        )
+        # entries_feature = []
+        logging.info(f"[Searcher] Results from indexer len={len(entries_feature)} time={time.time()-start_time}")
 
-        logging.info(f"Parsed query: {query}")
+        # logging.info(f"Parsed query: {query}")
         body = self.build_search_body(
             query["text_search"],
             query["range_search"],
@@ -548,19 +559,19 @@ class Searcher:
             seed=query["seed"],
         )
 
-        # logging.info(json.dumps(body, indent=2))
+        logging.info(f"[Searcher] Start querying database")
+
         # return []
         entries = self.search_db(body=body, size=max(len(entries_feature), 100))
 
         entries = list(entries)
+        logging.info(f"[Searcher] Database search done len={len(entries)} time={time.time()-start_time}")
         # if len(entries) > 0:
         #     logging.info(entries[0])
-        logging.info(f"Entries 1 {len(entries)}")
         if query["sorting"] == "feature":
             # entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["FeatureL2Mapping"]))
             entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["FeatureCosineMapping"]))
 
-        logging.info(f"Entries 2 {len(entries)}")
         if query["mapping"] == "umap":
             entries = list(
                 self.mapping_plugin_manager.run(
@@ -575,6 +586,8 @@ class Searcher:
                     ],
                 )
             )
+
+        logging.info(f"[Searcher] Mapping done len={len(entries)} time={time.time()-start_time}")
 
         if query["clustering"] == "kmeans":
             entries = list(
@@ -591,7 +604,7 @@ class Searcher:
                 )
             )
 
-        logging.info(f"Entries 3 {len(entries)}")
+        logging.info(f"[Searcher] Clustering done len={len(entries)} time={time.time()-start_time}")
 
         result.update({"entries": list(entries)})
 
@@ -607,9 +620,12 @@ class Searcher:
 
             result.update({"aggregations": aggregations})
 
+            logging.info(f"[Searcher] Aggregator done len={len(entries)} time={time.time()-start_time}")
+
         # Clean outputs if not requested
         for entry in entries:
             if "features" not in query["extras"]:
                 del entry["feature"]
 
+        logging.info(f"[Searcher] Search done len={len(entries)} time={time.time()-start_time}")
         return result

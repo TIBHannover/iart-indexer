@@ -14,8 +14,15 @@ import numbers
 from iart_indexer import indexer_pb2
 
 
-def get_features_from_db_entry(entry):
+def get_features_from_db_entry(entry, return_collection=False):
     data_dict = {"id": entry["id"], "feature": []}
+
+    if return_collection:
+        if "collection" in entry:
+            data_dict["collection"] = entry["collection"]
+        else:
+            data_dict["collection"] = {"id": "", "name": "", "is_public": False}
+
     # TODO
     if "feature" not in entry:
         return data_dict
@@ -295,3 +302,28 @@ def numpy_from_proto(proto):
     # content = np.frombuffer(proto.proto_content, dtype=DECODE_DTYPE_LUP[proto.dtype])
     content.reshape(proto.shape)
     return proto.name, content, proto.frame_number, proto.timestamp
+
+
+def get_element(data_dict: dict, path: str, split_element: str = "."):
+    if path is None:
+        return data_dict
+
+    if callable(path):
+        elem = path(data_dict)
+
+    if isinstance(path, str):
+        elem = data_dict
+        try:
+            for x in path.strip(split_element).split(split_element):
+                try:
+                    x = int(x)
+                    elem = elem[x]
+                except ValueError:
+                    elem = elem.get(x)
+        except:
+            pass
+
+    if isinstance(path, (list, set)):
+        elem = [get_element(data_dict, x) for x in path]
+
+    return elem
