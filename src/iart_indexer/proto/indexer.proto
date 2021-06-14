@@ -11,7 +11,6 @@ service Indexer {
   rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
   rpc status(StatusRequest) returns (StatusReply) {}
   rpc build_suggester(SuggesterRequest) returns (SuggesterReply) {}
-  rpc get(GetRequest) returns (GetReply) {}
 
   rpc search(SearchRequest) returns (SearchReply) {}
   rpc list_search_result(ListSearchResultRequest)
@@ -31,6 +30,13 @@ service Indexer {
 
   rpc dump(DumpRequest) returns (stream DumpReply) {}
   rpc load(stream LoadRequest) returns (stream LoadReply) {}
+
+  // entry services
+  rpc get(GetRequest) returns (GetReply) {}
+  rpc delete(DeleteRequest) returns (DeleteReply) {}
+  // collection services
+  rpc collection_delete(CollectionDeleteRequest) returns (CollectionDeleteReply) {}
+  rpc collection_list(CollectionListRequest) returns (CollectionListReply) {}
 }
 
 message Collection {
@@ -134,15 +140,6 @@ message StatusReply {
   // Tensor video = 3;
 }
 
-message GetRequest { string id = 1; }
-message GetReply {
-  string id = 1;
-  repeated ValueField meta = 2;
-  repeated ValueField origin = 3;
-  repeated ClassifierResult classifier = 4;
-  repeated FeatureResult feature = 5;
-  Collection collection = 7;
-}
 
 message SuggesterRequest {repeated string field_names = 1;}
 message SuggesterReply { string id = 1; }
@@ -336,3 +333,33 @@ message IndexingReply { string status = 1; string id = 2; }
 message AggregateReply {
   repeated ValueField field = 1;
 }
+
+
+message GetRequest { string id = 1; }
+message GetReply {
+  string id = 1;
+  repeated ValueField meta = 2;
+  repeated ValueField origin = 3;
+  repeated ClassifierResult classifier = 4;
+  repeated FeatureResult feature = 5;
+  Collection collection = 7;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+message DeleteReply {}
+
+message CollectionDeleteRequest {
+  string id = 1;
+}
+message CollectionDeleteReply {
+  repeated string collections = 1;
+  repeated string ids = 2;
+}
+
+message CollectionListRequest {}
+message CollectionListReply {
+  repeated Collection collections = 1;
+}
+   

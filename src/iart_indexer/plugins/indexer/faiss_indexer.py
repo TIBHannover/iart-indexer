@@ -463,7 +463,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         for x in indexers:
             with open(x, "rb") as f:
                 try:
-                    data = msgpack.unpackb(f.read())
+                    data = msgpack.unpackb(f.read(), strict_map_key=False)
                     if newest_index["timestamp"] < data["timestamp"]:
                         newest_index = data
                 except:
@@ -586,7 +586,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         else:
             raise KeyError
         with open(os.path.join(self.indexes_dir, index_id + ".msg"), "rb") as f:
-            index = msgpack.unpackb(f.read())
+            index = msgpack.unpackb(f.read(), strict_map_key=False)
 
         index["index"] = faiss.read_index(os.path.join(self.indexes_dir, index_id + ".index"))
 
@@ -617,7 +617,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
             raise KeyError
 
         with open(os.path.join(self.collections_dir, collection_id + ".msg"), "rb") as f:
-            collection = msgpack.unpackb(f.read())
+            collection = msgpack.unpackb(f.read(), strict_map_key=False)
 
         indexes = []
         for index in collection["indexes"]:

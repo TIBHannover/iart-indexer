@@ -15,7 +15,7 @@ def load_index(indexes_dir, index):
     else:
         raise KeyError
     with open(os.path.join(indexes_dir, index_id + ".msg"), "rb") as f:
-        index = msgpack.unpackb(f.read())
+        index = msgpack.unpackb(f.read(), strict_map_key=False)
 
     index["index"] = faiss.read_index(os.path.join(indexes_dir, index_id + ".index"))
     return index
@@ -30,7 +30,7 @@ def load_collection(collections_dir, indexes_dir, collection):
         raise KeyError
 
     with open(os.path.join(collections_dir, collection_id + ".msg"), "rb") as f:
-        collection = msgpack.unpackb(f.read())
+        collection = msgpack.unpackb(f.read(), strict_map_key=False)
 
     indexes = []
     for index in collection["indexes"]:
@@ -65,7 +65,7 @@ def main():
     for x in indexers:
         with open(x, "rb") as f:
             try:
-                data = msgpack.unpackb(f.read())
+                data = msgpack.unpackb(f.read(), strict_map_key=False)
                 if newest_index["timestamp"] < data["timestamp"]:
                     newest_index = data
             except:
