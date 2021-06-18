@@ -562,7 +562,7 @@ class Searcher:
         logging.info(f"[Searcher] Start querying database")
 
         # return []
-        entries = self.search_db(body=body, size=max(len(entries_feature), 100))
+        entries = self.search_db(body=body, size=max(len(entries_feature), 1000))
 
         entries = list(entries)
         logging.info(f"[Searcher] Database search done len={len(entries)} time={time.time()-start_time}")
