@@ -1,6 +1,7 @@
 import math
 import uuid
 
+import time
 
 import ml2rt
 import numpy as np
@@ -192,9 +193,10 @@ class ClipEmbeddingFeature(ImageTextPlugin):
         "model_device": "gpu",
         "model_file": "/home/matthias/clip_text.pt",
         "bpe_file": "/home/matthias/bpe_simple_vocab_16e6.txt.gz",
+        "max_tries": 5,
     }
 
-    default_version = 0.1
+    default_version = 0.4
 
     def __init__(self, **kwargs):
         super(ClipEmbeddingFeature, self).__init__(**kwargs)
@@ -208,10 +210,19 @@ class ClipEmbeddingFeature(ImageTextPlugin):
 
         self.tokenizer = SimpleTokenizer(self.bpe_file)
 
-        self.con = rai.Client(host=self.host, port=self.port)
+        self.max_tries = self.config["max_tries"]
 
-        if not self.check_rai():
-            self.register_rai()
+        try_count = self.max_tries
+        while try_count > 0:
+            try:
+                self.con = rai.Client(host=self.host, port=self.port)
+
+                if not self.check_rai():
+                    self.register_rai()
+                return
+            except:
+                try_count -= 1
+                time.sleep(4)
 
     def register_rai(self):
         model = ml2rt.load_model(self.model_file)

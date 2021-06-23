@@ -1,6 +1,7 @@
 import math
 import uuid
 
+import time
 
 import ml2rt
 import numpy as np
@@ -25,7 +26,7 @@ class ClipEmbeddingFeature(FeaturePlugin):
         "max_tries": 5,
     }
 
-    default_version = 0.3
+    default_version = 0.4
 
     def __init__(self, **kwargs):
         super(ClipEmbeddingFeature, self).__init__(**kwargs)
