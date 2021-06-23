@@ -83,6 +83,10 @@ class ClipEmbeddingFeature(FeaturePlugin):
             self.con.tensorset(f"image_{job_id}", image)
             result = self.con.modelrun(self.model_name, f"image_{job_id}", f"output_{job_id}")
             output = self.con.tensorget(f"output_{job_id}")[0, ...]
+
+            # normalize
+            output = output / np.linalg.norm(np.asarray(output))
+
             output_bin = (output > 0).astype(np.int32).tolist()
             output_bin_str = "".join([str(x) for x in output_bin])
 
