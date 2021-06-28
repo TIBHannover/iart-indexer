@@ -34,7 +34,7 @@ class KaggleResnetClassifier(ClassifierPlugin):
         "threshold": 0.25,
     }
 
-    default_version = 0.1
+    default_version = "0.1"
 
     def __init__(self, **kwargs):
         super(KaggleResnetClassifier, self).__init__(**kwargs)

@@ -33,7 +33,7 @@ class KaggleDenseClassifier(ClassifierPlugin):
         "threshold": 0.5,
     }
 
-    default_version = 0.1
+    default_version = "0.1"
 
     def __init__(self, **kwargs):
         super(KaggleDenseClassifier, self).__init__(**kwargs)

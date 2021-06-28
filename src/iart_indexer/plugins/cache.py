@@ -38,11 +38,15 @@ class Cache:
                     with open(os.path.join(self.cache_dir, "data.pkl"), "rb") as f:
                         self.cache_data = pickle.load(f)
 
+                    logging.info("Cache: 1")
                     for _, c in self.cache_data["classifier"].items():
+                        logging.info(os.path.join(self.cache_dir, f"{c['id']}.pkl"))
                         with open(os.path.join(self.cache_dir, f"{c['id']}.pkl"), "rb") as f:
                             self.classifier_data[c["cache_name"]] = pickle.load(f)
 
+                    logging.info("Cache: 2")
                     for _, c in self.cache_data["feature"].items():
+                        logging.info(os.path.join(self.cache_dir, f"{c['id']}.h5"))
                         index_id = c["id"]
                         self.feature_data[c["cache_name"]] = {
                             "h5": h5py.File(os.path.join(self.cache_dir, f"{index_id}.h5"), self.mode),
@@ -52,6 +56,7 @@ class Cache:
                             "data"
                         ].shape[0]
                         print(self.feature_data[c["cache_name"]])
+                    logging.info("Cache: 3")
 
             self.num_client += 1
 

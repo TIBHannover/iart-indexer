@@ -17,7 +17,7 @@ class Plugin:
 
     default_config = {}
 
-    default_version = 0.1
+    default_version = "0.1"
 
     _type = ""
 

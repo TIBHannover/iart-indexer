@@ -196,7 +196,7 @@ class ClipEmbeddingFeature(ImageTextPlugin):
         "max_tries": 5,
     }
 
-    default_version = 0.4
+    default_version = "0.4"
 
     def __init__(self, **kwargs):
         super(ClipEmbeddingFeature, self).__init__(**kwargs)

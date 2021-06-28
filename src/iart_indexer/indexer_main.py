@@ -113,6 +113,7 @@ def main():
                     for line in entries:
                         f.write(json.dumps(line) + "\n")
         elif args.task == "indexing":
+            available_plugins = client.plugin_list()
             plugins = []
             plugins_selected = None
             if args.plugins:
@@ -128,6 +129,7 @@ def main():
             client.indexing(paths=args.path, image_paths=args.image_paths, plugins=plugins)
 
         elif args.task == "bulk_indexing":
+            available_plugins = client.plugin_list()
             plugins = []
             plugins_selected = None
             if args.plugins:

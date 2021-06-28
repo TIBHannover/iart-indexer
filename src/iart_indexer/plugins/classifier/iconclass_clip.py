@@ -38,7 +38,7 @@ class IconclassCLIPClassifier(ClassifierPlugin):
         "k": 25,
     }
 
-    default_version = 0.1
+    default_version = "0.1"
 
     def __init__(self, **kwargs):
         super(IconclassCLIPClassifier, self).__init__(**kwargs)

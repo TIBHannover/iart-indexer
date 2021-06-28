@@ -19,7 +19,7 @@ from iart_indexer.plugins import *
 from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin, ImageTextPluginManager
 from iart_indexer.plugins import IndexerPluginManager
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
-from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry
+from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry, read_chunk
 from iart_indexer.jobs import IndexingJob
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
@@ -399,68 +399,112 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
-        def filter_and_translate(request_iterator):
+        def filter_and_translate(cache, request_iterator):
+            logging.info("[Server]: Start reading cache for indexing")
 
-            with Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="r") as cache:
-                for x in request_iterator:
-                    cache_data = cache[x.image.id]
+            for x in request_iterator:
 
-                    meta = meta_from_proto(x.image.meta)
-                    origin = meta_from_proto(x.image.origin)
-                    collection = {}
-                    if x.image.collection.id != "":
-                        collection["id"] = x.image.collection.id
-                        collection["name"] = x.image.collection.name
-                        collection["is_public"] = x.image.collection.is_public
-                    yield {
-                        "id": x.image.id,
-                        "image_data": x.image.encoded,
-                        "meta": meta,
-                        "origin": origin,
-                        "collection": collection,
-                        "cache": cache_data,
-                    }
+                cache_data = cache[x.image.id]
+
+                meta = meta_from_proto(x.image.meta)
+                origin = meta_from_proto(x.image.origin)
+                collection = {}
+                if x.image.collection.id != "":
+                    collection["id"] = x.image.collection.id
+                    collection["name"] = x.image.collection.name
+                    collection["is_public"] = x.image.collection.is_public
+                yield {
+                    "id": x.image.id,
+                    "image_data": x.image.encoded,
+                    "meta": meta,
+                    "origin": origin,
+                    "collection": collection,
+                    "cache": cache_data,
+                }
 
         db_bulk_cache = []
         logging.info(f"[Server] Indexing: start indexing")
 
+        # for x in request_iterator:
+        #     logging.info("###########")
+        #     logging.info(x)
+
         # compute features and classifiers and write them to the database
+        request_iter = iter(request_iterator)
+
         collections = set()
-        for i, (status, entry) in enumerate(
-            self.indexing_process_pool.map(IndexingJob(), filter_and_translate(request_iterator))
-        ):
-            logging.info(f"############### {i}")
-            logging.info(f"############### {status}")
-            if status != "ok":
-                logging.error(f"Indexing: {entry['id']}")
-                yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
-                continue
+        with Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="r") as cache:
+            while True:
+                chunk = read_chunk(filter_and_translate(cache, request_iter), chunksize=512)
+                if len(chunk) <= 0:
+                    break
 
-            collection = entry.get("collection")
-            if collection:
-                collection_id = collection.get("id")
-                if collection_id:
-                    collections.add(collection_id)
+                for i, (status, entry) in enumerate(self.indexing_process_pool.map(IndexingJob(), chunk, chunksize=64)):
+                    if status != "ok":
+                        logging.error(f"Indexing: {entry['id']}")
+                        yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
+                        continue
 
-            db_bulk_cache.append(entry)
+                    collection = entry.get("collection")
+                    if collection:
+                        collection_id = collection.get("id")
+                        if collection_id:
+                            collections.add(collection_id)
 
-            if len(db_bulk_cache) > 1000:
+                    db_bulk_cache.append(entry)
 
-                logging.info(f"[Server] Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
-                try_count = 20
-                while try_count > 0:
-                    try:
-                        database.bulk_insert(db_bulk_cache)
-                        db_bulk_cache = []
-                        try_count = 0
-                    except KeyboardInterrupt:
-                        raise
-                    except:
-                        logging.error(f"[Server] Indexing: database error (try count: {try_count})")
-                        time.sleep(1)
-                        try_count -= 1
+                    if len(db_bulk_cache) > 64:
 
-            yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
+                        logging.info(f"[Server] Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
+                        try_count = 20
+                        while try_count > 0:
+                            try:
+                                database.bulk_insert(db_bulk_cache)
+                                db_bulk_cache = []
+                                try_count = 0
+                            except KeyboardInterrupt:
+                                raise
+                            except:
+                                logging.error(f"[Server] Indexing: database error (try count: {try_count})")
+                                time.sleep(1)
+                                try_count -= 1
+
+                    yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
+
+        # collections = set()
+        # for i, (status, entry) in enumerate(
+        #     self.indexing_process_pool.map(IndexingJob(), filter_and_translate(request_iterator), chunksize=64)
+        # ):
+        #     if status != "ok":
+        #         logging.error(f"Indexing: {entry['id']}")
+        #         yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
+        #         continue
+
+        #     collection = entry.get("collection")
+        #     if collection:
+        #         collection_id = collection.get("id")
+        #         if collection_id:
+        #             collections.add(collection_id)
+
+        #     db_bulk_cache.append(entry)
+
+        #     if len(db_bulk_cache) > 64:
+
+        #         logging.info(f"[Server] Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
+        #         try_count = 20
+        #         while try_count > 0:
+        #             try:
+        #                 database.bulk_insert(db_bulk_cache)
+        #                 db_bulk_cache = []
+        #                 try_count = 0
+        #             except KeyboardInterrupt:
+        #                 raise
+        #             except:
+        #                 logging.error(f"[Server] Indexing: database error (try count: {try_count})")
+        #                 time.sleep(1)
+        #                 try_count -= 1
+
+        #     yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
 
         if len(db_bulk_cache) > 0:
             logging.info(f"[Server] Indexing flush results to database (count:{i} {len(db_bulk_cache)})")
@@ -468,19 +512,19 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             db_bulk_cache = []
 
         # submit collection indexing job
-        logging.info(f"[Server] Indexing collection {list(collections)}")
-        job_id = uuid.uuid4().hex
-        variable = {
-            "config": self.config,
-            "rebuild": False,
-            "collections": [c for c in collections],
-            "future": None,
-            "id": job_id,
-        }
-        logging.info(f"[Server] Submit job (build_indexer) ({variable})")
-        future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
-        variable["future"] = future
-        self.futures.append(variable)
+        # logging.info(f"[Server] Indexing collection {list(collections)}")
+        # job_id = uuid.uuid4().hex
+        # variable = {
+        #     "config": self.config,
+        #     "rebuild": False,
+        #     "collections": [c for c in collections],
+        #     "future": None,
+        #     "id": job_id,
+        # }
+        # logging.info(f"[Server] Submit job (build_indexer) ({variable})")
+        # future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
+        # variable["future"] = future
+        # self.futures.append(variable)
 
     def build_suggester(self, request, context):
 

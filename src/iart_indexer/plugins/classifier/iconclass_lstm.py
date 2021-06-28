@@ -35,7 +35,7 @@ class IconclassLSTMClassifier(ClassifierPlugin):
         "threshold": 1e-3,
     }
 
-    default_version = 0.1
+    default_version = "0.1"
 
     def __init__(self, **kwargs):
         super(IconclassLSTMClassifier, self).__init__(**kwargs)

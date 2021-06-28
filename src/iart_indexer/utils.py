@@ -14,6 +14,17 @@ import numbers
 from iart_indexer import indexer_pb2
 
 
+def read_chunk(iterator, chunksize=64):
+    chunk = []
+    for x in range(chunksize):
+        try:
+            chunk.append(next(iterator))
+        except StopIteration:
+            return chunk
+
+    return chunk
+
+
 def get_features_from_db_entry(entry, return_collection=False):
     data_dict = {"id": entry["id"], "feature": []}
 

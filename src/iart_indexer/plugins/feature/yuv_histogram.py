@@ -24,7 +24,7 @@ class YUVHistogramFeature(FeaturePlugin):
         "max_tries": 5,
     }
 
-    default_version = 0.1
+    default_version = "0.1"
 
     def __init__(self, **kwargs):
         super(YUVHistogramFeature, self).__init__(**kwargs)

@@ -1,6 +1,7 @@
 import logging
 import imageio
 import traceback
+from packaging import version
 
 from google.protobuf.json_format import MessageToJson, MessageToDict, ParseDict
 
@@ -16,7 +17,6 @@ class IndexingJob:
 
     @classmethod
     def init_worker(cls, config):
-        logging.info("INIT")
 
         feature_manager = FeaturePluginManager(configs=config.get("features", []))
         feature_manager.find()
@@ -30,7 +30,6 @@ class IndexingJob:
 
     @classmethod
     def __call__(cls, entry):
-        logging.info("CALL")
 
         classifier_manager = getattr(cls, "classifier_manager")
         feature_manager = getattr(cls, "feature_manager")
@@ -121,7 +120,10 @@ class IndexingJob:
         for exist_f in entry["cache"]["feature"]:
             if "feature" not in doc:
                 doc["feature"] = []
-            exist_f_version = version.parse(str(exist_f["version"]))
+            if "version" in exist_f:
+                exist_f_version = version.parse(str(exist_f["version"]))
+            else:
+                exist_f_version = version.parse("0.0.0")
 
             founded = False
             for computed_f in doc["feature"]:
@@ -140,5 +142,4 @@ class IndexingJob:
                     ],
                 }
                 doc["feature"].append(exist_f)
-
         return "ok", doc
