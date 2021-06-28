@@ -589,6 +589,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
             index = msgpack.unpackb(f.read(), strict_map_key=False)
 
         index["index"] = faiss.read_index(os.path.join(self.indexes_dir, index_id + ".index"))
+        index["index"].nprobe = self.number_of_cluster
 
         # build rev_entries
 
