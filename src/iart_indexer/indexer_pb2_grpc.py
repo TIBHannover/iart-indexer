@@ -29,11 +29,6 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.SuggesterRequest.SerializeToString,
             response_deserializer=indexer__pb2.SuggesterReply.FromString,
         )
-        self.get = channel.unary_unary(
-            "/iart.indexer.Indexer/get",
-            request_serializer=indexer__pb2.GetRequest.SerializeToString,
-            response_deserializer=indexer__pb2.GetReply.FromString,
-        )
         self.search = channel.unary_unary(
             "/iart.indexer.Indexer/search",
             request_serializer=indexer__pb2.SearchRequest.SerializeToString,
@@ -79,6 +74,26 @@ class IndexerStub(object):
             request_serializer=indexer__pb2.LoadRequest.SerializeToString,
             response_deserializer=indexer__pb2.LoadReply.FromString,
         )
+        self.get = channel.unary_unary(
+            "/iart.indexer.Indexer/get",
+            request_serializer=indexer__pb2.GetRequest.SerializeToString,
+            response_deserializer=indexer__pb2.GetReply.FromString,
+        )
+        self.delete = channel.unary_unary(
+            "/iart.indexer.Indexer/delete",
+            request_serializer=indexer__pb2.DeleteRequest.SerializeToString,
+            response_deserializer=indexer__pb2.DeleteReply.FromString,
+        )
+        self.collection_delete = channel.unary_unary(
+            "/iart.indexer.Indexer/collection_delete",
+            request_serializer=indexer__pb2.CollectionDeleteRequest.SerializeToString,
+            response_deserializer=indexer__pb2.CollectionDeleteReply.FromString,
+        )
+        self.collection_list = channel.unary_unary(
+            "/iart.indexer.Indexer/collection_list",
+            request_serializer=indexer__pb2.CollectionListRequest.SerializeToString,
+            response_deserializer=indexer__pb2.CollectionListReply.FromString,
+        )
 
 
 class IndexerServicer(object):
@@ -97,12 +112,6 @@ class IndexerServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def build_suggester(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def get(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -162,6 +171,30 @@ class IndexerServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def get(self, request, context):
+        """entry services"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def delete(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def collection_delete(self, request, context):
+        """collection services"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def collection_list(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_IndexerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -179,11 +212,6 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.build_suggester,
             request_deserializer=indexer__pb2.SuggesterRequest.FromString,
             response_serializer=indexer__pb2.SuggesterReply.SerializeToString,
-        ),
-        "get": grpc.unary_unary_rpc_method_handler(
-            servicer.get,
-            request_deserializer=indexer__pb2.GetRequest.FromString,
-            response_serializer=indexer__pb2.GetReply.SerializeToString,
         ),
         "search": grpc.unary_unary_rpc_method_handler(
             servicer.search,
@@ -229,6 +257,26 @@ def add_IndexerServicer_to_server(servicer, server):
             servicer.load,
             request_deserializer=indexer__pb2.LoadRequest.FromString,
             response_serializer=indexer__pb2.LoadReply.SerializeToString,
+        ),
+        "get": grpc.unary_unary_rpc_method_handler(
+            servicer.get,
+            request_deserializer=indexer__pb2.GetRequest.FromString,
+            response_serializer=indexer__pb2.GetReply.SerializeToString,
+        ),
+        "delete": grpc.unary_unary_rpc_method_handler(
+            servicer.delete,
+            request_deserializer=indexer__pb2.DeleteRequest.FromString,
+            response_serializer=indexer__pb2.DeleteReply.SerializeToString,
+        ),
+        "collection_delete": grpc.unary_unary_rpc_method_handler(
+            servicer.collection_delete,
+            request_deserializer=indexer__pb2.CollectionDeleteRequest.FromString,
+            response_serializer=indexer__pb2.CollectionDeleteReply.SerializeToString,
+        ),
+        "collection_list": grpc.unary_unary_rpc_method_handler(
+            servicer.collection_list,
+            request_deserializer=indexer__pb2.CollectionListRequest.FromString,
+            response_serializer=indexer__pb2.CollectionListReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("iart.indexer.Indexer", rpc_method_handlers)
@@ -316,35 +364,6 @@ class Indexer(object):
             "/iart.indexer.Indexer/build_suggester",
             indexer__pb2.SuggesterRequest.SerializeToString,
             indexer__pb2.SuggesterReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def get(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/iart.indexer.Indexer/get",
-            indexer__pb2.GetRequest.SerializeToString,
-            indexer__pb2.GetReply.FromString,
             options,
             channel_credentials,
             insecure,
@@ -606,6 +625,122 @@ class Indexer(object):
             "/iart.indexer.Indexer/load",
             indexer__pb2.LoadRequest.SerializeToString,
             indexer__pb2.LoadReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def get(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/iart.indexer.Indexer/get",
+            indexer__pb2.GetRequest.SerializeToString,
+            indexer__pb2.GetReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def delete(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/iart.indexer.Indexer/delete",
+            indexer__pb2.DeleteRequest.SerializeToString,
+            indexer__pb2.DeleteReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def collection_delete(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/iart.indexer.Indexer/collection_delete",
+            indexer__pb2.CollectionDeleteRequest.SerializeToString,
+            indexer__pb2.CollectionDeleteReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def collection_list(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/iart.indexer.Indexer/collection_list",
+            indexer__pb2.CollectionListRequest.SerializeToString,
+            indexer__pb2.CollectionListReply.FromString,
             options,
             channel_credentials,
             insecure,

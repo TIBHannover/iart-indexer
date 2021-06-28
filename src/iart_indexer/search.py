@@ -12,6 +12,8 @@ from iart_indexer.utils import image_from_proto, dict_from_proto
 
 import faulthandler
 
+from elasticsearch_dsl import Search, Q
+
 import time
 
 
@@ -139,10 +141,13 @@ class Searcher:
             if term_type == "text":
                 text = term.text
                 field = text.field.lower()
+                flag = "should"
                 if text.flag == indexer_pb2.TextSearchTerm.MUST:
                     flag = "must"
                 if text.flag == indexer_pb2.TextSearchTerm.SHOULD:
                     flag = "should"
+                if text.flag == indexer_pb2.TextSearchTerm.NOT:
+                    flag = "not"
 
                 text_search.append({"field": field, "query": text.query, "flag": flag})
 
@@ -166,6 +171,7 @@ class Searcher:
                     query_term = number.float_query
 
                 # parse relation
+                relation = "eq"
                 if number.relation == indexer_pb2.NumberSearchTerm.GREATER:
                     relation = "gt"
                 if number.relation == indexer_pb2.NumberSearchTerm.GREATER_EQ:
@@ -177,10 +183,13 @@ class Searcher:
                 if number.relation == indexer_pb2.NumberSearchTerm.LESS:
                     relation = "lt"
 
-                if number.flag == indexer_pb2.TextSearchTerm.MUST:
+                flag = "should"
+                if number.flag == indexer_pb2.NumberSearchTerm.MUST:
                     flag = "must"
-                if number.flag == indexer_pb2.TextSearchTerm.SHOULD:
+                if number.flag == indexer_pb2.NumberSearchTerm.SHOULD:
                     flag = "should"
+                if number.flag == indexer_pb2.NumberSearchTerm.NOT:
+                    flag = "not"
 
                 range_search.append({"field": field, "query": query_term, "relation": relation, "flag": flag})
 
@@ -313,7 +322,7 @@ class Searcher:
 
         return result
 
-    def build_search_body(
+    def build_search_body_old(
         self,
         text_search: List = [],
         range_search: List = [],
@@ -509,6 +518,171 @@ class Searcher:
 
         return body
 
+    def build_search_body(
+        self,
+        text_search: List = [],
+        range_search: List = [],
+        feature_search: List = [],
+        whitelist: List = [],
+        sorting=None,
+        seed=None,
+    ):
+
+        search = Search()
+        # Seed all random functions
+        if seed is not None and str(seed) != "":
+            seed = str(seed)
+        else:
+            seed = uuid.uuid4().hex
+
+        must_terms = []
+        should_terms = []
+        must_not_terms = []
+        for e in text_search:
+            term = None
+            if "field" not in e or e["field"] in [None, ""]:
+                term = Q("multi_match", fields=["meta_text", "classifier_text"], query=e["query"])
+            else:
+                field_path = e["field"].split(".")
+                if len(field_path) == 1:
+                    if field_path[0] == "meta":
+                        term = Q("multi_match", fields=["meta_text"], query=e["query"])
+                    elif field_path[0] == "classifier":
+                        term = Q("multi_match", fields=["classifier_text"], query=e["query"])
+                    elif field_path[0] == "origin":
+                        term = Q("multi_match", fields=["origin_text"], query=e["query"])
+
+                if len(field_path) == 2:
+
+                    if field_path[0] == "meta":
+                        term = Q(
+                            "nested",
+                            path="meta",
+                            query=Q(
+                                "bool",
+                                must=[Q("match", meta__name=field_path[1]), Q("match", meta__value_str=e["query"])],
+                            ),
+                        )
+                    if field_path[0] == "origin":
+                        term = Q(
+                            "nested",
+                            path="origin",
+                            query=Q(
+                                "bool",
+                                must=[Q("match", origin__name=field_path[1]), Q("match", origin__value_str=e["query"])],
+                            ),
+                        )
+
+            if term is None:
+                continue
+
+            if "flag" in e and e["flag"] is not None:
+                if e["flag"] == "must":
+                    must_terms.append(term)
+                elif e["flag"] == "should":
+                    should_terms.append(term)
+                else:
+                    must_not_terms.append(term)
+            else:
+                should_terms.append(term)
+
+        for e in range_search:
+            term = None
+            if "field" not in e or e["field"] is None:
+                # There is no generic int field in the database structure
+                continue
+            else:
+                field_path = e["field"].split(".")
+                if len(field_path) == 2:
+
+                    if field_path[0] == "meta":
+                        name_match = Q("match", meta__name=field_path[1])
+
+                        if e["relation"] != "eq":
+                            value_match = Q("range", meta__value_int={e["relation"]: e["query"]})
+                        else:
+                            value_match = Q("term", meta__value_int=e["query"])
+
+                        # value_match = {"term": {f"meta.value_int": {"value": e["query"]}}}
+
+                        term = Q(
+                            "nested",
+                            path="meta",
+                            query=Q(
+                                "bool",
+                                must=[name_match, value_match],
+                            ),
+                        )
+
+                    if field_path[0] == "origin":
+                        name_match = Q("match", origin__name=field_path[1])
+
+                        if e["relation"] != "eq":
+                            value_match = Q("range", origin__value_int={e["relation"]: e["query"]})
+                        else:
+                            value_match = Q("term", origin__value_int=e["query"])
+
+                        # value_match = {"term": {f"meta.value_int": {"value": e["query"]}}}
+
+                        term = Q(
+                            "nested",
+                            path="origin",
+                            query=Q(
+                                "bool",
+                                must=[name_match, value_match],
+                            ),
+                        )
+
+            if term is None:
+                continue
+
+            if "flag" in e and e["flag"] is not None:
+                if e["flag"] == "must":
+                    must_terms.append(term)
+                elif e["flag"] == "should":
+                    should_terms.append(term)
+                else:
+                    must_not_terms.append(term)
+            else:
+                should_terms.append(term)
+
+        search = search.query(Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms))
+
+        elastic_sorting = []
+        if isinstance(sorting, str) and sorting.lower() == "classifier":
+            elastic_sorting.append(
+                {
+                    "classifier.annotations.value": {
+                        "order": "desc",
+                        "mode": "sum",
+                        "nested": {"path": "classifier", "nested": {"path": "classifier.annotations"}},
+                    }
+                }
+            )
+
+        if isinstance(sorting, str) and sorting.lower() == "random":
+            should_terms.append({"function_score": {"functions": [{"random_score": {"seed": seed}}]}})
+
+        if whitelist is not None and len(whitelist) > 0:
+            body = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"ids": {"type": "_doc", "values": whitelist}},
+                            {"bool": {"should": should_terms, "must": must_terms}},
+                        ]
+                    }
+                }
+            }
+
+        else:
+            body = {"query": {"bool": {"should": should_terms, "must": must_terms}}}
+
+        if elastic_sorting is not None:
+            body.update({"sort": elastic_sorting})
+
+        return search.to_dict()
+
     def search_db(
         self,
         body,
@@ -550,6 +724,16 @@ class Searcher:
         logging.info(f"[Searcher] Results from indexer len={len(entries_feature)} time={time.time()-start_time}")
 
         # logging.info(f"Parsed query: {query}")
+        body_old = self.build_search_body_old(
+            query["text_search"],
+            query["range_search"],
+            query["feature_search"],
+            whitelist=entries_feature,
+            sorting=query["sorting"],
+            seed=query["seed"],
+        )
+
+        # logging.info(f"Parsed query: {query}")
         body = self.build_search_body(
             query["text_search"],
             query["range_search"],
@@ -558,6 +742,9 @@ class Searcher:
             sorting=query["sorting"],
             seed=query["seed"],
         )
+
+        logging.info(f"Old: {body_old}")
+        logging.info(f"New: {body}")
 
         logging.info(f"[Searcher] Start querying database")
 

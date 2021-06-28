@@ -164,6 +164,7 @@ message TextSearchTerm {
   enum Flag {
     MUST = 0;
     SHOULD = 1;
+    NOT = 2;
   }
 
   Flag flag = 3;
@@ -205,6 +206,7 @@ message NumberSearchTerm {
   enum Flag {
     MUST = 0;
     SHOULD = 1;
+    NOT = 2;
   }
 
   Flag flag = 6;
