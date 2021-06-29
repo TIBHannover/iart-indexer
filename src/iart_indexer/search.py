@@ -646,11 +646,27 @@ class Searcher:
             else:
                 should_terms.append(term)
 
-        search = search.query(Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms))
+        if isinstance(sorting, str) and sorting.lower() == "random":
+            should_terms.append(Q("function_score", functions=[{"random_score": {"seed": seed}}]))
 
-        elastic_sorting = []
+        if whitelist is not None and len(whitelist) > 0:
+
+            search = search.query(
+                Q(
+                    "bool",
+                    must=[
+                        Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms),
+                        Q("ids", type="_doc", values=whitelist),
+                    ],
+                )
+            )
+
+        else:
+            search = search.query(Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms))
+
         if isinstance(sorting, str) and sorting.lower() == "classifier":
-            elastic_sorting.append(
+
+            search.sort(
                 {
                     "classifier.annotations.value": {
                         "order": "desc",
@@ -660,26 +676,8 @@ class Searcher:
                 }
             )
 
-        if isinstance(sorting, str) and sorting.lower() == "random":
-            should_terms.append({"function_score": {"functions": [{"random_score": {"seed": seed}}]}})
-
-        if whitelist is not None and len(whitelist) > 0:
-            body = {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"ids": {"type": "_doc", "values": whitelist}},
-                            {"bool": {"should": should_terms, "must": must_terms}},
-                        ]
-                    }
-                }
-            }
-
-        else:
-            body = {"query": {"bool": {"should": should_terms, "must": must_terms}}}
-
-        if elastic_sorting is not None:
-            body.update({"sort": elastic_sorting})
+        # if elastic_sorting is not None:
+        #     body.update({"sort": elastic_sorting})
 
         return search.to_dict()
 

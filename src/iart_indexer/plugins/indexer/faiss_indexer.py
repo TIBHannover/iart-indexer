@@ -34,7 +34,7 @@ class FaissIndexer(IndexerPlugin):
         "number_of_cluster": 100,
         "one_index_per_collection": True,
         "one_index_for_public": True,
-        "number_of_probs": 8,
+        "number_of_probs": 3,
         "grpc": {"port": 50151, "host": "localhost"}
         # "indexing_size": 105536,
     }
@@ -589,7 +589,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
             index = msgpack.unpackb(f.read(), strict_map_key=False)
 
         index["index"] = faiss.read_index(os.path.join(self.indexes_dir, index_id + ".index"))
-        index["index"].nprobe = self.number_of_cluster
+        index["index"].nprobe = self.number_of_probs
 
         # build rev_entries
 
