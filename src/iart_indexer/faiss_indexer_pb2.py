@@ -6,7 +6,6 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -16,686 +15,534 @@ from . import indexer_pb2 as indexer__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
-    name="faiss_indexer.proto",
-    package="iart.faiss_indexer",
-    syntax="proto3",
-    serialized_options=b"P\001",
-    create_key=_descriptor._internal_create_key,
-    serialized_pb=b'\n\x13\x66\x61iss_indexer.proto\x12\x12iart.faiss_indexer\x1a\rindexer.proto"4\n\x05Query\x12\r\n\x05value\x18\x01 \x03(\x02\x12\x0e\n\x06plugin\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t"t\n\rSearchRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12"\n\x1ainclude_default_collection\x18\x03 \x01(\x08\x12*\n\x07queries\x18\x02 \x03(\x0b\x32\x19.iart.faiss_indexer.Query"\x1a\n\x0bSearchReply\x12\x0b\n\x03ids\x18\x01 \x03(\t"&\n\x0fIndexingRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t"\x0f\n\rIndexingReply"#\n\x0cTrainRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t"\x0c\n\nTrainReply"1\n\rDeleteRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t"\r\n\x0b\x44\x65leteReply"\r\n\x0bListRequest":\n\tListReply\x12-\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x18.iart.indexer.Collection2\x9b\x03\n\x0c\x46\x61issIndexer\x12N\n\x06search\x12!.iart.faiss_indexer.SearchRequest\x1a\x1f.iart.faiss_indexer.SearchReply"\x00\x12T\n\x08indexing\x12#.iart.faiss_indexer.IndexingRequest\x1a!.iart.faiss_indexer.IndexingReply"\x00\x12K\n\x05train\x12 .iart.faiss_indexer.TrainRequest\x1a\x1e.iart.faiss_indexer.TrainReply"\x00\x12N\n\x06\x64\x65lete\x12!.iart.faiss_indexer.DeleteRequest\x1a\x1f.iart.faiss_indexer.DeleteReply"\x00\x12H\n\x04list\x12\x1f.iart.faiss_indexer.ListRequest\x1a\x1d.iart.faiss_indexer.ListReply"\x00\x42\x02P\x01\x62\x06proto3',
-    dependencies=[
-        indexer__pb2.DESCRIPTOR,
-    ],
-)
+  name='faiss_indexer.proto',
+  package='iart.faiss_indexer',
+  syntax='proto3',
+  serialized_options=b'P\001',
+  create_key=_descriptor._internal_create_key,
+  serialized_pb=b'\n\x13\x66\x61iss_indexer.proto\x12\x12iart.faiss_indexer\x1a\rindexer.proto\"4\n\x05Query\x12\r\n\x05value\x18\x01 \x03(\x02\x12\x0e\n\x06plugin\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\"t\n\rSearchRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\"\n\x1ainclude_default_collection\x18\x03 \x01(\x08\x12*\n\x07queries\x18\x02 \x03(\x0b\x32\x19.iart.faiss_indexer.Query\"\x1a\n\x0bSearchReply\x12\x0b\n\x03ids\x18\x01 \x03(\t\"&\n\x0fIndexingRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\"\x0f\n\rIndexingReply\"#\n\x0cTrainRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\"\x0c\n\nTrainReply\"1\n\rDeleteRequest\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t\"\r\n\x0b\x44\x65leteReply\"\r\n\x0bListRequest\":\n\tListReply\x12-\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x18.iart.indexer.Collection2\x9b\x03\n\x0c\x46\x61issIndexer\x12N\n\x06search\x12!.iart.faiss_indexer.SearchRequest\x1a\x1f.iart.faiss_indexer.SearchReply\"\x00\x12T\n\x08indexing\x12#.iart.faiss_indexer.IndexingRequest\x1a!.iart.faiss_indexer.IndexingReply\"\x00\x12K\n\x05train\x12 .iart.faiss_indexer.TrainRequest\x1a\x1e.iart.faiss_indexer.TrainReply\"\x00\x12N\n\x06\x64\x65lete\x12!.iart.faiss_indexer.DeleteRequest\x1a\x1f.iart.faiss_indexer.DeleteReply\"\x00\x12H\n\x04list\x12\x1f.iart.faiss_indexer.ListRequest\x1a\x1d.iart.faiss_indexer.ListReply\"\x00\x42\x02P\x01\x62\x06proto3'
+  ,
+  dependencies=[indexer__pb2.DESCRIPTOR,])
+
+
 
 
 _QUERY = _descriptor.Descriptor(
-    name="Query",
-    full_name="iart.faiss_indexer.Query",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="iart.faiss_indexer.Query.value",
-            index=0,
-            number=1,
-            type=2,
-            cpp_type=6,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.FieldDescriptor(
-            name="plugin",
-            full_name="iart.faiss_indexer.Query.plugin",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.FieldDescriptor(
-            name="type",
-            full_name="iart.faiss_indexer.Query.type",
-            index=2,
-            number=3,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=58,
-    serialized_end=110,
+  name='Query',
+  full_name='iart.faiss_indexer.Query',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='iart.faiss_indexer.Query.value', index=0,
+      number=1, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='plugin', full_name='iart.faiss_indexer.Query.plugin', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='iart.faiss_indexer.Query.type', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=58,
+  serialized_end=110,
 )
 
 
 _SEARCHREQUEST = _descriptor.Descriptor(
-    name="SearchRequest",
-    full_name="iart.faiss_indexer.SearchRequest",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="collections",
-            full_name="iart.faiss_indexer.SearchRequest.collections",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.FieldDescriptor(
-            name="include_default_collection",
-            full_name="iart.faiss_indexer.SearchRequest.include_default_collection",
-            index=1,
-            number=3,
-            type=8,
-            cpp_type=7,
-            label=1,
-            has_default_value=False,
-            default_value=False,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.FieldDescriptor(
-            name="queries",
-            full_name="iart.faiss_indexer.SearchRequest.queries",
-            index=2,
-            number=2,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=112,
-    serialized_end=228,
+  name='SearchRequest',
+  full_name='iart.faiss_indexer.SearchRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='collections', full_name='iart.faiss_indexer.SearchRequest.collections', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='include_default_collection', full_name='iart.faiss_indexer.SearchRequest.include_default_collection', index=1,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='queries', full_name='iart.faiss_indexer.SearchRequest.queries', index=2,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=112,
+  serialized_end=228,
 )
 
 
 _SEARCHREPLY = _descriptor.Descriptor(
-    name="SearchReply",
-    full_name="iart.faiss_indexer.SearchReply",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="ids",
-            full_name="iart.faiss_indexer.SearchReply.ids",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=230,
-    serialized_end=256,
+  name='SearchReply',
+  full_name='iart.faiss_indexer.SearchReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ids', full_name='iart.faiss_indexer.SearchReply.ids', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=230,
+  serialized_end=256,
 )
 
 
 _INDEXINGREQUEST = _descriptor.Descriptor(
-    name="IndexingRequest",
-    full_name="iart.faiss_indexer.IndexingRequest",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="collections",
-            full_name="iart.faiss_indexer.IndexingRequest.collections",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=258,
-    serialized_end=296,
+  name='IndexingRequest',
+  full_name='iart.faiss_indexer.IndexingRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='collections', full_name='iart.faiss_indexer.IndexingRequest.collections', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=258,
+  serialized_end=296,
 )
 
 
 _INDEXINGREPLY = _descriptor.Descriptor(
-    name="IndexingReply",
-    full_name="iart.faiss_indexer.IndexingReply",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=298,
-    serialized_end=313,
+  name='IndexingReply',
+  full_name='iart.faiss_indexer.IndexingReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=298,
+  serialized_end=313,
 )
 
 
 _TRAINREQUEST = _descriptor.Descriptor(
-    name="TrainRequest",
-    full_name="iart.faiss_indexer.TrainRequest",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="collections",
-            full_name="iart.faiss_indexer.TrainRequest.collections",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=315,
-    serialized_end=350,
+  name='TrainRequest',
+  full_name='iart.faiss_indexer.TrainRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='collections', full_name='iart.faiss_indexer.TrainRequest.collections', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=315,
+  serialized_end=350,
 )
 
 
 _TRAINREPLY = _descriptor.Descriptor(
-    name="TrainReply",
-    full_name="iart.faiss_indexer.TrainReply",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=352,
-    serialized_end=364,
+  name='TrainReply',
+  full_name='iart.faiss_indexer.TrainReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=352,
+  serialized_end=364,
 )
 
 
 _DELETEREQUEST = _descriptor.Descriptor(
-    name="DeleteRequest",
-    full_name="iart.faiss_indexer.DeleteRequest",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="collections",
-            full_name="iart.faiss_indexer.DeleteRequest.collections",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.FieldDescriptor(
-            name="ids",
-            full_name="iart.faiss_indexer.DeleteRequest.ids",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=366,
-    serialized_end=415,
+  name='DeleteRequest',
+  full_name='iart.faiss_indexer.DeleteRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='collections', full_name='iart.faiss_indexer.DeleteRequest.collections', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ids', full_name='iart.faiss_indexer.DeleteRequest.ids', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=366,
+  serialized_end=415,
 )
 
 
 _DELETEREPLY = _descriptor.Descriptor(
-    name="DeleteReply",
-    full_name="iart.faiss_indexer.DeleteReply",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=417,
-    serialized_end=430,
+  name='DeleteReply',
+  full_name='iart.faiss_indexer.DeleteReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=417,
+  serialized_end=430,
 )
 
 
 _LISTREQUEST = _descriptor.Descriptor(
-    name="ListRequest",
-    full_name="iart.faiss_indexer.ListRequest",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=432,
-    serialized_end=445,
+  name='ListRequest',
+  full_name='iart.faiss_indexer.ListRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=432,
+  serialized_end=445,
 )
 
 
 _LISTREPLY = _descriptor.Descriptor(
-    name="ListReply",
-    full_name="iart.faiss_indexer.ListReply",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="collections",
-            full_name="iart.faiss_indexer.ListReply.collections",
-            index=0,
-            number=1,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=447,
-    serialized_end=505,
+  name='ListReply',
+  full_name='iart.faiss_indexer.ListReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='collections', full_name='iart.faiss_indexer.ListReply.collections', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=447,
+  serialized_end=505,
 )
 
-_SEARCHREQUEST.fields_by_name["queries"].message_type = _QUERY
-_LISTREPLY.fields_by_name["collections"].message_type = indexer__pb2._COLLECTION
-DESCRIPTOR.message_types_by_name["Query"] = _QUERY
-DESCRIPTOR.message_types_by_name["SearchRequest"] = _SEARCHREQUEST
-DESCRIPTOR.message_types_by_name["SearchReply"] = _SEARCHREPLY
-DESCRIPTOR.message_types_by_name["IndexingRequest"] = _INDEXINGREQUEST
-DESCRIPTOR.message_types_by_name["IndexingReply"] = _INDEXINGREPLY
-DESCRIPTOR.message_types_by_name["TrainRequest"] = _TRAINREQUEST
-DESCRIPTOR.message_types_by_name["TrainReply"] = _TRAINREPLY
-DESCRIPTOR.message_types_by_name["DeleteRequest"] = _DELETEREQUEST
-DESCRIPTOR.message_types_by_name["DeleteReply"] = _DELETEREPLY
-DESCRIPTOR.message_types_by_name["ListRequest"] = _LISTREQUEST
-DESCRIPTOR.message_types_by_name["ListReply"] = _LISTREPLY
+_SEARCHREQUEST.fields_by_name['queries'].message_type = _QUERY
+_LISTREPLY.fields_by_name['collections'].message_type = indexer__pb2._COLLECTION
+DESCRIPTOR.message_types_by_name['Query'] = _QUERY
+DESCRIPTOR.message_types_by_name['SearchRequest'] = _SEARCHREQUEST
+DESCRIPTOR.message_types_by_name['SearchReply'] = _SEARCHREPLY
+DESCRIPTOR.message_types_by_name['IndexingRequest'] = _INDEXINGREQUEST
+DESCRIPTOR.message_types_by_name['IndexingReply'] = _INDEXINGREPLY
+DESCRIPTOR.message_types_by_name['TrainRequest'] = _TRAINREQUEST
+DESCRIPTOR.message_types_by_name['TrainReply'] = _TRAINREPLY
+DESCRIPTOR.message_types_by_name['DeleteRequest'] = _DELETEREQUEST
+DESCRIPTOR.message_types_by_name['DeleteReply'] = _DELETEREPLY
+DESCRIPTOR.message_types_by_name['ListRequest'] = _LISTREQUEST
+DESCRIPTOR.message_types_by_name['ListReply'] = _LISTREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-Query = _reflection.GeneratedProtocolMessageType(
-    "Query",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _QUERY,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.Query)
-    },
-)
+Query = _reflection.GeneratedProtocolMessageType('Query', (_message.Message,), {
+  'DESCRIPTOR' : _QUERY,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.Query)
+  })
 _sym_db.RegisterMessage(Query)
 
-SearchRequest = _reflection.GeneratedProtocolMessageType(
-    "SearchRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SEARCHREQUEST,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.SearchRequest)
-    },
-)
+SearchRequest = _reflection.GeneratedProtocolMessageType('SearchRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHREQUEST,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.SearchRequest)
+  })
 _sym_db.RegisterMessage(SearchRequest)
 
-SearchReply = _reflection.GeneratedProtocolMessageType(
-    "SearchReply",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SEARCHREPLY,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.SearchReply)
-    },
-)
+SearchReply = _reflection.GeneratedProtocolMessageType('SearchReply', (_message.Message,), {
+  'DESCRIPTOR' : _SEARCHREPLY,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.SearchReply)
+  })
 _sym_db.RegisterMessage(SearchReply)
 
-IndexingRequest = _reflection.GeneratedProtocolMessageType(
-    "IndexingRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _INDEXINGREQUEST,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.IndexingRequest)
-    },
-)
+IndexingRequest = _reflection.GeneratedProtocolMessageType('IndexingRequest', (_message.Message,), {
+  'DESCRIPTOR' : _INDEXINGREQUEST,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.IndexingRequest)
+  })
 _sym_db.RegisterMessage(IndexingRequest)
 
-IndexingReply = _reflection.GeneratedProtocolMessageType(
-    "IndexingReply",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _INDEXINGREPLY,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.IndexingReply)
-    },
-)
+IndexingReply = _reflection.GeneratedProtocolMessageType('IndexingReply', (_message.Message,), {
+  'DESCRIPTOR' : _INDEXINGREPLY,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.IndexingReply)
+  })
 _sym_db.RegisterMessage(IndexingReply)
 
-TrainRequest = _reflection.GeneratedProtocolMessageType(
-    "TrainRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRAINREQUEST,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.TrainRequest)
-    },
-)
+TrainRequest = _reflection.GeneratedProtocolMessageType('TrainRequest', (_message.Message,), {
+  'DESCRIPTOR' : _TRAINREQUEST,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.TrainRequest)
+  })
 _sym_db.RegisterMessage(TrainRequest)
 
-TrainReply = _reflection.GeneratedProtocolMessageType(
-    "TrainReply",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRAINREPLY,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.TrainReply)
-    },
-)
+TrainReply = _reflection.GeneratedProtocolMessageType('TrainReply', (_message.Message,), {
+  'DESCRIPTOR' : _TRAINREPLY,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.TrainReply)
+  })
 _sym_db.RegisterMessage(TrainReply)
 
-DeleteRequest = _reflection.GeneratedProtocolMessageType(
-    "DeleteRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DELETEREQUEST,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.DeleteRequest)
-    },
-)
+DeleteRequest = _reflection.GeneratedProtocolMessageType('DeleteRequest', (_message.Message,), {
+  'DESCRIPTOR' : _DELETEREQUEST,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.DeleteRequest)
+  })
 _sym_db.RegisterMessage(DeleteRequest)
 
-DeleteReply = _reflection.GeneratedProtocolMessageType(
-    "DeleteReply",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DELETEREPLY,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.DeleteReply)
-    },
-)
+DeleteReply = _reflection.GeneratedProtocolMessageType('DeleteReply', (_message.Message,), {
+  'DESCRIPTOR' : _DELETEREPLY,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.DeleteReply)
+  })
 _sym_db.RegisterMessage(DeleteReply)
 
-ListRequest = _reflection.GeneratedProtocolMessageType(
-    "ListRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LISTREQUEST,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.ListRequest)
-    },
-)
+ListRequest = _reflection.GeneratedProtocolMessageType('ListRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LISTREQUEST,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.ListRequest)
+  })
 _sym_db.RegisterMessage(ListRequest)
 
-ListReply = _reflection.GeneratedProtocolMessageType(
-    "ListReply",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LISTREPLY,
-        "__module__": "faiss_indexer_pb2"
-        # @@protoc_insertion_point(class_scope:iart.faiss_indexer.ListReply)
-    },
-)
+ListReply = _reflection.GeneratedProtocolMessageType('ListReply', (_message.Message,), {
+  'DESCRIPTOR' : _LISTREPLY,
+  '__module__' : 'faiss_indexer_pb2'
+  # @@protoc_insertion_point(class_scope:iart.faiss_indexer.ListReply)
+  })
 _sym_db.RegisterMessage(ListReply)
 
 
 DESCRIPTOR._options = None
 
 _FAISSINDEXER = _descriptor.ServiceDescriptor(
-    name="FaissIndexer",
-    full_name="iart.faiss_indexer.FaissIndexer",
-    file=DESCRIPTOR,
+  name='FaissIndexer',
+  full_name='iart.faiss_indexer.FaissIndexer',
+  file=DESCRIPTOR,
+  index=0,
+  serialized_options=None,
+  create_key=_descriptor._internal_create_key,
+  serialized_start=508,
+  serialized_end=919,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='search',
+    full_name='iart.faiss_indexer.FaissIndexer.search',
     index=0,
+    containing_service=None,
+    input_type=_SEARCHREQUEST,
+    output_type=_SEARCHREPLY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-    serialized_start=508,
-    serialized_end=919,
-    methods=[
-        _descriptor.MethodDescriptor(
-            name="search",
-            full_name="iart.faiss_indexer.FaissIndexer.search",
-            index=0,
-            containing_service=None,
-            input_type=_SEARCHREQUEST,
-            output_type=_SEARCHREPLY,
-            serialized_options=None,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.MethodDescriptor(
-            name="indexing",
-            full_name="iart.faiss_indexer.FaissIndexer.indexing",
-            index=1,
-            containing_service=None,
-            input_type=_INDEXINGREQUEST,
-            output_type=_INDEXINGREPLY,
-            serialized_options=None,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.MethodDescriptor(
-            name="train",
-            full_name="iart.faiss_indexer.FaissIndexer.train",
-            index=2,
-            containing_service=None,
-            input_type=_TRAINREQUEST,
-            output_type=_TRAINREPLY,
-            serialized_options=None,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.MethodDescriptor(
-            name="delete",
-            full_name="iart.faiss_indexer.FaissIndexer.delete",
-            index=3,
-            containing_service=None,
-            input_type=_DELETEREQUEST,
-            output_type=_DELETEREPLY,
-            serialized_options=None,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.MethodDescriptor(
-            name="list",
-            full_name="iart.faiss_indexer.FaissIndexer.list",
-            index=4,
-            containing_service=None,
-            input_type=_LISTREQUEST,
-            output_type=_LISTREPLY,
-            serialized_options=None,
-            create_key=_descriptor._internal_create_key,
-        ),
-    ],
-)
+  ),
+  _descriptor.MethodDescriptor(
+    name='indexing',
+    full_name='iart.faiss_indexer.FaissIndexer.indexing',
+    index=1,
+    containing_service=None,
+    input_type=_INDEXINGREQUEST,
+    output_type=_INDEXINGREPLY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='train',
+    full_name='iart.faiss_indexer.FaissIndexer.train',
+    index=2,
+    containing_service=None,
+    input_type=_TRAINREQUEST,
+    output_type=_TRAINREPLY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='delete',
+    full_name='iart.faiss_indexer.FaissIndexer.delete',
+    index=3,
+    containing_service=None,
+    input_type=_DELETEREQUEST,
+    output_type=_DELETEREPLY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='list',
+    full_name='iart.faiss_indexer.FaissIndexer.list',
+    index=4,
+    containing_service=None,
+    input_type=_LISTREQUEST,
+    output_type=_LISTREPLY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+])
 _sym_db.RegisterServiceDescriptor(_FAISSINDEXER)
 
-DESCRIPTOR.services_by_name["FaissIndexer"] = _FAISSINDEXER
+DESCRIPTOR.services_by_name['FaissIndexer'] = _FAISSINDEXER
 
 # @@protoc_insertion_point(module_scope)

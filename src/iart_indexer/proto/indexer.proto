@@ -270,6 +270,7 @@ message SearchRequest {
   repeated ValueField clustering_options = 9;
   repeated string collections = 10;
   bool include_default_collection = 11;
+  repeated string ids = 12;
 }
 
 message SearchReply { string id = 1; }

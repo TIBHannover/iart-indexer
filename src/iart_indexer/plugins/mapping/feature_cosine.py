@@ -36,6 +36,8 @@ class FeatureCosineMapping(MappingPlugin):
 
                 new_entries.append((score, {**e, "coordinates": [score]}))
             new_entries = sorted(new_entries, key=lambda x: -x[0])
+            for x in new_entries[:10]:
+                logging.info(f"{x[1]['id']} {x[0]}")
             entries = [x[1] for x in new_entries]
 
         return entries

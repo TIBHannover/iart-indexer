@@ -76,6 +76,14 @@ class Searcher:
         else:
             seed = uuid.uuid4().hex
 
+        # parsing whitelists
+        whitelist = []
+        for id in query.ids:
+            whitelist.append(id)
+
+        if len(whitelist) == 0:
+            whitelist = None
+
         # parsing collection
 
         collections = query.collections
@@ -304,6 +312,7 @@ class Searcher:
         result.update({"clustering_options": clustering_options})
         result.update({"extras": extras})
         result.update({"seed": seed})
+        result.update({"whitelist": whitelist})
 
         result.update({"collections": collections})
         result.update({"include_default_collection": include_default_collection})
@@ -676,9 +685,6 @@ class Searcher:
                 }
             )
 
-        # if elastic_sorting is not None:
-        #     body.update({"sort": elastic_sorting})
-
         return search.to_dict()
 
     def search_db(
@@ -721,12 +727,24 @@ class Searcher:
         # entries_feature = []
         logging.info(f"[Searcher] Results from indexer len={len(entries_feature)} time={time.time()-start_time}")
 
+        if query["whitelist"] is not None:
+            if len(entries_feature) > 0:
+                whitelist = list(set(entries_feature) & set(query["whitelist"]))
+                if len(whitelist) == 0:
+                    whitelist = query["whitelist"]
+            else:
+                whitelist = query["whitelist"]
+        else:
+            whitelist = entries_feature
+
+        logging.info(f"whitelist: {whitelist}")
+
         # logging.info(f"Parsed query: {query}")
         body_old = self.build_search_body_old(
             query["text_search"],
             query["range_search"],
             query["feature_search"],
-            whitelist=entries_feature,
+            whitelist=whitelist,
             sorting=query["sorting"],
             seed=query["seed"],
         )
@@ -736,18 +754,18 @@ class Searcher:
             query["text_search"],
             query["range_search"],
             query["feature_search"],
-            whitelist=entries_feature,
+            whitelist=whitelist,
             sorting=query["sorting"],
             seed=query["seed"],
         )
 
-        logging.info(f"Old: {body_old}")
+        # logging.info(f"Old: {body_old}")
         logging.info(f"New: {body}")
 
         logging.info(f"[Searcher] Start querying database")
 
         # return []
-        entries = self.search_db(body=body, size=max(len(entries_feature), 1000))
+        entries = self.search_db(body=body, size=max(len(whitelist), 1000))
 
         entries = list(entries)
         logging.info(f"[Searcher] Database search done len={len(entries)} time={time.time()-start_time}")
