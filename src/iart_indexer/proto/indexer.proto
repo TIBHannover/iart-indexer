@@ -16,10 +16,8 @@ service Indexer {
   rpc list_search_result(ListSearchResultRequest)
       returns (ListSearchResultReply) {}
 
-    
   rpc aggregate(AggregateRequest) returns (AggregateReply) {}
-  
-  
+
   rpc suggest(SuggestRequest) returns (SuggestReply) {}
 
   rpc build_indexer(BuildIndexerRequest) returns (BuildIndexerReply) {}
@@ -33,9 +31,10 @@ service Indexer {
 
   // entry services
   rpc get(GetRequest) returns (GetReply) {}
-  rpc delete(DeleteRequest) returns (DeleteReply) {}
+  rpc delete (DeleteRequest) returns (DeleteReply) {}
   // collection services
-  rpc collection_delete(CollectionDeleteRequest) returns (CollectionDeleteReply) {}
+  rpc collection_delete(CollectionDeleteRequest)
+      returns (CollectionDeleteReply) {}
   rpc collection_list(CollectionListRequest) returns (CollectionListReply) {}
 }
 
@@ -132,7 +131,6 @@ message PluginInfo {
 message ListPluginsRequest {}
 message ListPluginsReply { repeated PluginInfo plugins = 1; }
 
-
 message StatusRequest { string id = 1; }
 message StatusReply {
   string status = 1;
@@ -140,10 +138,8 @@ message StatusReply {
   // Tensor video = 3;
 }
 
-
-message SuggesterRequest {repeated string field_names = 1;}
+message SuggesterRequest { repeated string field_names = 1; }
 message SuggesterReply { string id = 1; }
-
 
 // Search Request
 message FeatureSearchTerm {
@@ -170,7 +166,6 @@ message TextSearchTerm {
   Flag flag = 3;
 }
 
-
 message ImageTextSearchTerm {
   repeated PluginRun plugins = 1;
   string query = 2;
@@ -183,7 +178,7 @@ message ImageTextSearchTerm {
 }
 
 message NumberSearchTerm {
-  
+
   string field = 1;
 
   oneof query {
@@ -202,7 +197,6 @@ message NumberSearchTerm {
 
   Relation relation = 5;
 
-
   enum Flag {
     MUST = 0;
     SHOULD = 1;
@@ -211,7 +205,6 @@ message NumberSearchTerm {
 
   Flag flag = 6;
 }
-
 
 message SearchTerm {
   oneof term {
@@ -222,10 +215,9 @@ message SearchTerm {
   }
 }
 
-
 message AggregateRequest {
   repeated string fields = 1;
-  int32 size= 2;
+  int32 size = 2;
   bool use_query = 3;
 }
 
@@ -254,13 +246,11 @@ message SearchRequest {
 
   Sorting sorting = 2;
   Mapping mapping = 3;
-  
+
   AggregateRequest aggregate = 4;
   string random_seed = 5;
 
-  enum Extra {
-    EXTRA_FEATURES = 0;
-  }
+  enum Extra { EXTRA_FEATURES = 0; }
 
   repeated Extra extras = 6;
 
@@ -275,7 +265,6 @@ message SearchRequest {
 
 message SearchReply { string id = 1; }
 
-
 message SearchResultEntry {
   string id = 1;
   repeated ValueField meta = 2;
@@ -286,6 +275,7 @@ message SearchResultEntry {
   int64 cluster = 7;
   float distance = 8;
   Collection collection = 9;
+  bool padded = 10;
 }
 
 message AggregateResult {
@@ -293,9 +283,11 @@ message AggregateResult {
   repeated ValueField entries = 2;
 }
 
-
 message ListSearchResultRequest { string id = 1; }
-message ListSearchResultReply { repeated SearchResultEntry entries = 1; repeated AggregateResult aggregate = 2; }
+message ListSearchResultReply {
+  repeated SearchResultEntry entries = 1;
+  repeated AggregateResult aggregate = 2;
+}
 
 message SuggestGroup {
   string group = 1;
@@ -305,17 +297,23 @@ message SuggestGroup {
 message SuggestRequest { string query = 1; }
 message SuggestReply { repeated SuggestGroup groups = 1; }
 
-message BuildIndexerRequest { bool rebuild=1; repeated string collections = 2;}
+message BuildIndexerRequest {
+  bool rebuild = 1;
+  repeated string collections = 2;
+}
 message BuildIndexerReply {}
 
 message BuildFeatureCacheRequest {}
 message BuildFeatureCacheReply {}
 
-message DumpRequest {string origin = 1;}
+message DumpRequest { string origin = 1; }
 message DumpReply { bytes entry = 1; }
 
 message LoadRequest { bytes entry = 1; }
-message LoadReply {string status = 1; string id = 2; }
+message LoadReply {
+  string status = 1;
+  string id = 2;
+}
 
 message IndexingRequest {
   // PluginRun plugins = 1;
@@ -323,8 +321,10 @@ message IndexingRequest {
   // bool update_database = 3;
 }
 
-message IndexingReply { string status = 1; string id = 2; }
-
+message IndexingReply {
+  string status = 1;
+  string id = 2;
+}
 
 // message AggregateRequest {
 //   string type = 1;
@@ -333,10 +333,7 @@ message IndexingReply { string status = 1; string id = 2; }
 //   int32 size = 4;
 // }
 
-message AggregateReply {
-  repeated ValueField field = 1;
-}
-
+message AggregateReply { repeated ValueField field = 1; }
 
 message GetRequest { string id = 1; }
 message GetReply {
@@ -348,21 +345,14 @@ message GetReply {
   Collection collection = 7;
 }
 
-message DeleteRequest {
-  string id = 1;
-}
+message DeleteRequest { string id = 1; }
 message DeleteReply {}
 
-message CollectionDeleteRequest {
-  string id = 1;
-}
+message CollectionDeleteRequest { string id = 1; }
 message CollectionDeleteReply {
   repeated string collections = 1;
   repeated string ids = 2;
 }
 
 message CollectionListRequest {}
-message CollectionListReply {
-  repeated Collection collections = 1;
-}
-   
+message CollectionListReply { repeated Collection collections = 1; }

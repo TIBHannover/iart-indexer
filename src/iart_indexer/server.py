@@ -77,6 +77,7 @@ def search(args):
         for e in search_result["entries"]:
             entry = result.entries.add()
             entry.id = e["id"]
+            entry.padded = e["padded"]
             if "meta" in e:
                 meta_to_proto(entry.meta, e["meta"])
             if "origin" in e:
@@ -619,7 +620,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                 context.set_details("Still running")
                 return indexer_pb2.ListSearchResultReply()
             try:
-                result = ParseDict(job_data["future"].result(), indexer_pb2.ListSearchResultReply())
+                result = job_data["future"].result()
+                result = ParseDict(result, indexer_pb2.ListSearchResultReply())
                 # result = indexer_pb2.ListSearchResultReply.ParseFromString(job_data["future"].result())
 
             except Exception as e:
