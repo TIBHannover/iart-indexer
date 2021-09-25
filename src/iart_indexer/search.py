@@ -268,7 +268,6 @@ class Searcher:
 
                 # TODO add example search here
                 else:
-
                     image = image_from_proto(feature.image)
 
                     feature_results = list(
