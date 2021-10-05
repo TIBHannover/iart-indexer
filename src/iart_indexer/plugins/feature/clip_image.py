@@ -1,11 +1,13 @@
 import math
 import uuid
-
+import logging
 import time
 
 import ml2rt
 import numpy as np
 import redisai as rai
+import imageio
+
 
 from iart_indexer import indexer_pb2
 from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
@@ -69,6 +71,7 @@ class ClipEmbeddingFeature(FeaturePlugin):
         return False
 
     def call(self, entries):
+        logging.info("CLIP")
 
         result_entries = []
         result_annotations = []
@@ -76,8 +79,17 @@ class ClipEmbeddingFeature(FeaturePlugin):
             entry_annotation = []
             # image = image_from_proto(entry)
             image = entry
+            logging.info("##################")
+            logging.info(image.shape)
+            imageio.imwrite("/tmp/a.jpg", image)
             image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
+            logging.info(image.shape)
+            imageio.imwrite("/tmp/b.jpg", image)
             image = image_crop(image, [224, 224])
+            imageio.imwrite("/tmp/c.jpg", image)
+
+            logging.info(image.shape)
+            logging.info("##################")
 
             job_id = uuid.uuid4().hex
 

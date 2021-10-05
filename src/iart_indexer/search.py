@@ -269,7 +269,7 @@ class Searcher:
                 # TODO add example search here
                 else:
                     image = image_from_proto(feature.image)
-
+                    logging.info("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTt")
                     feature_results = list(
                         self.feature_plugin_manager.run([image])  # , plugins=[x.name.lower() for x in feature.plugins])
                     )[0]
@@ -538,7 +538,7 @@ class Searcher:
         else:
             whitelist = entries_feature
 
-        logging.info(f"whitelist: {whitelist}")
+        logging.info(f"whitelist: {len(whitelist)}")
 
         # logging.info(f"Parsed query: {query}")
         body = self.build_search_body(
@@ -551,7 +551,6 @@ class Searcher:
         )
 
         # logging.info(f"Old: {body_old}")
-        logging.info(f"New: {body}")
 
         logging.info(f"[Searcher] Start querying database")
 
@@ -580,7 +579,6 @@ class Searcher:
             entries_padding = self.search_db(body=body_padding, size=max(len(whitelist_padding), 1000))
 
             entries_padding = list(entries_padding)
-            logging.info(f"Padding: {entries_padding[0]}")
             logging.info(
                 f"[Searcher] Database search for padding done len={len(entries_padding)} time={time.time()-start_time}"
             )

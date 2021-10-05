@@ -80,7 +80,7 @@ class FaissIndexer(IndexerPlugin):
         stub.indexing(faiss_indexer_pb2.IndexingRequest(collections=collections))
 
     def search(self, queries, collections=None, include_default_collection=True, size=100):
-        logging.info(f"[FaissIndexer] Search queries={queries}")
+        # logging.info(f"[FaissIndexer] Search queries={queries}")
         request = faiss_indexer_pb2.SearchRequest(
             collections=collections, include_default_collection=include_default_collection
         )
@@ -655,9 +655,6 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
                         faiss.normalize_L2(feature)
                         q_result = index["index"].search(feature, k=1000)
-                        logging.info(
-                            f"[FaissServer] Result list from collection={collection_id} index={index['type']} len={len([x for x in  q_result[1][0] if x >0])}  sample={[q_result[1][0][:2],q_result[0][0][:2]]} map={[index['rev_entries'][np.asscalar(x)] for x in q_result[1][0] if x >= 0]}"
-                        )
                         ids.extend([index["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
 
         return faiss_indexer_pb2.SearchReply(ids=ids)

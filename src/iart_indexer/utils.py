@@ -113,27 +113,14 @@ def image_from_proto(image_proto):
 
     image = image_normalize(image)
 
-    print("################", flush=True)
-    print(image.shape, flush=True)
-
     if image_proto.roi.width > 0 and image_proto.roi.height > 0:
         y = int(image_proto.roi.y * image.shape[0])
         height = int(image_proto.roi.height * image.shape[0])
         x = int(image_proto.roi.x * image.shape[1])
         width = int(image_proto.roi.width * image.shape[1])
 
-        print("1", flush=True)
-        # TODO validate values
         image = image[y : y + height, x : x + width]
-        print("2", flush=True)
 
-        print(image.shape, flush=True)
-        imageio.imwrite("/tmp/roi.jpg", image)
-
-        print("3", flush=True)
-
-    # if len(image.shape) == 2:
-    #     image = np.stack([image] * 3, -1)
     return image
 
 
@@ -149,7 +136,7 @@ def image_resize(image, max_dim=None, min_dim=None, size=None):
         shape = np.asarray(image.shape[:2], dtype=np.float32)
 
         short_dim = min(shape)
-        scale = min(1, min_dim / short_dim)
+        scale = max(1, min_dim / short_dim)
         new_shape = np.asarray(shape * scale, dtype=np.int32)
     elif size is not None:
         new_shape = size
