@@ -187,13 +187,22 @@ class FaissIndexerTrainJob:
                     break
                     # break
 
-            logging.info(f"[FaissIndexerTrainJob] Start training")
+            for index_name, index_data in data.items():
+                logging.info(f"[FaissIndexerTrainJob] {index_name}:{len(data[index_name]['data'])}")
+            logging.info(f"[FaissIndexerTrainJob] Start training of {len(data.items())} indexes")
             id = uuid.uuid4().hex
             collection = {"indexes": [], "id": id, "collection_id": id}
             for index_name, index_data in data.items():
                 d = index_data["d"]
                 quantizer = faiss.IndexFlatIP(d)
-                index = faiss.IndexIVFFlat(quantizer, d, faiss_config.get("number_of_cluster", 100))
+                number_of_clusters = faiss_config.get("number_of_cluster", 100)
+                number_of_clusters_to_train = min(number_of_clusters, len(index_data))
+                if number_of_clusters_to_train < number_of_clusters:
+                    logging.warning(
+                        f"[FaissIndexerTrainJob] Dataset size is very small ({number_of_clusters_to_train} < {number_of_clusters})"
+                    )
+
+                index = faiss.IndexIVFFlat(quantizer, d, number_of_clusters_to_train)
 
                 train_data = np.asarray(index_data["data"]).astype("float32")
                 faiss.normalize_L2(train_data)

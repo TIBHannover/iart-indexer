@@ -43,6 +43,7 @@ def parse_args():
             "search",
             "aggregate",
             "build_feature_cache",
+            "build_indexer",
             "load",
             "dump",
         ],

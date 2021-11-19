@@ -4,6 +4,8 @@ import re
 import json
 import argparse
 
+import copy
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="")
@@ -35,7 +37,7 @@ def main():
     with open(args.input_path, "r") as f_in, open(args.output_path, "w") as f_out:
         for line in f_in:
             d = json.loads(line)
-            d = merge_dict(d, update)
+            d = merge_dict(d, copy.deepcopy(update))
 
             f_out.write(json.dumps(d) + "\n")
 

@@ -472,60 +472,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
                     yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
 
-        # collections = set()
-        # for i, (status, entry) in enumerate(
-        #     self.indexing_process_pool.map(IndexingJob(), filter_and_translate(request_iterator), chunksize=64)
-        # ):
-        #     if status != "ok":
-        #         logging.error(f"Indexing: {entry['id']}")
-        #         yield indexer_pb2.IndexingReply(status="error", id=entry["id"])
-        #         continue
-
-        #     collection = entry.get("collection")
-        #     if collection:
-        #         collection_id = collection.get("id")
-        #         if collection_id:
-        #             collections.add(collection_id)
-
-        #     db_bulk_cache.append(entry)
-
-        #     if len(db_bulk_cache) > 64:
-
-        #         logging.info(f"[Server] Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
-        #         try_count = 20
-        #         while try_count > 0:
-        #             try:
-        #                 database.bulk_insert(db_bulk_cache)
-        #                 db_bulk_cache = []
-        #                 try_count = 0
-        #             except KeyboardInterrupt:
-        #                 raise
-        #             except:
-        #                 logging.error(f"[Server] Indexing: database error (try count: {try_count})")
-        #                 time.sleep(1)
-        #                 try_count -= 1
-
-        #     yield indexer_pb2.IndexingReply(status="ok", id=entry["id"])
-
         if len(db_bulk_cache) > 0:
             logging.info(f"[Server] Indexing flush results to database (count:{i} {len(db_bulk_cache)})")
             database.bulk_insert(db_bulk_cache)
             db_bulk_cache = []
-
-        # submit collection indexing job
-        # logging.info(f"[Server] Indexing collection {list(collections)}")
-        # job_id = uuid.uuid4().hex
-        # variable = {
-        #     "config": self.config,
-        #     "rebuild": False,
-        #     "collections": [c for c in collections],
-        #     "future": None,
-        #     "id": job_id,
-        # }
-        # logging.info(f"[Server] Submit job (build_indexer) ({variable})")
-        # future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
-        # variable["future"] = future
-        # self.futures.append(variable)
 
     def build_suggester(self, request, context):
 

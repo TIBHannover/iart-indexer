@@ -15,6 +15,8 @@ import imageio
 import random
 import msgpack
 
+import utils
+
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer import faiss_indexer_pb2, faiss_indexer_pb2_grpc
 from iart_indexer.utils import image_resize
@@ -65,8 +67,8 @@ def list_jsonl(paths, image_paths=None):
 
             if os.path.exists(entry["path"]):
                 entries.append(entry)
-                # print(entries)
-                # break
+            elif "link" in entry.get("origin", {}):
+                entries.append(entry)
 
             logging.info(f"{len(entries)}")
 
@@ -166,11 +168,27 @@ class Client:
 
         return entries
 
-    def indexing(self, paths, image_paths=None, plugins: list = None):
+    def indexing(
+        self,
+        paths,
+        image_paths=None,
+        plugins: list = None,
+        download: bool = True,
+        resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}],
+    ):
         if not isinstance(paths, (list, set)) and os.path.splitext(paths)[1] == ".jsonl":
             entries = list_jsonl(paths, image_paths)
         else:
             entries = list_images(paths)
+
+        if download:
+            entries_to_download = [e for e in entries if ("path" not in e or not os.path.exists(e["path"]))]
+            entries_exists = [e for e in entries if ("path" in e and os.path.exists(e["path"]))]
+            logging.info(f"Client: Downloading {len(entries_to_download)} images")
+            entries_to_download = utils.download_entries(entries_to_download, image_output=image_paths)
+            entries = [*entries_exists, *entries_to_download]
+        else:
+            entries = [e for e in entries if ("path" in e and os.path.exists(e["path"]))]
 
         logging.info(f"Client: Start indexing {len(entries)} images")
 
@@ -240,6 +258,7 @@ class Client:
                     if "is_public" in entry["collection"]:
                         collection.is_public = entry["collection"]["is_public"]
                 # print(request_image)
+                print(f'Reading {entry["path"]}')
                 request_image.encoded = open(entry["path"], "rb").read()
                 yield request
             # request_image.path = image.encode()
