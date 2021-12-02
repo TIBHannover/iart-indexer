@@ -12,7 +12,7 @@ import urllib.request
 import numpy as np
 import multiprocessing as mp
 
-from image import image_resize
+from .image import image_resize
 
 
 def download_image(url, max_dim=1024, try_count=2):
