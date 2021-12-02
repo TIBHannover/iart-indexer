@@ -8,8 +8,6 @@ import math
 from scipy.spatial import distance_matrix
 from scipy.optimize import linear_sum_assignment
 
-import rasterfairy
-
 import umap
 import random
 
@@ -37,8 +35,6 @@ class UMapMapping(MappingPlugin):
 
         if self.grid_method is None:
             self.grid_method = None
-        elif self.grid_method.lower() == "rasterfairy":
-            self.grid_method = "rasterfairy"
         elif self.grid_method.lower() == "scipy":
             self.grid_method = "scipy"
         else:
@@ -82,37 +78,6 @@ class UMapMapping(MappingPlugin):
 
         return [{**e, "coordinates": grid_points[i, :].tolist()} for i, e in enumerate(entries)]
 
-    def map_to_rasterfairy_grid(self, entries):
-        points = np.asarray([x["coordinates"] for x in entries])
-
-        points = (points - np.amin(points)) / (np.amax(points) - np.amin(points))
-
-        num_points = points.shape[0]
-
-        if self.grid_square:
-            grid_length = math.ceil(math.sqrt(num_points))
-            height = grid_length
-            width = grid_length
-        else:
-            height = math.floor(math.sqrt(num_points))
-            width = math.ceil(num_points / height)
-            grid_length = np.amax([height, width])
-        logging.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        grid_xy = rasterfairy.transformPointCloud2D(
-            points,
-            target={
-                "width": width,
-                "height": height,
-                "mask": np.zeros((height, width), dtype=int),
-                "count": width * height,
-                "hex": False,
-            },
-        )  # , target=(grid_length,grid_length))[0]
-        grid_points = grid_xy[0]
-        grid_points = grid_points / np.amax(grid_points, axis=0)
-
-        return [{**e, "coordinates": grid_points[i, :].tolist()} for i, e in enumerate(entries)]
-
     def call(self, entries, query):
         ref_feature = "clip_embedding_feature"
         features = []
@@ -131,8 +96,5 @@ class UMapMapping(MappingPlugin):
 
         if self.grid_method == "scipy":
             new_entries = self.map_to_scipy_grid(new_entries)
-
-        if self.grid_method == "rasterfairy":
-            new_entries = self.map_to_rasterfairy_grid(new_entries)
 
         return new_entries

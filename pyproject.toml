@@ -21,7 +21,6 @@ packaging = "^20.8"
 spacy = "^3.0.1"
 ftfy = "^5.9"
 regex = "^2021.3.17"
-rasterfairy = {git = "https://github.com/Quasimondo/RasterFairy.git"}
 elasticsearch-dsl = "^7.3.0"
 
 [tool.poetry.dev-dependencies]

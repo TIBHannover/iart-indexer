@@ -3,4 +3,5 @@
 
 # Allow files and directories
 !/pyproject.toml
+!/poetry.lock
 !/src/**
