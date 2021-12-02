@@ -1,19 +1,18 @@
 import os
-import sys
 import re
-import argparse
-
-import urllib.error
-import urllib.request
+import sys
+import time
 import imageio
 import hashlib
-import time
+import logging
+import argparse
+import urllib.error
+import urllib.request
 
 import numpy as np
 import multiprocessing as mp
 
-import utils
-import logging
+from image import image_resize
 
 
 def download_image(url, max_dim=1024, try_count=2):
@@ -33,7 +32,7 @@ def download_image(url, max_dim=1024, try_count=2):
             )
             with urllib.request.urlopen(request, timeout=20) as response:
                 image = imageio.imread(response.read(), pilmode="RGB")
-                image = utils.image_resize(image, max_dim=max_dim)
+                image = image_resize(image, max_dim=max_dim)
                 return image
 
         except urllib.error.URLError as err:
@@ -77,7 +76,7 @@ def download_entry(entry, image_output, resolutions=[{"min_dim": 200, "suffix": 
 
     for res in resolutions:
         if "min_dim" in res:
-            new_image = utils.image_resize(image, min_dim=res["min_dim"])
+            new_image = image_resize(image, min_dim=res["min_dim"])
             image_output_file = os.path.join(output_dir, f"{hash_value}{res['suffix']}.jpg")
         else:
             new_image = image
