@@ -41,6 +41,7 @@ sp_de = spacy.load("de_core_news_sm")
 
 def search(args):
     logging.info("Search: Start")
+
     try:
 
         start_time = time.time()
@@ -140,7 +141,6 @@ def filter_autocompletion(autocompletion_string):
 
 
 def build_suggestion_job(args):
-
     try:
         database = args["database"]
         suggester = args["suggester"]
@@ -152,6 +152,7 @@ def build_suggestion_job(args):
 
         for x in field_names:
             split = x.split(".")
+
             if split[0] == "meta":
                 meta_fields.append(split[1])
             if split[0] == "origin":
@@ -160,8 +161,10 @@ def build_suggestion_job(args):
                 classifier_fields.append(split[1])
 
         db_bulk_cache = []
+
         for i, x in enumerate(database.all()):
             meta_values = []
+
             if "meta" in x:
                 for m in x["meta"]:
                     if m["name"] not in meta_fields:
@@ -172,18 +175,20 @@ def build_suggestion_job(args):
                         meta_values.extend(filter_autocompletion(m["value_str"]))
 
             origin_values = []
+
             if "origin" in x:
                 for o in x["origin"]:
                     if o["name"] not in origin_fields:
                         if "*" not in origin_fields:
                             continue
+
                     if isinstance(o["value_str"], str):
                         origin_values.extend(filter_autocompletion(o["value_str"]))
 
             annotations_values = []
+
             if "classifier" in x:
                 for classifier in x["classifier"]:
-
                     if classifier["plugin"] not in classifier_fields:
                         if "*" not in classifier_fields:
                             continue
@@ -206,9 +211,9 @@ def build_suggestion_job(args):
             )
 
             if len(db_bulk_cache) > 1000:
-
                 logging.info(f"BuildSuggester: flush results to database (count:{i} {len(db_bulk_cache)})")
                 try_count = 20
+
                 while try_count > 0:
                     try:
                         suggester.bulk_insert(db_bulk_cache)
@@ -248,9 +253,18 @@ def build_indexer(args):
                         "query": {
                             "function_score": {
                                 "query": {
-                                    "nested": {"path": "collection", "query": {"match": {"collection.is_public": True}}}
+                                    "nested": {
+                                        "path": "collection",
+                                        "query": {
+                                            "match": {
+                                                "collection.is_public": True,
+                                            },
+                                        },
+                                    },
                                 },
-                                "random_score": {"seed": 42},
+                                "random_score": {
+                                    "seed": 42,
+                                },
                             },
                         },
                         "size": 1000,
@@ -270,10 +284,16 @@ def build_indexer(args):
                                 "query": {
                                     "nested": {
                                         "path": "collection",
-                                        "query": {"terms": {"collection.id": self.collections}},
+                                        "query": {
+                                            "terms": {
+                                                "collection.id": self.collections
+                                            }
+                                        },
                                     }
                                 },
-                                "random_score": {"seed": 42},
+                                "random_score": {
+                                    "seed": 42,
+                                },
                             }
                         },
                         "size": 1000,
@@ -282,7 +302,9 @@ def build_indexer(args):
                     query = {
                         "query": {
                             "function_score": {
-                                "random_score": {"seed": 42},
+                                "random_score": {
+                                    "seed": 42,
+                                },
                             }
                         },
                         "size": 1000,
@@ -309,8 +331,8 @@ def build_feature_cache(args):
         config = args["config"]
         database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
         cache = Cache(cache_dir=config.get("cache", {"cache_dir": None})["cache_dir"], mode="a")
-        with cache as cache:
 
+        with cache as cache:
             class EntryReader:
                 def __iter__(self):
                     for entry in database.all():
@@ -397,23 +419,24 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return reply
 
     def indexing(self, request_iterator, context):
-
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
         def filter_and_translate(cache, request_iterator):
             logging.info("[Server]: Start reading cache for indexing")
 
             for x in request_iterator:
-
                 cache_data = cache[x.image.id]
 
                 meta = meta_from_proto(x.image.meta)
                 origin = meta_from_proto(x.image.origin)
+
                 collection = {}
+
                 if x.image.collection.id != "":
                     collection["id"] = x.image.collection.id
                     collection["name"] = x.image.collection.name
                     collection["is_public"] = x.image.collection.is_public
+
                 yield {
                     "id": x.image.id,
                     "image_data": x.image.encoded,
@@ -426,14 +449,9 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         db_bulk_cache = []
         logging.info(f"[Server] Indexing: start indexing")
 
-        # for x in request_iterator:
-        #     logging.info("###########")
-        #     logging.info(x)
-
-        # compute features and classifiers and write them to the database
         request_iter = iter(request_iterator)
-
         collections = set()
+
         with Cache(cache_dir=self.config.get("cache", {"cache_dir": None})["cache_dir"], mode="r") as cache:
             while True:
                 chunk = read_chunk(filter_and_translate(cache, request_iter), chunksize=512)
@@ -447,17 +465,19 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                         continue
 
                     collection = entry.get("collection")
+
                     if collection:
                         collection_id = collection.get("id")
+                        
                         if collection_id:
                             collections.add(collection_id)
 
                     db_bulk_cache.append(entry)
 
                     if len(db_bulk_cache) > 64:
-
                         logging.info(f"[Server] Indexing: flush results to database (count:{i} {len(db_bulk_cache)})")
                         try_count = 20
+
                         while try_count > 0:
                             try:
                                 database.bulk_insert(db_bulk_cache)
@@ -478,10 +498,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             db_bulk_cache = []
 
     def build_suggester(self, request, context):
-
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
         suggester = ElasticSearchSuggester(config=self.config.get("elasticsearch", {}))
         job_id = uuid.uuid4().hex
+
         variable = {
             "database": database,
             "suggester": suggester,
@@ -489,6 +509,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "future": None,
             "id": job_id,
         }
+
         future = self.process_pool.submit(build_suggestion_job, variable)
 
         variable["future"] = future
@@ -497,27 +518,29 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return indexer_pb2.SuggesterReply(id=job_id)
 
     def status(self, request, context):
-
         futures_lut = {x["id"]: i for i, x in enumerate(self.futures)}
 
         if request.id in futures_lut:
             job_data = self.futures[futures_lut[request.id]]
             done = job_data["future"].done()
+
             if not done:
                 return indexer_pb2.StatusReply(status="running")
 
             result = job_data["future"].result()
+
             if result is None:
                 return indexer_pb2.StatusReply(status="error")
+
             return indexer_pb2.StatusReply(status="done", indexing=result)
 
         return indexer_pb2.StatusReply(status="error")
 
     def get(self, request, context):
-
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
 
         entry = database.get_entry(request.id)
+
         if entry is None:
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details("Entry unknown")
@@ -525,6 +548,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         result = indexer_pb2.GetReply()
         result.id = entry["id"]
+
         if "meta" in entry:
             meta_to_proto(result.meta, entry["meta"])
         if "collection" in entry:
@@ -538,10 +562,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             classifier_to_proto(result.classifier, entry["classifier"])
         if "feature" in entry:
             feature_to_proto(result.feature, entry["feature"])
+
         return result
 
     def search(self, request, context):
-
         jsonObj = MessageToDict(request)
         logging.info(jsonObj)
 
@@ -559,12 +583,12 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         return indexer_pb2.SearchReply(id=job_id)
 
     def list_search_result(self, request, context):
-
         futures_lut = {x["id"]: i for i, x in enumerate(self.futures)}
 
         if request.id in futures_lut:
             job_data = self.futures[futures_lut[request.id]]
             done = job_data["future"].done()
+
             if not done:
                 context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
                 context.set_details("Still running")
@@ -572,12 +596,11 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             try:
                 result = job_data["future"].result()
                 result = ParseDict(result, indexer_pb2.ListSearchResultReply())
-                # result = indexer_pb2.ListSearchResultReply.ParseFromString(job_data["future"].result())
-
             except Exception as e:
                 logging.error(f"Indexer: {repr(e)}")
                 logging.error(traceback.format_exc())
                 result = None
+
             if result is None:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details("Search error")
@@ -587,10 +610,10 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         context.set_code(grpc.StatusCode.NOT_FOUND)
         context.set_details("Job unknown")
+
         return indexer_pb2.ListSearchResultReply()
 
     def aggregate(self, request, context):
-
         jsonObj = MessageToJson(request)
         logging.info(jsonObj)
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
@@ -598,6 +621,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         size = 5 if request.size <= 0 else request.size
         result_list = []
+
         if request.part == "meta" and request.type == "count":
             result_list = aggregator.meta_text_count(field_name=request.field_name, size=size)
         elif request.part == "origin" and request.type == "count":
@@ -611,14 +635,15 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             context.set_details("Job unknown")
 
         result = indexer_pb2.AggregateReply()
+
         for x in result_list:
             f = result.field.add()
             f.key = x["name"]
             f.int_val = x["value"]
+
         return result
 
     def suggest(self, request, context):
-
         jsonObj = MessageToJson(request)
         logging.info(jsonObj)
 
@@ -628,11 +653,14 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         logging.info(suggestions)
 
         result = indexer_pb2.SuggestReply()
+
         for group in suggestions:
             if len(group["options"]) < 1:
                 continue
+
             g = result.groups.add()
             g.group = group["type"]
+
             for suggestion in group["options"]:
                 g.suggestions.append(suggestion)
 
@@ -699,8 +727,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         else:
             body = None
         logging.info(body)
-        # return
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+
         for entry in database.raw_all(body=body):
             yield indexer_pb2.DumpReply(entry=msgpack.packb(entry))
 
@@ -713,11 +741,12 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         db_bulk_cache = []
         logging.info(f"Load: start load")
+
         for i, entry in enumerate(extract_entry_from_request(request_iterator)):
             if entry is None:
                 yield indexer_pb2.LoadReply(status="error", id=entry["id"])
                 continue
-            # print(entry)
+
             db_bulk_cache.append(entry)
 
             if len(db_bulk_cache) > 1000:
@@ -735,10 +764,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
                         logging.error(f"Load: database error (try count: {try_count})")
                         time.sleep(1)
                         try_count -= 1
-            # print(entry)
-            # print()
-            # print(database.get_entry(entry["id"]))
-            # exit()
 
             yield indexer_pb2.LoadReply(status="ok", id=entry["id"])
 
@@ -751,7 +776,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 class Server:
     def __init__(self, config):
         self.config = config
-
         self.commune = Commune(config)
 
         self.server = grpc.server(
@@ -761,18 +785,20 @@ class Server:
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
             ],
         )
+
         indexer_pb2_grpc.add_IndexerServicer_to_server(
             self.commune,
             self.server,
         )
+
         grpc_config = config.get("grpc", {})
         port = grpc_config.get("port", 50051)
-
         self.server.add_insecure_port(f"[::]:{port}")
 
     def run(self):
         self.server.start()
         logging.info("[Server] Ready")
+
         try:
             while True:
                 num_jobs = len(self.commune.futures)

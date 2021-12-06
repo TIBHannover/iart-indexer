@@ -1,26 +1,31 @@
 import pickle
-import numpy as np
 import numbers
+
+import numpy as np
+
 from iart_indexer import indexer_pb2
 
 
 def meta_from_proto_old(proto):
     result_dict = {}
+
     for m in proto:
         field = m.WhichOneof("value")
+
         if field == "string_val":
             result_dict[m.key] = m.string_val
         if field == "int_val":
             result_dict[m.key] = m.int_val
         if field == "float_val":
             result_dict[m.key] = m.float_val
+
     return result_dict
 
 
 def meta_to_proto_old(proto, data):
-
     for k, v in data.items():
         meta = proto.add()
+
         if isinstance(v, numbers.Integral):
             meta.int_val = v
             meta.key = k
@@ -30,39 +35,57 @@ def meta_to_proto_old(proto, data):
         elif isinstance(v, str):
             meta.string_val = v
             meta.key = k
+
     return proto
 
 
 def meta_from_proto(proto):
     result_list = []
+
     for m in proto:
         field = m.WhichOneof("value")
+
         if field == "string_val":
-            result_list.append({"name": m.key, "value_str": m.string_val})
+            result_list.append({
+                "name": m.key,
+                "value_str": m.string_val,
+            })
         if field == "int_val":
-            result_list.append({"name": m.key, "value_int": m.int_val, "value_str": str(m.int_val)})
+            result_list.append({
+                "name": m.key,
+                "value_int": m.int_val,
+                "value_str": str(m.int_val),
+            })
         if field == "float_val":
-            result_list.append({"name": m.key, "value_float": m.float_val, "value_str": str(m.float_val)})
+            result_list.append({
+                "name": m.key,
+                "value_float": m.float_val,
+                "value_str": str(m.float_val),
+            })
+
     return result_list
 
 
 def dict_from_proto(proto):
     result = {}
+
     for m in proto:
         field = m.WhichOneof("value")
+
         if field == "string_val":
             result.update({m.key: m.string_val})
         if field == "int_val":
             result.update({m.key: m.int_val})
         if field == "float_val":
             result.append({m.key: m.float_val})
+
     return result
 
 
 def meta_to_proto(proto, data):
-
     for d in data:
         meta = proto.add()
+
         if "value_int" in d and d["value_int"] is not None:
             meta.int_val = d["value_int"]
             meta.key = d["name"]
@@ -72,15 +95,19 @@ def meta_to_proto(proto, data):
         elif "value_str" in d and d["value_str"] is not None:
             meta.string_val = d["value_str"]
             meta.key = d["name"]
+
     return proto
 
 
 def classifier_from_proto(proto):
     result_list = []
+
     for c in proto:
-        result_list.append(
-            {"plugin": c.plugin, "annotations": [{"name": a.concept, "value": a.prob} for a in c.concepts]}
-        )
+        result_list.append({
+            "plugin": c.plugin,
+            "annotations": [{"name": a.concept, "value": a.prob} for a in c.concepts],
+        })
+
     return result_list
 
 
@@ -88,18 +115,25 @@ def classifier_to_proto(proto, data):
     for c in data:
         classifier = proto.add()
         classifier.plugin = c["plugin"]
+
         for a in c["annotations"]:
             concept = classifier.concepts.add()
             concept.concept = a["name"]
             concept.type = a["type"]
             concept.prob = a["value"]
+
     return proto
 
 
 def feature_from_proto(proto):
     result_list = []
+
     for f in proto:
-        result_list.append({"plugin": f.plugin, "annotations": [{"feature": list(f.feature), "type": f.type}]})
+        result_list.append({
+            "plugin": f.plugin,
+            "annotations": [{"feature": list(f.feature), "type": f.type}],
+        })
+
     return result_list
 
 
@@ -107,20 +141,27 @@ def feature_to_proto(proto, data):
     for f in data:
         feature = proto.add()
         feature.plugin = f["plugin"]
-        # TODO support list here
+
         for a in f["annotations"]:
             if "value" in a:
                 feature.feature.extend(a["value"])
+
             feature.type = a["type"]
+
     return proto
 
 
 def suggestions_from_proto(proto):
     result_list = []
+
     for g in proto.groups:
-        group_dict = {"group": g.group, "suggestions": list(g.suggestions)}
+        group_dict = {
+            "group": g.group,
+            "suggestions": list(g.suggestions)
+        }
 
         result_list.append(group_dict)
+
     return result_list
 
 
@@ -140,16 +181,14 @@ def numpy_to_proto(proto, name, value, frame_number, timestamp):
         np.dtype("object"): indexer_pb2.DT_STRING,
         np.dtype("bool"): indexer_pb2.DT_BOOL,
     }
-    # proto = indexer_pb2.VideoProto
 
     proto.name = name
     proto.frame_number = frame_number
     proto.timestamp = timestamp
-
     proto.dtype = ENCODE_DTYPE_LUP[value.dtype]
-
     proto.proto_content = pickle.dumps(value)
     proto.shape.extend(value.shape)
+
     return proto
 
 
@@ -171,6 +210,6 @@ def numpy_from_proto(proto):
     }
 
     content = pickle.loads(proto.proto_content)
-    # content = np.frombuffer(proto.proto_content, dtype=DECODE_DTYPE_LUP[proto.dtype])
     content.reshape(proto.shape)
+
     return proto.name, content, proto.frame_number, proto.timestamp

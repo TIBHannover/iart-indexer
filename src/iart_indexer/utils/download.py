@@ -3,21 +3,17 @@ import re
 import sys
 import time
 import imageio
-import hashlib
 import logging
-import argparse
 import urllib.error
 import urllib.request
 
-import numpy as np
-import multiprocessing as mp
+from tqdm import tqdm
+from multiprocessing import Pool
 
 from .image import image_resize
 
 
 def download_image(url, max_dim=1024, try_count=2):
-
-    try_count = try_count
     while try_count > 0:
         try:
             request = urllib.request.Request(
@@ -30,18 +26,20 @@ def download_image(url, max_dim=1024, try_count=2):
                     )
                 },
             )
+
             with urllib.request.urlopen(request, timeout=20) as response:
                 image = imageio.imread(response.read(), pilmode="RGB")
                 image = image_resize(image, max_dim=max_dim)
+
                 return image
 
-        except urllib.error.URLError as err:
+        except urllib.error.URLError:
             time.sleep(1.0)
-        except urllib.error.HTTPError as err:
+        except urllib.error.HTTPError:
             time.sleep(10.0)
         except KeyboardInterrupt:
             raise
-        except Exception as e:
+        except Exception:
             time.sleep(1.0)
 
         try_count -= 1
@@ -49,7 +47,11 @@ def download_image(url, max_dim=1024, try_count=2):
     return None
 
 
-def download_entry(entry, image_output, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]):
+def download_entry(
+    entry,
+    image_output,
+    resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]
+):
     if os.path.splitext(entry["origin"]["link"])[1].lower()[1:] in [
         "svg",
         "djvu",
@@ -77,11 +79,10 @@ def download_entry(entry, image_output, resolutions=[{"min_dim": 200, "suffix": 
     for res in resolutions:
         if "min_dim" in res:
             new_image = image_resize(image, min_dim=res["min_dim"])
-            image_output_file = os.path.join(output_dir, f"{hash_value}{res['suffix']}.jpg")
         else:
             new_image = image
-            image_output_file = os.path.join(output_dir, f"{hash_value}{res['suffix']}.jpg")
 
+        image_output_file = os.path.join(output_dir, f"{hash_value}{res['suffix']}.jpg")
         imageio.imwrite(image_output_file, new_image)
 
     image_output_file = os.path.abspath(os.path.join(output_dir, f"{hash_value}.jpg"))
@@ -99,15 +100,22 @@ def download_entries(
     resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}],
 ):
     new_entries = []
-    with mp.Pool(40) as p:
 
-        for i, x in enumerate(p.imap(_download_entry, [(e, image_output, resolutions) for e in entries])):
+    with Pool(40) as p:
+        values = [(e, image_output, resolutions) for e in entries]
+
+        for i, x in enumerate(
+            tqdm(
+                p.imap(_download_entry, values),
+                desc="Downloading", total=len(entries),
+            )
+        ):
             if i % 100 == 0:
-                logging.info(f"Entries downloader: Downloading {i}/{len(entries)}")
+                logging.info(f"Downloading {i}/{len(entries)}")
+
             if x is None:
                 continue
 
-            print(f'Reading {x["path"]}')
             new_entries.append(x)
 
     return new_entries

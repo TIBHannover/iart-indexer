@@ -11,5 +11,3 @@ RUN python -m spacy download de_core_news_sm
 
 COPY /pyproject.toml /src /indexer/
 RUN pip install /indexer
-
-CMD python -m iart_indexer --mode server -v -c /config.json
