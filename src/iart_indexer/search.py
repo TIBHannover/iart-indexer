@@ -1,20 +1,17 @@
-import logging
 import uuid
 import json
+import time
+import logging
+import faulthandler
 
 import numpy as np
 
-from iart_indexer import indexer_pb2
 from typing import Dict, List
-from iart_indexer.utils import get_features_from_db_entry
-
-from iart_indexer.utils import image_from_proto, dict_from_proto
-
-import faulthandler
-
 from elasticsearch_dsl import Search, Q
 
-import time
+from iart_indexer import indexer_pb2
+from iart_indexer.utils import get_features_from_db_entry
+from iart_indexer.utils import image_from_proto, dict_from_proto
 
 
 class Searcher:
@@ -39,22 +36,27 @@ class Searcher:
 
     def merge_feature(self, features):
         plugin_feature = {}
+
         for p in features:
             plugin = p["plugin"]
             type = p["type"]
             value = p["value"]
             weight = p["weight"]
+
             if plugin not in plugin_feature:
                 plugin_feature[plugin] = {}
             if type not in plugin_feature[plugin]:
                 plugin_feature[plugin][type] = []
-            plugin_feature[plugin][type].append({"value": np.asarray(value), "weight": weight})
+
+            plugin_feature[plugin][type].append({
+                "value": np.asarray(value),
+                "weight": weight
+            })
 
         result_features = []
+
         for p, plugin_data in plugin_feature.items():
-
             for t, values in plugin_data.items():
-
                 mean_value = np.mean(np.stack([v["value"] * v["weight"] for v in values]), axis=0)
                 mean_weight = np.mean(np.stack([np.abs(v["weight"]) for v in values]))
                 result_features.append({"plugin": p, "type": t, "value": mean_value.tolist(), "weight": mean_weight})
@@ -83,13 +85,13 @@ class Searcher:
             whitelist = None
 
         # parsing collection
-
         collections = query.collections
         include_default_collection = query.include_default_collection
 
         # Parse sorting args
         sorting = None
         logging.info(f"Sorting: {query.sorting}")
+
         if query.sorting == indexer_pb2.SearchRequest.SORTING_CLASSIFIER:
             sorting = "classifier"
         if query.sorting == indexer_pb2.SearchRequest.SORTING_FEATURE:
@@ -105,13 +107,16 @@ class Searcher:
             random_term = query.terms.add()
             random_term.feature.image.id = entry["id"]
             feature_exist = False
+
             for term in query.terms:
                 if term == random_term:
                     continue
 
                 term_type = term.WhichOneof("term")
+
                 if term_type == "feature":
                     feature_exist = True
+
                     for p in term.feature.plugins:
                         plugins = random_term.feature.plugins.add()
                         plugins.name = p.name
@@ -124,30 +129,36 @@ class Searcher:
 
         # Parse mapping args
         mapping = None
+
         if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
             mapping = "umap"
+
         mapping_options = dict_from_proto(query.mapping_options)
 
         clustering = None
+
         if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_KMEANS:
             clustering = "kmeans"
         if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_AGGLOMERATIVE:
             clustering = "agglomerative"
+
         clustering_options = dict_from_proto(query.clustering_options)
 
         # Parse additional fields
         extras = []
+
         for extra in query.extras:
             if extra == indexer_pb2.SearchRequest.EXTRA_FEATURES:
                 extras.append("features")
 
         for term in query.terms:
-
             term_type = term.WhichOneof("term")
+
             if term_type == "text":
                 text = term.text
                 field = text.field.lower()
                 flag = "should"
+
                 if text.flag == indexer_pb2.TextSearchTerm.MUST:
                     flag = "must"
                 if text.flag == indexer_pb2.TextSearchTerm.SHOULD:
@@ -161,8 +172,8 @@ class Searcher:
                 number = term.number
                 field = number.field.lower()
 
-                # parse number query field
                 query_type = number.WhichOneof("query")
+
                 if query_type == "string_query":
                     try:
                         query_term = int(number.string_query)
@@ -171,6 +182,7 @@ class Searcher:
                             query_term = float(number.string_query)
                         except:
                             continue
+
                 if query_type == "int_query":
                     query_term = number.int_query
                 if query_type == "float_query":
@@ -197,16 +209,22 @@ class Searcher:
                 if number.flag == indexer_pb2.NumberSearchTerm.NOT:
                     flag = "not"
 
-                range_search.append({"field": field, "query": query_term, "relation": relation, "flag": flag})
+                range_search.append({
+                    "field": field,
+                    "query": query_term,
+                    "relation": relation,
+                    "flag": flag,
+                })
 
             if term_type == "image_text":
-
                 image_text = term.image_text
+
                 feature_results = list(
                     self.image_text_plugin_manager.run(
                         [image_text.query]
-                    )  # , plugins=[x.name.lower() for x in feature.plugins])
+                    )
                 )[0]
+
                 if image_text.flag == indexer_pb2.ImageTextSearchTerm.NEGATIVE:
                     weight_mult = -1.0
                 else:
@@ -216,10 +234,11 @@ class Searcher:
                     # feature_results
                     for f in feature_results["plugins"]:
                         if p.name.lower() == f._plugin.name.lower():
-
                             annotations = []
+
                             for anno in f._annotations[0]:
                                 result_type = anno.WhichOneof("result")
+
                                 if result_type == "feature":
                                     annotation_dict = {}
                                     binary = anno.feature.binary
@@ -243,8 +262,8 @@ class Searcher:
                     weight_mult = 1.0
 
                 query_feature = []
-
                 entry = None
+
                 if feature.image.id is not None and feature.image.id != "":
                     entry = self.database.get_entry(feature.image.id)
 
@@ -254,6 +273,7 @@ class Searcher:
                     for p in feature.plugins:
                         if p.weight is None or abs(p.weight) < 1e-4:
                             continue
+
                         # TODO add weight
                         for f in entry["feature"]:
 
@@ -269,22 +289,22 @@ class Searcher:
                 # TODO add example search here
                 else:
                     image = image_from_proto(feature.image)
-                    logging.info("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTt")
                     feature_results = list(
-                        self.feature_plugin_manager.run([image])  # , plugins=[x.name.lower() for x in feature.plugins])
+                        self.feature_plugin_manager.run([image])
                     )[0]
 
                     for p in feature.plugins:
 
                         if p.weight is None or abs(p.weight) < 1e-4:
                             continue
-                        # feature_results
+
                         for f in feature_results["plugins"]:
                             if p.name.lower() == f._plugin.name.lower():
-
                                 annotations = []
+
                                 for anno in f._annotations[0]:
                                     result_type = anno.WhichOneof("result")
+
                                     if result_type == "feature":
                                         annotation_dict = {}
                                         binary = anno.feature.binary
@@ -310,7 +330,6 @@ class Searcher:
         result.update({"extras": extras})
         result.update({"seed": seed})
         result.update({"whitelist": whitelist})
-
         result.update({"collections": collections})
         result.update({"include_default_collection": include_default_collection})
 
@@ -337,9 +356,8 @@ class Searcher:
         sorting=None,
         seed=None,
     ):
-
         search = Search()
-        # Seed all random functions
+
         if seed is not None and str(seed) != "":
             seed = str(seed)
         else:
@@ -348,12 +366,15 @@ class Searcher:
         must_terms = []
         should_terms = []
         must_not_terms = []
+
         for e in text_search:
             term = None
+
             if "field" not in e or e["field"] in [None, ""]:
                 term = Q("multi_match", fields=["meta_text", "classifier_text"], query=e["query"])
             else:
                 field_path = e["field"].split(".")
+
                 if len(field_path) == 1:
                     if field_path[0] == "meta":
                         term = Q("multi_match", fields=["meta_text"], query=e["query"])
@@ -361,25 +382,29 @@ class Searcher:
                         term = Q("multi_match", fields=["classifier_text"], query=e["query"])
                     elif field_path[0] == "origin":
                         term = Q("multi_match", fields=["origin_text"], query=e["query"])
-
-                if len(field_path) == 2:
-
+                elif len(field_path) == 2:
                     if field_path[0] == "meta":
                         term = Q(
                             "nested",
                             path="meta",
                             query=Q(
                                 "bool",
-                                must=[Q("match", meta__name=field_path[1]), Q("match", meta__value_str=e["query"])],
+                                must=[
+                                    Q("match", meta__name=field_path[1]),
+                                    Q("match", meta__value_str=e["query"]),
+                                ],
                             ),
                         )
-                    if field_path[0] == "origin":
+                    elif field_path[0] == "origin":
                         term = Q(
                             "nested",
                             path="origin",
                             query=Q(
                                 "bool",
-                                must=[Q("match", origin__name=field_path[1]), Q("match", origin__value_str=e["query"])],
+                                must=[
+                                    Q("match", origin__name=field_path[1]),
+                                    Q("match", origin__value_str=e["query"]),
+                                ],
                             ),
                         )
 
@@ -509,13 +534,10 @@ class Searcher:
         logging.info(f"[Searcher] Start searching")
 
         query = self.parse_query(query)
-        logging.info(f"[Searcher] Parsing query done time={time.time()-start_time}")
+        logging.info(f"[Searcher] Parsed query time={time.time() - start_time}")
 
         query["feature_search"] = self.merge_feature(query["feature_search"])
-        logging.info(f"[Searcher] Merged features time={time.time()-start_time}")
-
-        # query = self.parse_query(query)
-        # logging.info("Query parsed")
+        logging.info(f"[Searcher] Merged features time={time.time() - start_time}")
 
         entries_feature = list(
             self.indexer_plugin_manager.search(
@@ -525,12 +547,16 @@ class Searcher:
                 size=1000,
             )
         )
-        # entries_feature = []
-        logging.info(f"[Searcher] Results from indexer len={len(entries_feature)} time={time.time()-start_time}")
+
+        logging.info(
+            f"[Searcher] Results from indexer len={len(entries_feature)} " +
+            f"time={time.time() - start_time}"
+        )
 
         if query["whitelist"] is not None:
             if len(entries_feature) > 0:
                 whitelist = list(set(entries_feature) & set(query["whitelist"]))
+
                 if len(whitelist) == 0:
                     whitelist = query["whitelist"]
             else:
@@ -538,9 +564,8 @@ class Searcher:
         else:
             whitelist = entries_feature
 
-        logging.info(f"whitelist: {len(whitelist)}")
+        logging.info(f"[Searcher] Whitelist len={len(whitelist)}")
 
-        # logging.info(f"Parsed query: {query}")
         body = self.build_search_body(
             query["text_search"],
             query["range_search"],
@@ -550,21 +575,22 @@ class Searcher:
             seed=query["seed"],
         )
 
-        # logging.info(f"Old: {body_old}")
-
         logging.info(f"[Searcher] Start querying database")
 
-        # return []
         entries = self.search_db(body=body, size=max(len(whitelist), 1000))
-
         entries = list(entries)
-        logging.info(f"[Searcher] Database search done len={len(entries)} time={time.time()-start_time}")
+
+        logging.info(
+            f"[Searcher] Database search done len={len(entries)} " +
+            f"time={time.time() - start_time}"
+        )
 
         entries = [{**x, "padded": False} for x in entries]
 
         # extend entries
         if len(entries) <= 1:
             whitelist_padding = []
+
             if query["whitelist"] is not None:
                 whitelist_padding.extend(query["whitelist"])
 
@@ -576,11 +602,13 @@ class Searcher:
                 sorting=query["sorting"],
                 seed=query["seed"],
             )
-            entries_padding = self.search_db(body=body_padding, size=max(len(whitelist_padding), 1000))
 
+            entries_padding = self.search_db(body=body_padding, size=max(len(whitelist_padding), 1000))
             entries_padding = list(entries_padding)
+
             logging.info(
-                f"[Searcher] Database search for padding done len={len(entries_padding)} time={time.time()-start_time}"
+                f"[Searcher] Database search for padding done len={len(entries_padding)} " +
+                f"time={time.time() - start_time}"
             )
 
             entris_lut = (x["id"] for x in entries)
@@ -588,13 +616,16 @@ class Searcher:
             for x in entries_padding:
                 if x["id"] in entris_lut:
                     continue
+
                 entries.append({**x, "padded": True})
 
-        # if len(entries) > 0:
-        #     logging.info(entries[0])
         if query["sorting"] == "feature":
-            # entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["FeatureL2Mapping"]))
-            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["FeatureCosineMapping"]))
+            entries = list(
+                self.mapping_plugin_manager.run(
+                    entries, query["feature_search"],
+                    ["FeatureCosineMapping"]
+                )
+            )
 
         if query["mapping"] == "umap":
             entries = list(
@@ -611,7 +642,10 @@ class Searcher:
                 )
             )
 
-        logging.info(f"[Searcher] Mapping done len={len(entries)} time={time.time()-start_time}")
+            logging.info(
+                f"[Searcher] Mapping done len={len(entries)} " +
+                f"time={time.time() - start_time}"
+            )
 
         if query["clustering"] == "kmeans":
             entries = list(
@@ -628,28 +662,42 @@ class Searcher:
                 )
             )
 
-        logging.info(f"[Searcher] Clustering done len={len(entries)} time={time.time()-start_time}")
+            logging.info(
+                f"[Searcher] Clustering done len={len(entries)} " +
+                f"time={time.time() - start_time}"
+            )
 
         result.update({"entries": list(entries)})
 
         if self.aggregator and "aggregate" in query:
             if query["aggregate"]["use_query"]:
                 aggregations = self.aggregator(
-                    query=body["query"], field_names=query["aggregate"]["fields"], size=query["aggregate"]["size"]
+                    query=body["query"],
+                    field_names=query["aggregate"]["fields"],
+                    size=query["aggregate"]["size"],
                 )
             else:
                 aggregations = self.aggregator(
-                    query=None, field_names=query["aggregate"]["fields"], size=query["aggregate"]["size"]
+                    query=None,
+                    field_names=query["aggregate"]["fields"],
+                    size=query["aggregate"]["size"],
                 )
 
             result.update({"aggregations": aggregations})
 
-            logging.info(f"[Searcher] Aggregator done len={len(entries)} time={time.time()-start_time}")
+            logging.info(
+                f"[Searcher] Aggregator done len={len(entries)} " + 
+                f"time={time.time() - start_time}"
+            )
 
         # Clean outputs if not requested
         for entry in entries:
             if "features" not in query["extras"]:
                 del entry["feature"]
 
-        logging.info(f"[Searcher] Search done len={len(entries)} time={time.time()-start_time}")
+        logging.info(
+            f"[Searcher] Search done len={len(entries)} " +
+            f"time={time.time() - start_time}"
+        )
+
         return result

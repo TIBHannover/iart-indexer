@@ -1,15 +1,19 @@
-import logging
-from multiprocessing.pool import Pool
-import threading
+import re
+import copy
+import grpc
 import time
 import uuid
-import re
+import spacy
+import msgpack
+import imageio
+import logging
 import traceback
-from concurrent import futures
+import threading
 
-import copy
 import numpy as np
-import grpc
+
+from concurrent import futures
+from multiprocessing.pool import Pool
 from google.protobuf.json_format import MessageToJson, MessageToDict, ParseDict
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
@@ -19,21 +23,13 @@ from iart_indexer.plugins import *
 from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin, ImageTextPluginManager
 from iart_indexer.plugins import IndexerPluginManager
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
-from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry, read_chunk
+from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry, read_chunk, image_normalize
 from iart_indexer.jobs import IndexingJob
-
-_ONE_DAY_IN_SECONDS = 60 * 60 * 24
 from iart_indexer.search import Searcher
 from iart_indexer.aggregation import Aggregator
-
 from iart_indexer.plugins.cache import Cache
 
-import msgpack
-
-import imageio
-from iart_indexer.utils import image_normalize
-
-import spacy
+_ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 sp_en = spacy.load("en_core_web_sm")
 sp_de = spacy.load("de_core_news_sm")
@@ -43,8 +39,8 @@ def search(args):
     logging.info("Search: Start")
 
     try:
-
         start_time = time.time()
+
         query = ParseDict(args["query"], indexer_pb2.SearchRequest())
         config = args["config"]
 
@@ -68,10 +64,11 @@ def search(args):
             mapping_plugin_manager,
             aggregator=aggregator,
         )
-        logging.info(f"Init done: {time.time()-start_time}")
+
+        logging.info(f"Init done: {time.time() - start_time}")
 
         search_result = searcher(query)
-        logging.info(f"Search done: {time.time()-start_time}")
+        logging.info(f"Search done: {time.time() - start_time}")
 
         result = indexer_pb2.ListSearchResultReply()
 
@@ -79,6 +76,7 @@ def search(args):
             entry = result.entries.add()
             entry.id = e["id"]
             entry.padded = e["padded"]
+
             if "meta" in e:
                 meta_to_proto(entry.meta, e["meta"])
             if "origin" in e:
@@ -96,22 +94,26 @@ def search(args):
 
         if "aggregations" in search_result:
             for e in search_result["aggregations"]:
-                # logging.info(e)
                 aggr = result.aggregate.add()
                 aggr.field_name = e["field_name"]
+
                 for y in e["entries"]:
                     value_field = aggr.entries.add()
                     value_field.key = y["name"]
                     value_field.int_val = y["value"]
+
         result_dict = MessageToDict(result)
 
         return result_dict
     except Exception as e:
         logging.error(f"Indexer: {repr(e)}")
-        # logging.error(traceback.format_exc())
-
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+
+        traceback.print_exception(
+            exc_type, exc_value, exc_traceback,
+            limit=2, file=sys.stdout,
+        )
+
     return None
 
 
@@ -326,7 +328,6 @@ def build_indexer(args):
 
 
 def build_feature_cache(args):
-
     try:
         config = args["config"]
         database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
@@ -544,6 +545,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         if entry is None:
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details("Entry unknown")
+
             return indexer_pb2.GetReply()
 
         result = indexer_pb2.GetReply()
@@ -576,6 +578,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             "future": None,
             "id": job_id,
         }
+
         future = self.process_pool.submit(search, copy.deepcopy(variable))
         variable["future"] = future
         self.futures.append(variable)
@@ -750,9 +753,9 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             db_bulk_cache.append(entry)
 
             if len(db_bulk_cache) > 1000:
-
                 logging.info(f"Load: flush results to database (count:{i} {len(db_bulk_cache)})")
                 try_count = 20
+
                 while try_count > 0:
                     try:
                         database.bulk_insert(db_bulk_cache)

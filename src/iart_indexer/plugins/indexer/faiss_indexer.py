@@ -426,20 +426,19 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         self.futures = []
         self.lock = Lock()
 
-        # Search config from indexes plugin list
         self.faiss_config = self.default_config
         self.config = config
 
         faiss_indexer_config = None
         indexes = get_element(config, "indexes")
+
         if isinstance(indexes, (list, set)):
             for x in indexes:
                 if x["type"] == "FaissIndexer":
                     faiss_indexer_config = get_element(x, "params")
+
         if faiss_indexer_config is not None:
             self.faiss_config.update(faiss_indexer_config)
-
-        #
 
         self.indexer_dir = self.faiss_config["indexer_dir"]
         self.train_size = self.faiss_config["train_size"]
@@ -460,19 +459,26 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         self.collections = {}
         self.default_collection = None
         self.load()
+
         logging.info(
-            f"[FaissIndexer] Latest snapshot loaded ({datetime.fromtimestamp(self.timestamp)}) with {len(self.collections)} collections"
+            f"[FaissIndexer] Latest snapshot loaded ({datetime.fromtimestamp(self.timestamp)}) " +
+            f"with {len(self.collections)} collections"
         )
 
     def load(self):
         indexers = [
-            os.path.join(self.indexer_dir, x) for x in os.listdir(self.indexer_dir) if re.match(r"^.*?\.msg$", x)
+            os.path.join(self.indexer_dir, x) 
+            for x in os.listdir(self.indexer_dir)
+            if re.match(r"^.*?\.msg$", x)
         ]
+
         newest_index = {"timestamp": 0.0}
+
         for x in indexers:
             with open(x, "rb") as f:
                 try:
                     data = msgpack.unpackb(f.read(), strict_map_key=False)
+
                     if newest_index["timestamp"] < data["timestamp"]:
                         newest_index = data
                 except:
@@ -486,6 +492,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
             self.default_collection = newest_index["default_collection"]
 
             collections_to_delete = []
+
             for k, v in self.collections:
                 if v["id"] not in newest_index["collections"]:
                     collections_to_delete.append(k)
@@ -494,21 +501,25 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
                 del self.collections[k]
 
             collections_to_load = []
+
             for collection in newest_index["collections"]:
                 if collection not in [x["id"] for x in self.collections.values()]:
                     collections_to_load.append(collection)
 
             logging.info(f"[FaissIndexer] Loading {collections_to_load} unloading {collections_to_delete}")
+
             for collection in collections_to_load:
                 collection = self.load_collection(collection)
                 self.collections[collection["collection_id"]] = collection
 
     def set_trained_collection(self, collection):
         logging.info(f"[FaissServer] Update trained collection")
+
         with self.lock:
             self.save_collection(collection)
             self.trained_collection = collection
             self.timestamp = datetime.timestamp(datetime.now())
+
             with open(os.path.join(self.indexer_dir, uuid.uuid4().hex + ".msg"), "wb") as f:
                 f.write(
                     msgpack.packb(
@@ -523,8 +534,10 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
     def set_collections(self, collections, default_collection):
         logging.info(
-            f"[FaissServer] Update collections default_collection={default_collection} collections={[(c['id'], c['collection_id']) for c in collections]}"
+            f"[FaissServer] Update collections default_collection={default_collection} " +
+            f"collections={[(c['id'], c['collection_id']) for c in collections]}"
         )
+
         with self.lock:
             self.timestamp = datetime.timestamp(datetime.now())
             logging.info([c["id"] for c in collections])
@@ -556,16 +569,20 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
                 )
 
         logging.info(
-            f"[FaissServer] Update collections done default_collection={self.default_collection} collections={[(c['id'], k) for k,c in self.collections.items()]}"
+            f"[FaissServer] Update collections done default_collection={self.default_collection} " +
+            f"collections={[(c['id'], k) for k,c in self.collections.items()]}"
         )
 
     @staticmethod
     def copy_collection(collection, new_ids=False):
         new_collection = copy.deepcopy({k: v for k, v in collection.items() if k != "indexes"})
+
         if "indexes" in collection:
             new_indexes = []
+
             for index in collection["indexes"]:
                 new_indexes.append(FaissCommune.copy_index(index, new_ids=new_ids))
+                
             new_collection["indexes"] = new_indexes
 
         if new_ids:
@@ -638,22 +655,25 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
     def search(self, request, context):
         logging.info(
-            f"[FaissServer] Search collections={request.collections} queries_len={len(request.queries)} include_default_collection={request.include_default_collection}"
+            f"[FaissServer] Search collections={request.collections} " +
+            f"queries_len={len(request.queries)} " +
+            f"include_default_collection={request.include_default_collection}"
         )
 
         # TODO lock
         ids = []
-
         collections = list(request.collections)
+
         if len(collections) == 0:
             collections = [self.default_collection]
         elif request.include_default_collection:
             collections.extend([self.default_collection])
-        for collection_id in collections:
 
+        for collection_id in collections:
             if collection_id not in self.collections:
                 logging.warning(f"[FaissServer] Unknown collection {collection_id}")
                 continue
+
             collection = self.collections[collection_id]
 
             for query in request.queries:

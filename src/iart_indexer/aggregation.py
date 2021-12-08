@@ -36,7 +36,7 @@ class Aggregator:
                 body["query"] = query
 
             aggr = self.database.raw_aggregate(body=body)
-            # logging.info(aggr)
+
             for x in aggr["aggregations"][f"{nested_field}_nested"][f"{nested_field}_name_filter"][
                 f"{nested_field}_name_filter_aggr"
             ]["buckets"]:
@@ -59,24 +59,22 @@ class Aggregator:
                 body["query"] = query
 
             aggr = self.database.raw_aggregate(body=body)
-            # logging.info(aggr)
+
             for x in aggr["aggregations"][f"{nested_field}_nested"][f"{nested_field}_name_filter_aggr"]["buckets"]:
                 yield {"name": x["key"], "value": x["doc_count"]}
 
     def __call__(self, query, field_names, size=250):
-        logging.info("Aggregator")
-        # logging.info(query)
-        # logging.info(field_names)
-
         aggregations = []
-        for field_name in field_names:
-            # logging.info(field_name)
 
+        for field_name in field_names:
             field_path = field_name.split(".")
+
             if field_path[0] not in ["meta", "origin"]:
                 continue
+
             if len(field_path) == 1:
                 aggregation = list(self.text_count(query, nested_field=field_path[0], size=size))
+
                 if aggregation and len(aggregation) > 0:
                     aggregations.append({"field_name": field_name, "entries": aggregation})
 
@@ -84,6 +82,7 @@ class Aggregator:
                 aggregation = list(
                     self.text_count(query, nested_field=field_path[0], field_name=field_path[1], size=size)
                 )
+
                 if aggregation and len(aggregation) > 0:
                     aggregations.append({"field_name": field_name, "entries": aggregation})
 

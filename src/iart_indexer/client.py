@@ -54,7 +54,8 @@ def get_entry_with_path(entry, image_paths):
 
             try:
                 shutil.copy(entry_path, entry["path"])
-
+                os.remove(entry_path)
+                
                 return entry
             except:
                 pass
