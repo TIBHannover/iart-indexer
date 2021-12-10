@@ -114,8 +114,11 @@ def search(args):
         exc_type, exc_value, exc_traceback = sys.exc_info()
 
         traceback.print_exception(
-            exc_type, exc_value, exc_traceback,
-            limit=2, file=sys.stdout,
+            exc_type,
+            exc_value,
+            exc_traceback,
+            limit=2,
+            file=sys.stdout,
         )
 
     return None
@@ -290,11 +293,7 @@ def build_indexer(args):
                                 "query": {
                                     "nested": {
                                         "path": "collection",
-                                        "query": {
-                                            "terms": {
-                                                "collection.id": self.collections
-                                            }
-                                        },
+                                        "query": {"terms": {"collection.id": self.collections}},
                                     }
                                 },
                                 "random_score": {
@@ -338,6 +337,7 @@ def build_feature_cache(args):
         cache = Cache(cache_dir=config.get("cache", {"cache_dir": None})["cache_dir"], mode="a")
 
         with cache as cache:
+
             class EntryReader:
                 def __iter__(self):
                     for entry in database.all():
@@ -473,7 +473,7 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
                     if collection:
                         collection_id = collection.get("id")
-                        
+
                         if collection_id:
                             collections.add(collection_id)
 
@@ -501,6 +501,9 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             logging.info(f"[Server] Indexing flush results to database (count:{i} {len(db_bulk_cache)})")
             database.bulk_insert(db_bulk_cache)
             db_bulk_cache = []
+
+        # start indexing all
+        self.managers["indexer_manager"].indexing(collections)
 
     def build_suggester(self, request, context):
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))

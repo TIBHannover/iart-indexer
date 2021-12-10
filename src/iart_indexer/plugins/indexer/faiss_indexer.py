@@ -66,7 +66,7 @@ class FaissIndexer(IndexerPlugin):
         stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
         stub.train(faiss_indexer_pb2.TrainRequest(collections=collections))
 
-    def indexing(self, train_entries, index_entries, collections=None, rebuild=False):
+    def indexing(self, collections=None, rebuild=False):
         logging.info(f"[FaissIndexer] Indexing collections={collections}")
 
         channel = grpc.insecure_channel(
@@ -464,15 +464,13 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         self.load()
 
         logging.info(
-            f"[FaissIndexer] Latest snapshot loaded ({datetime.fromtimestamp(self.timestamp)}) " +
-            f"with {len(self.collections)} collections"
+            f"[FaissIndexer] Latest snapshot loaded ({datetime.fromtimestamp(self.timestamp)}) "
+            + f"with {len(self.collections)} collections"
         )
 
     def load(self):
         indexers = [
-            os.path.join(self.indexer_dir, x) 
-            for x in os.listdir(self.indexer_dir)
-            if re.match(r"^.*?\.msg$", x)
+            os.path.join(self.indexer_dir, x) for x in os.listdir(self.indexer_dir) if re.match(r"^.*?\.msg$", x)
         ]
 
         newest_index = {"timestamp": 0.0}
@@ -537,8 +535,8 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
     def set_collections(self, collections, default_collection):
         logging.info(
-            f"[FaissServer] Update collections default_collection={default_collection} " +
-            f"collections={[(c['id'], c['collection_id']) for c in collections]}"
+            f"[FaissServer] Update collections default_collection={default_collection} "
+            + f"collections={[(c['id'], c['collection_id']) for c in collections]}"
         )
 
         with self.lock:
@@ -572,8 +570,8 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
                 )
 
         logging.info(
-            f"[FaissServer] Update collections done default_collection={self.default_collection} " +
-            f"collections={[(c['id'], k) for k,c in self.collections.items()]}"
+            f"[FaissServer] Update collections done default_collection={self.default_collection} "
+            + f"collections={[(c['id'], k) for k,c in self.collections.items()]}"
         )
 
     @staticmethod
@@ -585,7 +583,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
             for index in collection["indexes"]:
                 new_indexes.append(FaissCommune.copy_index(index, new_ids=new_ids))
-                
+
             new_collection["indexes"] = new_indexes
 
         if new_ids:
@@ -658,9 +656,9 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
     def search(self, request, context):
         logging.info(
-            f"[FaissServer] Search collections={request.collections} " +
-            f"queries_len={len(request.queries)} " +
-            f"include_default_collection={request.include_default_collection}"
+            f"[FaissServer] Search collections={request.collections} "
+            + f"queries_len={len(request.queries)} "
+            + f"include_default_collection={request.include_default_collection}"
         )
 
         # TODO lock

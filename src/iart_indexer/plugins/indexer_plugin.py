@@ -32,7 +32,7 @@ class IndexerPluginManager(PluginManager):
 
         for pl in os.listdir(path):
             match = re.match(file_re, pl)
-            
+
             if match:
                 a = importlib.import_module("iart_indexer.plugins.indexer.{}".format(match.group(1)))
                 function_dir = dir(a)
@@ -42,8 +42,6 @@ class IndexerPluginManager(PluginManager):
 
     def indexing(
         self,
-        train_entries,
-        index_entries,
         collections=None,
         rebuild=False,
         plugins=None,
@@ -58,8 +56,6 @@ class IndexerPluginManager(PluginManager):
             logging.info(f"IndexerPluginManager: {plugin.name}")
 
             plugin.indexing(
-                train_entries,
-                index_entries,
                 rebuild=rebuild,
                 collections=collections,
             )
@@ -79,10 +75,7 @@ class IndexerPluginManager(PluginManager):
             plugin = plugin["plugin"]
 
             entries = plugin.search(
-                queries,
-                collections=collections, 
-                include_default_collection=include_default_collection,
-                size=size
+                queries, collections=collections, include_default_collection=include_default_collection, size=size
             )
 
             result_list.extend(entries)
