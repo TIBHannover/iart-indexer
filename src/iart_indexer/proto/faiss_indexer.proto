@@ -1,6 +1,6 @@
 syntax = "proto3";
 option java_multiple_files = true;
-import "indexer.proto";
+// import "indexer.proto";
 
 
 // python -m grpc_tools.protoc -I../web --python_out=. --grpc_python_out=.
@@ -9,11 +9,11 @@ import "indexer.proto";
 package iart.faiss_indexer;
 
 service FaissIndexer {
+    rpc list(ListRequest) returns (ListReply) {}
     rpc search(SearchRequest) returns (SearchReply) {}
     rpc indexing(IndexingRequest) returns (IndexingReply) {}
     rpc train(TrainRequest) returns (TrainReply) {}
     rpc delete(DeleteRequest) returns (DeleteReply) {}
-    rpc list(ListRequest) returns (ListReply) {}
 }
 
 message Query {
@@ -22,7 +22,19 @@ message Query {
     string type = 3;
 }
 
+message Collection {
+    string id = 1;
+    int32 count = 2;
+}
 
+message ListRequest {
+    repeated string collections = 1;
+    bool include_default_collection = 2;
+}
+
+message ListReply { 
+    repeated Collection collections = 1; 
+}
 
 message SearchRequest {
     repeated string collections = 1;
@@ -57,11 +69,4 @@ message DeleteRequest{
 
 message DeleteReply{
 
-}
-
-
-message ListRequest{}
-
-message ListReply{
-    repeated iart.indexer.Collection collections = 1;
 }

@@ -73,17 +73,17 @@ class Aggregator:
                 continue
 
             if len(field_path) == 1:
-                aggregation = list(self.text_count(query, nested_field=field_path[0], size=size))
-
-                if aggregation and len(aggregation) > 0:
-                    aggregations.append({"field_name": field_name, "entries": aggregation})
-
-            if len(field_path) == 2:
+                aggregation = list(
+                    self.text_count(query, nested_field=field_path[0], size=size)
+                )
+            elif len(field_path) == 2:
                 aggregation = list(
                     self.text_count(query, nested_field=field_path[0], field_name=field_path[1], size=size)
                 )
+            else:
+                continue
 
-                if aggregation and len(aggregation) > 0:
-                    aggregations.append({"field_name": field_name, "entries": aggregation})
+            if aggregation and len(aggregation) > 0:
+                aggregations.append({"field_name": field_name, "entries": aggregation})
 
         return aggregations

@@ -423,6 +423,7 @@ class Searcher:
 
         for e in range_search:
             term = None
+
             if "field" not in e or e["field"] is None:
                 # There is no generic int field in the database structure
                 continue
@@ -438,8 +439,6 @@ class Searcher:
                         else:
                             value_match = Q("term", meta__value_int=e["query"])
 
-                        # value_match = {"term": {f"meta.value_int": {"value": e["query"]}}}
-
                         term = Q(
                             "nested",
                             path="meta",
@@ -448,16 +447,13 @@ class Searcher:
                                 must=[name_match, value_match],
                             ),
                         )
-
-                    if field_path[0] == "origin":
+                    elif field_path[0] == "origin":
                         name_match = Q("match", origin__name=field_path[1])
 
                         if e["relation"] != "eq":
                             value_match = Q("range", origin__value_int={e["relation"]: e["query"]})
                         else:
                             value_match = Q("term", origin__value_int=e["query"])
-
-                        # value_match = {"term": {f"meta.value_int": {"value": e["query"]}}}
 
                         term = Q(
                             "nested",
@@ -485,28 +481,65 @@ class Searcher:
             should_terms.append(Q("function_score", functions=[{"random_score": {"seed": seed}}]))
 
         if whitelist is not None and len(whitelist) > 0:
+            if should_terms or must_terms:
+                origin_terms = []
 
-            search = search.query(
-                Q(
-                    "bool",
-                    must=[
-                        Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms),
-                        Q("ids", type="_doc", values=whitelist),
-                    ],
-                )
-            )
+                for i, should_term in enumerate(should_terms):
+                    if should_term.path == "origin":
+                        origin_terms.append(should_term)
+                        should_terms[i] = None
 
+                for i, must_term in enumerate(must_terms):
+                    if must_term.path == "origin":
+                        origin_terms.append(must_term)
+                        must_terms[i] = None
+
+                should_terms = [x for x in should_terms if x is not None]
+                must_terms = [x for x in must_terms if x is not None]
+
+                if origin_terms:
+                    search = search.query(
+                        Q(
+                            "bool",
+                            must=[
+                                Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms),
+                                Q(
+                                    "bool",
+                                    should=[
+                                        Q("bool", must=origin_terms),
+                                        Q("ids", type="_doc", values=whitelist),
+                                    ],
+                                ),
+                            ]
+                        )
+                    )
+                else:
+                    search = search.query(
+                        Q(
+                            "bool",
+                            must=[
+                                Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms),
+                                Q("ids", type="_doc", values=whitelist),
+                            ],
+                        )
+                    )
+            else:
+                search = search.query(Q("ids", type="_doc", values=whitelist))
         else:
             search = search.query(Q("bool", must=must_terms, should=should_terms, must_not=must_not_terms))
 
         if isinstance(sorting, str) and sorting.lower() == "classifier":
-
             search.sort(
                 {
                     "classifier.annotations.value": {
                         "order": "desc",
                         "mode": "sum",
-                        "nested": {"path": "classifier", "nested": {"path": "classifier.annotations"}},
+                        "nested": {
+                            "path": "classifier",
+                            "nested": {
+                                "path": "classifier.annotations",
+                            },
+                        },
                     }
                 }
             )

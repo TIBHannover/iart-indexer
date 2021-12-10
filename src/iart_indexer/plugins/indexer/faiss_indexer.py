@@ -80,10 +80,11 @@ class FaissIndexer(IndexerPlugin):
         stub.indexing(faiss_indexer_pb2.IndexingRequest(collections=collections))
 
     def search(self, queries, collections=None, include_default_collection=True, size=100):
-        # logging.info(f"[FaissIndexer] Search queries={queries}")
         request = faiss_indexer_pb2.SearchRequest(
-            collections=collections, include_default_collection=include_default_collection
+            collections=collections,
+            include_default_collection=include_default_collection,
         )
+
         for q in queries:
             query = request.queries.add()
             query.plugin = q["plugin"]
@@ -97,9 +98,11 @@ class FaissIndexer(IndexerPlugin):
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
             ],
         )
+
         stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
         reply = stub.search(request)
         result = copy.deepcopy(list(reply.ids))
+
         return result
 
 
@@ -676,15 +679,17 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
             collection = self.collections[collection_id]
 
-            for query in request.queries:
-                for index in collection["indexes"]:
-                    if index["plugin"] == query.plugin and index["type"] == query.type:
+            if request.queries:
+                for query in request.queries:
+                    for index in collection["indexes"]:
+                        if index["plugin"] == query.plugin and index["type"] == query.type:
+                            feature = np.asarray([list(query.value)]).astype("float32")
+                            faiss.normalize_L2(feature)
 
-                        feature = np.asarray([list(query.value)]).astype("float32")
-
-                        faiss.normalize_L2(feature)
-                        q_result = index["index"].search(feature, k=1000)
-                        ids.extend([index["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
+                            q_result = index["index"].search(feature, k=1000)
+                            ids.extend([index["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
+            else:
+                ids.extend(list(collection["indexes"][0]["entries"].keys()))
 
         return faiss_indexer_pb2.SearchReply(ids=ids)
 
