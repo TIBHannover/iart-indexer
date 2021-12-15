@@ -24,6 +24,8 @@ import grpc
 from concurrent import futures
 from threading import Lock
 
+from itertools import zip_longest
+
 
 @IndexerPluginManager.export("FaissIndexer")
 class FaissIndexer(IndexerPlugin):
@@ -106,6 +108,91 @@ class FaissIndexer(IndexerPlugin):
         return result
 
 
+class FaissEntryReader:
+    def __init__(self, database, collections=None, size=None):
+        self.database = database
+        self.collections = collections
+        self.size = size
+
+    def __iter__(self):
+        if self.collections is not None:
+            query = {
+                "query": {
+                    "function_score": {
+                        "query": {
+                            "nested": {
+                                "path": "collection",
+                                "query": {"terms": {"collection.id": self.collections}},
+                            }
+                        },
+                        "random_score": {"seed": 42},
+                    }
+                }
+            }
+        else:
+            query = {
+                "query": {
+                    "function_score": {
+                        "query": {
+                            "nested": {
+                                "path": "collection",
+                                "query": {"match": {"collection.is_public": True}},
+                            }
+                        },
+                        "random_score": {"seed": 42},
+                    },
+                }
+            }
+        for i, entry in enumerate(self.database.raw_all(query, size=self.size)):
+            yield get_features_from_db_entry(entry, return_collection=True)
+
+
+class Batcher:
+    def __init__(self, iterator, size=1):
+        self.size = size
+        self.iterator = iterator
+
+    def __iter__(self):
+        args = [iter(self.iterator)] * self.size
+        for x in zip_longest(*args):
+            yield x
+
+
+class FeatureReader:
+    def __init__(self, iterator, default_collection_id, batch_size=320):
+        self.batch_size = batch_size
+        self.iterator = iterator
+        self.default_collection_id = default_collection_id
+
+    def __iter__(self):
+        iter = Batcher(self.iterator, self.batch_size)
+
+        for batch in iter:
+            feature_cache = {}
+            for entry in batch:
+                if entry is None:
+                    continue
+
+                collection_id = get_element(entry, "collection.id")
+                is_public = get_element(entry, "collection.is_public")
+                if collection_id is None or is_public is None or is_public:
+                    collection_id = self.default_collection_id
+
+                for feature in entry["feature"]:
+
+                    index_name = collection_id + "." + feature["plugin"] + "." + feature["type"]
+                    if index_name not in feature_cache:
+                        feature_cache[index_name] = []
+                    feature_cache[index_name].append({"id": entry["id"], "value": feature["value"]})
+
+            results = []
+            for k, v in feature_cache.items():
+                collection_id, plugin, type = k.split(".")
+                results.append({"collection_id": collection_id, "plugin": plugin, "type": type, "entries": v})
+            
+            yield results
+
+
 class FaissIndexerTrainJob:
     @classmethod
     def __call__(cls, args):
@@ -118,50 +205,14 @@ class FaissIndexerTrainJob:
             logging.info(f"[FaissIndexerTrainJob] Start train job config={config} config={faiss_config}")
             database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
 
-            class TrainEntryReader:
-                def __init__(self, collections=None):
-                    self.collections = collections
-
-                def __iter__(self):
-                    if self.collections is not None:
-                        query = {
-                            "query": {
-                                "function_score": {
-                                    "query": {
-                                        "nested": {
-                                            "path": "collection",
-                                            "query": {"terms": {"collection.id": self.collections}},
-                                        }
-                                    },
-                                    "random_score": {"seed": 42},
-                                }
-                            },
-                            "size": 1000,
-                        }
-                    else:
-                        query = {
-                            "query": {
-                                "function_score": {
-                                    "query": {
-                                        "nested": {
-                                            "path": "collection",
-                                            "query": {"match": {"collection.is_public": True}},
-                                        }
-                                    },
-                                    "random_score": {"seed": 42},
-                                },
-                            },
-                            "size": 1000,
-                        }
-
-                    for entry in database.raw_all(query):
-                        yield get_features_from_db_entry(entry, return_collection=True)
-
             data = {}
             index_names = set()
 
             logging.info(f"[FaissIndexerTrainJob] Start database reading")
-            for i, entry in enumerate(TrainEntryReader(collections)):
+
+            for i, entry in enumerate(
+                FaissEntryReader(database, collections, size=faiss_config.get("train_size", 10000))
+            ):
                 id = entry["id"]
 
                 for feature in entry["feature"]:
@@ -181,15 +232,6 @@ class FaissIndexerTrainJob:
 
                     index_names.add(index_name)
 
-                if i % 1000 == 0 and i > 0:
-                    logging.info(f"[FaissIndexerTrainJob] Read {i}")
-
-                    for index_name, index_data in data.items():
-                        logging.info(f"[FaissIndexerTrainJob] {index_name}:{len(data[index_name]['data'])}")
-                if i > faiss_config.get("train_size", 10000):
-                    break
-                    # break
-
             for index_name, index_data in data.items():
                 logging.info(f"[FaissIndexerTrainJob] {index_name}:{len(data[index_name]['data'])}")
             logging.info(f"[FaissIndexerTrainJob] Start training of {len(data.items())} indexes")
@@ -205,14 +247,11 @@ class FaissIndexerTrainJob:
                         f"[FaissIndexerTrainJob] Dataset size is very small ({number_of_clusters_to_train} < {number_of_clusters})"
                     )
 
+                # Faiss training
                 index = faiss.IndexIVFFlat(quantizer, d, number_of_clusters_to_train)
-
                 train_data = np.asarray(index_data["data"]).astype("float32")
                 faiss.normalize_L2(train_data)
                 index.train(train_data)
-                # index.add(train_data)
-
-                # faiss.write_index(index, os.path.join(self.indexer_dir, index_data["id"] + ".index"))
 
                 collection["indexes"].append(
                     {
@@ -245,7 +284,6 @@ class FaissIndexerIndexingJob:
             database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
 
             # copy all indexes to local variables
-
             trained_collection = FaissCommune.copy_collection(indexer.trained_collection)
             collections = {k: FaissCommune.copy_collection(v) for k, v in indexer.collections.items()}
             # deafult collection should be part of collections
@@ -255,142 +293,45 @@ class FaissIndexerIndexingJob:
                 f"[FaissIndexerIndexingJob] Found existing default_collection={default_collection_id} collections={[(c['id'], k) for k, c in collections.items()]}"
             )
 
+            # init a new default_collection if no other exists
             if default_collection_id is None:
                 default_collection = FaissCommune.copy_collection(trained_collection)
                 default_collection_id = default_collection["id"]
                 default_collection["collection_id"] = default_collection_id
                 collections[default_collection_id] = default_collection
 
-            class EntryReader:
-                def __init__(self, collections=None):
-                    self.collections = collections
-
-                def __iter__(self):
-                    if self.collections is not None:
-                        query = {
-                            "query": {
-                                "function_score": {
-                                    "query": {
-                                        "nested": {
-                                            "path": "collection",
-                                            "query": {"terms": {"collection.id": self.collections}},
-                                        }
-                                    },
-                                    "random_score": {"seed": 42},
-                                }
-                            },
-                            "size": 1000,
-                        }
-                    else:
-                        query = {
-                            "query": {
-                                "function_score": {
-                                    "random_score": {"seed": 42},
-                                }
-                            },
-                            "size": 1000,
-                        }
-
-                    for entry in database.raw_all(query):
-                        yield get_features_from_db_entry(entry, return_collection=True)
-
             # only update collections
             collections_to_update = set()
             # rebuild collections
-            feature_cache = {}
-            feature_cache = {}
-            logging.info(f"[FaissIndexer] Reading features")
-            for i, entry in enumerate(EntryReader(collections_to_index)):
-                id = entry["id"]
-                collection_id = get_element(entry, "collection.id")
-                if collection_id is None:
-                    collection_id = default_collection_id
+            logging.info(f"[FaissIndexerIndexingJob] Reading features")
+            for entries in FeatureReader(FaissEntryReader(database, collections_to_index), default_collection_id):
 
-                # mark collection
-                # collections_to_update.add(collection_id)
+                logging.info(f"[FaissIndexerIndexingJob] Write features to faiss indexes")
+                for entry in entries:
 
-                is_public = get_element(entry, "collection.is_public")
-                if is_public is None:
-                    is_public = False
+                    collection_id, plugin, type = entry["collection_id"], entry["plugin"], entry["type"]
+                    if collection_id not in collections:
+                        collections[collection_id] = {
+                            **FaissCommune.copy_collection(trained_collection),
+                            "collection_id": collection_id,
+                            "timestamp": datetime.timestamp(datetime.now()),
+                        }
 
-                # if is_public:
-                #     collections_to_update.add(default_collection_id)
+                    for index in collections[collection_id]["indexes"]:
+                        if index["type"] == type and index["plugin"] == plugin:
+                            ids = [x["id"] for x in entry["entries"] if x["id"] not in index["entries"]]
+                            values = [x["value"] for x in entry["entries"] if x["id"] not in index["entries"]]
+                            if len(values) == 0:
+                                continue
+                            values = np.asarray(values).astype("float32")
+                            faiss.normalize_L2(values)
+                            index["index"].add(values)
+                            for id in ids:
+                                index["entries"][id] = len(index["entries"])
 
-                for feature in entry["feature"]:
-
-                    index_name = collection_id + "." + feature["plugin"] + "." + feature["type"]
-                    if index_name not in feature_cache:
-                        feature_cache[index_name] = []
-                    feature_cache[index_name].append({"id": entry["id"], "value": feature["value"]})
-
-                    if is_public:
-
-                        index_name = default_collection_id + "." + feature["plugin"] + "." + feature["type"]
-                        # print(dir(indexer_data[index_name]))
-                        if index_name not in feature_cache:
-                            feature_cache[index_name] = []
-                        feature_cache[index_name].append({"id": entry["id"], "value": feature["value"]})
-
-                # add features to index
-                cache_to_clear = []
-                for k, v in feature_cache.items():
-                    if len(v) >= 1000:
-                        collection_id, plugin, type = k.split(".")
-                        if collection_id not in collections:
-                            collections[collection_id] = {
-                                **FaissCommune.copy_collection(trained_collection),
-                                "collection_id": collection_id,
-                                "timestamp": datetime.timestamp(datetime.now()),
-                            }
-
-                        for index in collections[collection_id]["indexes"]:
-                            if index["type"] == type and index["plugin"] == plugin:
-                                ids = [x["id"] for x in v if x["id"] not in index["entries"]]
-                                values = [x["value"] for x in v if x["id"] not in index["entries"]]
-                                if len(values) == 0:
-                                    continue
-                                values = np.asarray(values).astype("float32")
-
-                                faiss.normalize_L2(values)
-                                index["index"].add(values)
-                                for id in ids:
-                                    index["entries"][id] = len(index["entries"])
-                                logging.info(f"Index: {collection_id} {index['type']} {len(index['entries'])}")
-
-                                collections_to_update.add(collection_id)
-                        cache_to_clear.append(k)
-
-                for cache in cache_to_clear:
-                    del feature_cache[cache]
-            # empty the last samples
-
-            logging.info(f"[FaissIndexer] Write features to faiss indexes")
-            for k, v in feature_cache.items():
-
-                collection_id, plugin, type = k.split(".")
-                if collection_id not in collections:
-                    collections[collection_id] = {
-                        **FaissCommune.copy_collection(trained_collection),
-                        "collection_id": collection_id,
-                        "timestamp": datetime.timestamp(datetime.now()),
-                    }
-
-                for index in collections[collection_id]["indexes"]:
-                    if index["type"] == type and index["plugin"] == plugin:
-                        ids = [x["id"] for x in v if x["id"] not in index["entries"]]
-                        values = [x["value"] for x in v if x["id"] not in index["entries"]]
-                        if len(values) == 0:
-                            continue
-                        values = np.asarray(values).astype("float32")
-                        faiss.normalize_L2(values)
-                        index["index"].add(values)
-                        for id in ids:
-                            index["entries"][id] = len(index["entries"])
-
-                        index["rev_entries"] = {v: k for k, v in index["entries"].items()}
-                        logging.info(f"Index: {collection_id} {index['type']} {len(index['entries'])}")
-                        collections_to_update.add(collection_id)
-                # save everything that gets updated
+                            index["rev_entries"] = {v: k for k, v in index["entries"].items()}
+                            logging.info(f"Index: {collection_id} {index['type']} {len(index['entries'])}")
+                            collections_to_update.add(collection_id)
 
             new_collections = []
             new_default_collection_id = None
@@ -451,7 +392,6 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         self.one_index_for_public = self.faiss_config["one_index_for_public"]
         self.number_of_probs = self.faiss_config["number_of_probs"]
 
-        logging.info(self.faiss_config)
 
         # create some folders
         os.makedirs(self.indexer_dir, exist_ok=True)

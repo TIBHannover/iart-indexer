@@ -1,3 +1,4 @@
+import sys
 import math
 import json
 import logging
@@ -138,10 +139,9 @@ class ElasticSearchDatabase(Database):
     def bulk_insert(self, generator):
         def add_fields(generator):
             for x in generator:
-                logging.info(f'BULK: {x["id"]}')
                 yield {"_id": x["id"], "_index": self.index, **x}
 
-        bulk(client=self.es, actions=add_fields(generator))
+        bulk(client=self.es, actions=add_fields(generator), refresh="wait_for")
 
     def insert_entry(self, hash_id, doc):
         self.es.index(index=self.index, doc_type=self.type, id=hash_id, body=doc)
@@ -186,7 +186,6 @@ class ElasticSearchDatabase(Database):
     def update_plugin(self, hash_id, plugin_name, plugin_version, plugin_type, annotations):
         entry = self.get_entry(hash_id=hash_id)
         if entry is None:
-            # TODO logging
             return
 
         # convert protobuf to dict
@@ -379,14 +378,18 @@ class ElasticSearchDatabase(Database):
             return []
         # self.es.update('')
 
-    def raw_all(self, body, pagesize=250, scroll_timeout="10m"):
+    def raw_all(self, body, pagesize=250, scroll_timeout="10m", size=None):
         if not self.es.indices.exists(index=self.index):
             return None
+
         is_first = True
+        count = 0
+        if size is None:
+            size = sys.maxsize
         while True:
             # Scroll next
             if is_first:  # Initialize scroll
-                result = self.es.search(index=self.index, scroll="1m", body=body)
+                result = self.es.search(index=self.index, scroll="1m", body={**body, "size": pagesize})
                 is_first = False
             else:
                 result = self.es.scroll(body={"scroll_id": scroll_id, "scroll": scroll_timeout})
@@ -396,7 +399,11 @@ class ElasticSearchDatabase(Database):
             if not hits:
                 break
             # Yield each entry
-            yield from (hit["_source"] for hit in hits)
+            for hit in hits:
+                if count >= size:
+                    return
+                count += 1
+                yield hit["_source"]
 
     def all(self, pagesize=250, scroll_timeout="10m", **kwargs):
         if not self.es.indices.exists(index=self.index):
