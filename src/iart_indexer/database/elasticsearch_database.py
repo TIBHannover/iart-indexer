@@ -426,3 +426,8 @@ class ElasticSearchDatabase(Database):
 
     def drop(self):
         self.es.indices.delete(index=self.index, ignore=[400, 404])
+
+    def raw_delete(self, body):
+        if not self.es.indices.exists(index=self.index):
+            return None
+        return self.es.delete_by_query(index=self.index, body=body)

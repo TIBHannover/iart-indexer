@@ -107,6 +107,24 @@ class FaissIndexer(IndexerPlugin):
 
         return result
 
+    def delete(self, collections=None):
+        request = faiss_indexer_pb2.DeleteRequest(
+            collections=collections,
+        )
+
+
+        channel = grpc.insecure_channel(
+            f"{self.host}:{self.port}",
+            options=[
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
+            ],
+        )
+
+        stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
+        reply = stub.delete(request)
+        return
+
 
 class FaissEntryReader:
     def __init__(self, database, collections=None, size=None):
@@ -476,12 +494,11 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
     def set_collections(self, collections, default_collection):
         logging.info(
             f"[FaissServer] Update collections default_collection={default_collection} "
-            + f"collections={[(c['id'], c['collection_id']) for c in collections]}"
+            + f"collections={[{'id':c['id'], 'collection_id':k} for k,c in self.collections.items()]}"
         )
 
         with self.lock:
             self.timestamp = datetime.timestamp(datetime.now())
-            logging.info([c["id"] for c in collections])
 
             for collection in collections:
                 self.save_collection(collection)
@@ -511,7 +528,42 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
         logging.info(
             f"[FaissServer] Update collections done default_collection={self.default_collection} "
-            + f"collections={[(c['id'], k) for k,c in self.collections.items()]}"
+            + f"collections={[{'id':c['id'], 'collection_id':k} for k,c in self.collections.items()]}"
+        )
+    
+    def delete_collections(self, collections):
+        logging.info(
+            f"[FaissServer] Delete collections collections={collections} "
+            + f"collections={[{'id':c['id'], 'collection_id':k} for k,c in self.collections.items()]}"
+        )
+
+        with self.lock:
+            self.timestamp = datetime.timestamp(datetime.now())
+            for collection_id in collections:
+                if collection_id in self.collections:
+                    collection = self.collections[collection_id]
+                    del self.collections[collection_id]
+                    # delete files from hdd
+
+                    for index in collection["indexes"]:
+                        os.remove(os.path.join(self.indexes_dir, index["id"] + ".index"))
+                        os.remove(os.path.join(self.indexes_dir, index["id"] + ".msg"))
+                    os.remove(os.path.join(self.collections_dir, collection["id"] + ".msg"))
+
+            with open(os.path.join(self.indexer_dir, uuid.uuid4().hex + ".msg"), "wb") as f:
+                f.write(
+                    msgpack.packb(
+                        {
+                            "collections": [c["id"] for _, c in self.collections.items()],
+                            "timestamp": self.timestamp,
+                            "default_collection": self.default_collection,
+                            "trained_collection": self.trained_collection["id"],
+                        }
+                    )
+                )
+        logging.info(
+            f"[FaissServer] Delete collections done default_collection={self.default_collection} "
+            + f"collections={[{'id':c['id'], 'collection_id':k} for k,c in self.collections.items()]}"
         )
 
     @staticmethod
@@ -679,7 +731,9 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         return faiss_indexer_pb2.TrainReply()
 
     def delete(self, request, context):
-        logging.info("[FaissServer] Delete")
+        logging.info(f"[FaissServer] Delete {request.collections}")
+        self.delete_collections(collections=request.collections)
+        return faiss_indexer_pb2.DeleteReply()
 
 
 class FaissServer:

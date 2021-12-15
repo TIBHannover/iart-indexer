@@ -48,19 +48,18 @@ class IndexerPluginManager(PluginManager):
         configs=None,
     ):
         # TODO add lock here
-        logging.info("IndexerPluginManager: indexing")
-        logging.info(f"IndexerPluginManager: {len(self.plugin_list)} {collections}")
+        logging.info(f"[IndexerPluginManager]: indexing")
+        logging.info(f"[IndexerPluginManager]: {len(self.plugin_list)} {collections}")
 
         for plugin in self.plugin_list:
             plugin = plugin["plugin"]
-            logging.info(f"IndexerPluginManager: {plugin.name}")
+            logging.info(f"[IndexerPluginManager]: {plugin.name}")
 
             plugin.indexing(
                 rebuild=rebuild,
                 collections=collections,
             )
 
-        # TODO force reloading of other processes
 
     def search(
         self,
@@ -81,6 +80,24 @@ class IndexerPluginManager(PluginManager):
             result_list.extend(entries)
 
         return result_list
+
+    
+    def delete(
+        self,
+        collections=None,
+    ):
+        # TODO add lock here
+        logging.info(f"[IndexerPluginManager]: delete")
+        logging.info(f"[IndexerPluginManager]: {len(self.plugin_list)} {collections}")
+
+        for plugin in self.plugin_list:
+            plugin = plugin["plugin"]
+            logging.info(f"[IndexerPluginManager]: {plugin.name}")
+
+            plugin.delete(
+                collections=collections,
+            )
+
 
 
 class IndexerPlugin(Plugin):

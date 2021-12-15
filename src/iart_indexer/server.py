@@ -782,6 +782,26 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             database.bulk_insert(db_bulk_cache)
             db_bulk_cache = []
 
+    def collection_delete(self, request, context):
+        logging.info("[Server] collection_delete")
+        logging.info(request.id)
+
+        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
+        result = database.raw_delete({
+                    "query": {
+                        "nested": {
+                            "path": "collection",
+                            "query": {"terms": {"collection.id": [request.id]}},
+                        }}})
+
+        logging.info(f"[Server] {result}")
+
+        result = indexer_pb2.CollectionDeleteReply()#collections,ids)
+
+        # start indexing all
+        self.managers["indexer_manager"].delete([request.id])
+
+        return result
 
 class Server:
     def __init__(self, config):
