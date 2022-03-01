@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'P\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rindexer.proto\x12\x0ciart.indexer\"9\n\nCollection\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tis_public\x18\x03 \x01(\x08\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\xdf\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x1e\n\x03roi\x18\x04 \x01(\x0b\x32\x11.iart.indexer.RoI\x12&\n\x04meta\x18\x05 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x06 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.CollectionB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\"K\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\'\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x15.iart.indexer.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\xad\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x34\n\nclassifier\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.ClassifierResultH\x00\x12.\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x1b.iart.indexer.FeatureResultH\x00\x42\x08\n\x06result\"^\n\x0bImageResult\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\x12+\n\x07results\x18\x02 \x03(\x0b\x32\x1a.iart.indexer.PluginResult\"<\n\x0eIndexingResult\x12*\n\x07results\x18\x01 \x03(\x0b\x32\x19.iart.indexer.ImageResult\"V\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12,\n\x08settings\x18\x03 \x03(\x0b\x32\x1a.iart.indexer.PluginConfig\"\x14\n\x12ListPluginsRequest\"=\n\x10ListPluginsReply\x12)\n\x07plugins\x18\x01 \x03(\x0b\x32\x18.iart.indexer.PluginInfo\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"Y\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x30\n\x08indexing\x18\x02 \x01(\x0b\x32\x1c.iart.indexer.IndexingResultH\x00\x42\x08\n\x06result\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb9\x01\n\x11\x46\x65\x61tureSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\"\n\x05image\x18\x02 \x01(\x0b\x32\x13.iart.indexer.Image\x12\x32\n\x04\x66lag\x18\x03 \x01(\x0e\x32$.iart.indexer.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\x86\x01\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12/\n\x04\x66lag\x18\x03 \x01(\x0e\x32!.iart.indexer.TextSearchTerm.Flag\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\"\xa8\x01\n\x13ImageTextSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\x34\n\x04\x66lag\x18\x03 \x01(\x0e\x32&.iart.indexer.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xcb\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12\x39\n\x08relation\x18\x05 \x01(\x0e\x32\'.iart.indexer.NumberSearchTerm.Relation\x12\x31\n\x04\x66lag\x18\x06 \x01(\x0e\x32#.iart.indexer.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x06\n\x02\x45Q\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x0e\n\nGREATER_EQ\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\x42\x07\n\x05query\"\xe1\x01\n\nSearchTerm\x12,\n\x04text\x18\x01 \x01(\x0b\x32\x1c.iart.indexer.TextSearchTermH\x00\x12\x30\n\x06number\x18\x02 \x01(\x0b\x32\x1e.iart.indexer.NumberSearchTermH\x00\x12\x37\n\nimage_text\x18\x03 \x01(\x0b\x32!.iart.indexer.ImageTextSearchTermH\x00\x12\x32\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x1f.iart.indexer.FeatureSearchTermH\x00\x42\x06\n\x04term\"C\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\x12\x11\n\tuse_query\x18\x03 \x01(\x08\"\xce\x06\n\rSearchRequest\x12\'\n\x05terms\x18\x01 \x03(\x0b\x32\x18.iart.indexer.SearchTerm\x12\x34\n\x07sorting\x18\x02 \x01(\x0e\x32#.iart.indexer.SearchRequest.Sorting\x12\x34\n\x07mapping\x18\x03 \x01(\x0e\x32#.iart.indexer.SearchRequest.Mapping\x12\x31\n\taggregate\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.AggregateRequest\x12\x13\n\x0brandom_seed\x18\x05 \x01(\t\x12\x31\n\x06\x65xtras\x18\x06 \x03(\x0e\x32!.iart.indexer.SearchRequest.Extra\x12\x31\n\x0fmapping_options\x18\x07 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12:\n\nclustering\x18\x08 \x01(\x0e\x32&.iart.indexer.SearchRequest.Clustering\x12\x34\n\x12\x63lustering_options\x18\t \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x13\n\x0b\x63ollections\x18\n \x03(\t\x12\"\n\x1ainclude_default_collection\x18\x0b \x01(\x08\x12\x0b\n\x03ids\x18\x0c \x03(\t\"\x97\x01\n\x07Sorting\x12\x13\n\x0fSORTING_DEFAULT\x10\x00\x12\x16\n\x12SORTING_CLASSIFIER\x10\x01\x12\x13\n\x0fSORTING_FEATURE\x10\x02\x12\x12\n\x0eSORTING_RANDOM\x10\x03\x12\x1a\n\x16SORTING_RANDOM_FEATURE\x10\x04\x12\x1a\n\x16SORTING_RANDOM_CLUSTER\x10\x05\"0\n\x07Mapping\x12\x13\n\x0fMAPPING_DEFAULT\x10\x00\x12\x10\n\x0cMAPPING_UMAP\x10\x01\"Y\n\nClustering\x12\x16\n\x12\x43LUSTERING_DEFAULT\x10\x00\x12\x15\n\x11\x43LUSTERING_KMEANS\x10\x02\x12\x1c\n\x18\x43LUSTERING_AGGLOMERATIVE\x10\x03\"\x1b\n\x05\x45xtra\x12\x12\n\x0e\x45XTRA_FEATURES\x10\x00\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xc9\x02\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\x12\x0f\n\x07\x63luster\x18\x07 \x01(\x03\x12\x10\n\x08\x64istance\x18\x08 \x01(\x02\x12,\n\ncollection\x18\t \x01(\x0b\x32\x18.iart.indexer.Collection\x12\x0e\n\x06padded\x18\n \x01(\x08\"P\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12)\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"{\n\x15ListSearchResultReply\x12\x30\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1f.iart.indexer.SearchResultEntry\x12\x30\n\taggregate\x18\x02 \x03(\x0b\x32\x1d.iart.indexer.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\":\n\x0cSuggestReply\x12*\n\x06groups\x18\x01 \x03(\x0b\x32\x1a.iart.indexer.SuggestGroup\";\n\x13\x42uildIndexerRequest\x12\x0f\n\x07rebuild\x18\x01 \x01(\x08\x12\x13\n\x0b\x63ollections\x18\x02 \x03(\t\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\x1d\n\x0b\x44umpRequest\x12\x0e\n\x06origin\x18\x01 \x01(\t\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"5\n\x0fIndexingRequest\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"9\n\x0e\x41ggregateReply\x12\'\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x18.iart.indexer.ValueField\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xf8\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.Collection\"\x1b\n\rDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\r\n\x0b\x44\x65leteReply\"%\n\x17\x43ollectionDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\x15\x43ollectionDeleteReply\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t\"\x17\n\x15\x43ollectionListRequest\"D\n\x13\x43ollectionListReply\x12-\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x18.iart.indexer.Collection2\xfd\t\n\x07Indexer\x12R\n\x0clist_plugins\x12 .iart.indexer.ListPluginsRequest\x1a\x1e.iart.indexer.ListPluginsReply\"\x00\x12\x42\n\x06status\x12\x1b.iart.indexer.StatusRequest\x1a\x19.iart.indexer.StatusReply\"\x00\x12Q\n\x0f\x62uild_suggester\x12\x1e.iart.indexer.SuggesterRequest\x1a\x1c.iart.indexer.SuggesterReply\"\x00\x12\x42\n\x06search\x12\x1b.iart.indexer.SearchRequest\x1a\x19.iart.indexer.SearchReply\"\x00\x12\x62\n\x12list_search_result\x12%.iart.indexer.ListSearchResultRequest\x1a#.iart.indexer.ListSearchResultReply\"\x00\x12K\n\taggregate\x12\x1e.iart.indexer.AggregateRequest\x1a\x1c.iart.indexer.AggregateReply\"\x00\x12\x45\n\x07suggest\x12\x1c.iart.indexer.SuggestRequest\x1a\x1a.iart.indexer.SuggestReply\"\x00\x12U\n\rbuild_indexer\x12!.iart.indexer.BuildIndexerRequest\x1a\x1f.iart.indexer.BuildIndexerReply\"\x00\x12\x65\n\x13\x62uild_feature_cache\x12&.iart.indexer.BuildFeatureCacheRequest\x1a$.iart.indexer.BuildFeatureCacheReply\"\x00\x12L\n\x08indexing\x12\x1d.iart.indexer.IndexingRequest\x1a\x1b.iart.indexer.IndexingReply\"\x00(\x01\x30\x01\x12>\n\x04\x64ump\x12\x19.iart.indexer.DumpRequest\x1a\x17.iart.indexer.DumpReply\"\x00\x30\x01\x12@\n\x04load\x12\x19.iart.indexer.LoadRequest\x1a\x17.iart.indexer.LoadReply\"\x00(\x01\x30\x01\x12\x39\n\x03get\x12\x18.iart.indexer.GetRequest\x1a\x16.iart.indexer.GetReply\"\x00\x12\x42\n\x06\x64\x65lete\x12\x1b.iart.indexer.DeleteRequest\x1a\x19.iart.indexer.DeleteReply\"\x00\x12\x61\n\x11\x63ollection_delete\x12%.iart.indexer.CollectionDeleteRequest\x1a#.iart.indexer.CollectionDeleteReply\"\x00\x12[\n\x0f\x63ollection_list\x12#.iart.indexer.CollectionListRequest\x1a!.iart.indexer.CollectionListReply\"\x00\x42\x02P\x01\x62\x06proto3'
+  serialized_pb=b'\n\rindexer.proto\x12\x0ciart.indexer\"9\n\nCollection\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tis_public\x18\x03 \x01(\x08\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\xdf\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x1e\n\x03roi\x18\x04 \x01(\x0b\x32\x11.iart.indexer.RoI\x12&\n\x04meta\x18\x05 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x06 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.CollectionB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\"K\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\'\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x15.iart.indexer.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\xad\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x34\n\nclassifier\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.ClassifierResultH\x00\x12.\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x1b.iart.indexer.FeatureResultH\x00\x42\x08\n\x06result\"^\n\x0bImageResult\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\x12+\n\x07results\x18\x02 \x03(\x0b\x32\x1a.iart.indexer.PluginResult\"<\n\x0eIndexingResult\x12*\n\x07results\x18\x01 \x03(\x0b\x32\x19.iart.indexer.ImageResult\"V\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12,\n\x08settings\x18\x03 \x03(\x0b\x32\x1a.iart.indexer.PluginConfig\"\x14\n\x12ListPluginsRequest\"=\n\x10ListPluginsReply\x12)\n\x07plugins\x18\x01 \x03(\x0b\x32\x18.iart.indexer.PluginInfo\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"Y\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x30\n\x08indexing\x18\x02 \x01(\x0b\x32\x1c.iart.indexer.IndexingResultH\x00\x42\x08\n\x06result\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb9\x01\n\x11\x46\x65\x61tureSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\"\n\x05image\x18\x02 \x01(\x0b\x32\x13.iart.indexer.Image\x12\x32\n\x04\x66lag\x18\x03 \x01(\x0e\x32$.iart.indexer.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\x86\x01\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12/\n\x04\x66lag\x18\x03 \x01(\x0e\x32!.iart.indexer.TextSearchTerm.Flag\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\"\xa8\x01\n\x13ImageTextSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\x34\n\x04\x66lag\x18\x03 \x01(\x0e\x32&.iart.indexer.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xcb\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12\x39\n\x08relation\x18\x05 \x01(\x0e\x32\'.iart.indexer.NumberSearchTerm.Relation\x12\x31\n\x04\x66lag\x18\x06 \x01(\x0e\x32#.iart.indexer.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x06\n\x02\x45Q\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x0e\n\nGREATER_EQ\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\x42\x07\n\x05query\"\xe1\x01\n\nSearchTerm\x12,\n\x04text\x18\x01 \x01(\x0b\x32\x1c.iart.indexer.TextSearchTermH\x00\x12\x30\n\x06number\x18\x02 \x01(\x0b\x32\x1e.iart.indexer.NumberSearchTermH\x00\x12\x37\n\nimage_text\x18\x03 \x01(\x0b\x32!.iart.indexer.ImageTextSearchTermH\x00\x12\x32\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x1f.iart.indexer.FeatureSearchTermH\x00\x42\x06\n\x04term\"C\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\x12\x11\n\tuse_query\x18\x03 \x01(\x08\"\xe1\x06\n\rSearchRequest\x12\'\n\x05terms\x18\x01 \x03(\x0b\x32\x18.iart.indexer.SearchTerm\x12\x34\n\x07sorting\x18\x02 \x01(\x0e\x32#.iart.indexer.SearchRequest.Sorting\x12\x34\n\x07mapping\x18\x03 \x01(\x0e\x32#.iart.indexer.SearchRequest.Mapping\x12\x31\n\taggregate\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.AggregateRequest\x12\x13\n\x0brandom_seed\x18\x05 \x01(\t\x12\x31\n\x06\x65xtras\x18\x06 \x03(\x0e\x32!.iart.indexer.SearchRequest.Extra\x12\x31\n\x0fmapping_options\x18\x07 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12:\n\nclustering\x18\x08 \x01(\x0e\x32&.iart.indexer.SearchRequest.Clustering\x12\x34\n\x12\x63lustering_options\x18\t \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x13\n\x0b\x63ollections\x18\n \x03(\t\x12\"\n\x1ainclude_default_collection\x18\x0b \x01(\x08\x12\x0b\n\x03ids\x18\x0c \x03(\t\"\x97\x01\n\x07Sorting\x12\x13\n\x0fSORTING_DEFAULT\x10\x00\x12\x16\n\x12SORTING_CLASSIFIER\x10\x01\x12\x13\n\x0fSORTING_FEATURE\x10\x02\x12\x12\n\x0eSORTING_RANDOM\x10\x03\x12\x1a\n\x16SORTING_RANDOM_FEATURE\x10\x04\x12\x1a\n\x16SORTING_RANDOM_CLUSTER\x10\x05\"0\n\x07Mapping\x12\x13\n\x0fMAPPING_DEFAULT\x10\x00\x12\x10\n\x0cMAPPING_UMAP\x10\x01\"l\n\nClustering\x12\x16\n\x12\x43LUSTERING_DEFAULT\x10\x00\x12\x11\n\rCLUSTERING_GM\x10\x01\x12\x15\n\x11\x43LUSTERING_KMEANS\x10\x02\x12\x1c\n\x18\x43LUSTERING_AGGLOMERATIVE\x10\x03\"\x1b\n\x05\x45xtra\x12\x12\n\x0e\x45XTRA_FEATURES\x10\x00\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xc9\x02\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\x12\x0f\n\x07\x63luster\x18\x07 \x01(\x03\x12\x10\n\x08\x64istance\x18\x08 \x01(\x02\x12,\n\ncollection\x18\t \x01(\x0b\x32\x18.iart.indexer.Collection\x12\x0e\n\x06padded\x18\n \x01(\x08\"P\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12)\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"{\n\x15ListSearchResultReply\x12\x30\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1f.iart.indexer.SearchResultEntry\x12\x30\n\taggregate\x18\x02 \x03(\x0b\x32\x1d.iart.indexer.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\":\n\x0cSuggestReply\x12*\n\x06groups\x18\x01 \x03(\x0b\x32\x1a.iart.indexer.SuggestGroup\";\n\x13\x42uildIndexerRequest\x12\x0f\n\x07rebuild\x18\x01 \x01(\x08\x12\x13\n\x0b\x63ollections\x18\x02 \x03(\t\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\x1d\n\x0b\x44umpRequest\x12\x0e\n\x06origin\x18\x01 \x01(\t\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"5\n\x0fIndexingRequest\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"9\n\x0e\x41ggregateReply\x12\'\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x18.iart.indexer.ValueField\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xf8\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.Collection\"\x1b\n\rDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\r\n\x0b\x44\x65leteReply\"%\n\x17\x43ollectionDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\x15\x43ollectionDeleteReply\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t\"\x17\n\x15\x43ollectionListRequest\"D\n\x13\x43ollectionListReply\x12-\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x18.iart.indexer.Collection2\xfd\t\n\x07Indexer\x12R\n\x0clist_plugins\x12 .iart.indexer.ListPluginsRequest\x1a\x1e.iart.indexer.ListPluginsReply\"\x00\x12\x42\n\x06status\x12\x1b.iart.indexer.StatusRequest\x1a\x19.iart.indexer.StatusReply\"\x00\x12Q\n\x0f\x62uild_suggester\x12\x1e.iart.indexer.SuggesterRequest\x1a\x1c.iart.indexer.SuggesterReply\"\x00\x12\x42\n\x06search\x12\x1b.iart.indexer.SearchRequest\x1a\x19.iart.indexer.SearchReply\"\x00\x12\x62\n\x12list_search_result\x12%.iart.indexer.ListSearchResultRequest\x1a#.iart.indexer.ListSearchResultReply\"\x00\x12K\n\taggregate\x12\x1e.iart.indexer.AggregateRequest\x1a\x1c.iart.indexer.AggregateReply\"\x00\x12\x45\n\x07suggest\x12\x1c.iart.indexer.SuggestRequest\x1a\x1a.iart.indexer.SuggestReply\"\x00\x12U\n\rbuild_indexer\x12!.iart.indexer.BuildIndexerRequest\x1a\x1f.iart.indexer.BuildIndexerReply\"\x00\x12\x65\n\x13\x62uild_feature_cache\x12&.iart.indexer.BuildFeatureCacheRequest\x1a$.iart.indexer.BuildFeatureCacheReply\"\x00\x12L\n\x08indexing\x12\x1d.iart.indexer.IndexingRequest\x1a\x1b.iart.indexer.IndexingReply\"\x00(\x01\x30\x01\x12>\n\x04\x64ump\x12\x19.iart.indexer.DumpRequest\x1a\x17.iart.indexer.DumpReply\"\x00\x30\x01\x12@\n\x04load\x12\x19.iart.indexer.LoadRequest\x1a\x17.iart.indexer.LoadReply\"\x00(\x01\x30\x01\x12\x39\n\x03get\x12\x18.iart.indexer.GetRequest\x1a\x16.iart.indexer.GetReply\"\x00\x12\x42\n\x06\x64\x65lete\x12\x1b.iart.indexer.DeleteRequest\x1a\x19.iart.indexer.DeleteReply\"\x00\x12\x61\n\x11\x63ollection_delete\x12%.iart.indexer.CollectionDeleteRequest\x1a#.iart.indexer.CollectionDeleteReply\"\x00\x12[\n\x0f\x63ollection_list\x12#.iart.indexer.CollectionListRequest\x1a!.iart.indexer.CollectionListReply\"\x00\x42\x02P\x01\x62\x06proto3'
 )
 
 
@@ -257,12 +257,17 @@ _SEARCHREQUEST_CLUSTERING = _descriptor.EnumDescriptor(
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='CLUSTERING_KMEANS', index=1, number=2,
+      name='CLUSTERING_GM', index=1, number=1,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='CLUSTERING_AGGLOMERATIVE', index=2, number=3,
+      name='CLUSTERING_KMEANS', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='CLUSTERING_AGGLOMERATIVE', index=3, number=3,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
@@ -270,7 +275,7 @@ _SEARCHREQUEST_CLUSTERING = _descriptor.EnumDescriptor(
   containing_type=None,
   serialized_options=None,
   serialized_start=3360,
-  serialized_end=3449,
+  serialized_end=3468,
 )
 _sym_db.RegisterEnumDescriptor(_SEARCHREQUEST_CLUSTERING)
 
@@ -289,8 +294,8 @@ _SEARCHREQUEST_EXTRA = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3451,
-  serialized_end=3478,
+  serialized_start=3470,
+  serialized_end=3497,
 )
 _sym_db.RegisterEnumDescriptor(_SEARCHREQUEST_EXTRA)
 
@@ -1568,7 +1573,7 @@ _SEARCHREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=2632,
-  serialized_end=3478,
+  serialized_end=3497,
 )
 
 
@@ -1599,8 +1604,8 @@ _SEARCHREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3480,
-  serialized_end=3505,
+  serialized_start=3499,
+  serialized_end=3524,
 )
 
 
@@ -1694,8 +1699,8 @@ _SEARCHRESULTENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3508,
-  serialized_end=3837,
+  serialized_start=3527,
+  serialized_end=3856,
 )
 
 
@@ -1733,8 +1738,8 @@ _AGGREGATERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3839,
-  serialized_end=3919,
+  serialized_start=3858,
+  serialized_end=3938,
 )
 
 
@@ -1765,8 +1770,8 @@ _LISTSEARCHRESULTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3921,
-  serialized_end=3958,
+  serialized_start=3940,
+  serialized_end=3977,
 )
 
 
@@ -1804,8 +1809,8 @@ _LISTSEARCHRESULTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3960,
-  serialized_end=4083,
+  serialized_start=3979,
+  serialized_end=4102,
 )
 
 
@@ -1843,8 +1848,8 @@ _SUGGESTGROUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4085,
-  serialized_end=4135,
+  serialized_start=4104,
+  serialized_end=4154,
 )
 
 
@@ -1875,8 +1880,8 @@ _SUGGESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4137,
-  serialized_end=4168,
+  serialized_start=4156,
+  serialized_end=4187,
 )
 
 
@@ -1907,8 +1912,8 @@ _SUGGESTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4170,
-  serialized_end=4228,
+  serialized_start=4189,
+  serialized_end=4247,
 )
 
 
@@ -1946,8 +1951,8 @@ _BUILDINDEXERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4230,
-  serialized_end=4289,
+  serialized_start=4249,
+  serialized_end=4308,
 )
 
 
@@ -1971,8 +1976,8 @@ _BUILDINDEXERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4291,
-  serialized_end=4310,
+  serialized_start=4310,
+  serialized_end=4329,
 )
 
 
@@ -1996,8 +2001,8 @@ _BUILDFEATURECACHEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4312,
-  serialized_end=4338,
+  serialized_start=4331,
+  serialized_end=4357,
 )
 
 
@@ -2021,8 +2026,8 @@ _BUILDFEATURECACHEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4340,
-  serialized_end=4364,
+  serialized_start=4359,
+  serialized_end=4383,
 )
 
 
@@ -2053,8 +2058,8 @@ _DUMPREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4366,
-  serialized_end=4395,
+  serialized_start=4385,
+  serialized_end=4414,
 )
 
 
@@ -2085,8 +2090,8 @@ _DUMPREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4397,
-  serialized_end=4423,
+  serialized_start=4416,
+  serialized_end=4442,
 )
 
 
@@ -2117,8 +2122,8 @@ _LOADREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4425,
-  serialized_end=4453,
+  serialized_start=4444,
+  serialized_end=4472,
 )
 
 
@@ -2156,8 +2161,8 @@ _LOADREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4455,
-  serialized_end=4494,
+  serialized_start=4474,
+  serialized_end=4513,
 )
 
 
@@ -2188,8 +2193,8 @@ _INDEXINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4496,
-  serialized_end=4549,
+  serialized_start=4515,
+  serialized_end=4568,
 )
 
 
@@ -2227,8 +2232,8 @@ _INDEXINGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4551,
-  serialized_end=4594,
+  serialized_start=4570,
+  serialized_end=4613,
 )
 
 
@@ -2259,8 +2264,8 @@ _AGGREGATEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4596,
-  serialized_end=4653,
+  serialized_start=4615,
+  serialized_end=4672,
 )
 
 
@@ -2291,8 +2296,8 @@ _GETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4655,
-  serialized_end=4679,
+  serialized_start=4674,
+  serialized_end=4698,
 )
 
 
@@ -2358,8 +2363,8 @@ _GETREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4682,
-  serialized_end=4930,
+  serialized_start=4701,
+  serialized_end=4949,
 )
 
 
@@ -2390,8 +2395,8 @@ _DELETEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4932,
-  serialized_end=4959,
+  serialized_start=4951,
+  serialized_end=4978,
 )
 
 
@@ -2415,8 +2420,8 @@ _DELETEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4961,
-  serialized_end=4974,
+  serialized_start=4980,
+  serialized_end=4993,
 )
 
 
@@ -2447,8 +2452,8 @@ _COLLECTIONDELETEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4976,
-  serialized_end=5013,
+  serialized_start=4995,
+  serialized_end=5032,
 )
 
 
@@ -2486,8 +2491,8 @@ _COLLECTIONDELETEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5015,
-  serialized_end=5072,
+  serialized_start=5034,
+  serialized_end=5091,
 )
 
 
@@ -2511,8 +2516,8 @@ _COLLECTIONLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5074,
-  serialized_end=5097,
+  serialized_start=5093,
+  serialized_end=5116,
 )
 
 
@@ -2543,8 +2548,8 @@ _COLLECTIONLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5099,
-  serialized_end=5167,
+  serialized_start=5118,
+  serialized_end=5186,
 )
 
 _VALUEFIELD.oneofs_by_name['value'].fields.append(
@@ -3087,8 +3092,8 @@ _INDEXER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=5170,
-  serialized_end=6447,
+  serialized_start=5189,
+  serialized_end=6466,
   methods=[
   _descriptor.MethodDescriptor(
     name='list_plugins',

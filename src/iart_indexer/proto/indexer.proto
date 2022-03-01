@@ -240,6 +240,7 @@ message SearchRequest {
 
   enum Clustering {
     CLUSTERING_DEFAULT = 0;
+    CLUSTERING_GM = 1;
     CLUSTERING_KMEANS = 2;
     CLUSTERING_AGGLOMERATIVE = 3;
   }

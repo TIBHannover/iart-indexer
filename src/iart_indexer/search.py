@@ -1,5 +1,4 @@
 import uuid
-import json
 import time
 import logging
 import faulthandler
@@ -26,6 +25,7 @@ class Searcher:
         aggregator=None,
     ):
         super().__init__()
+
         self.database = database
         self.feature_plugin_manager = feature_plugin_manager
         self.image_text_plugin_manager = image_text_plugin_manager
@@ -137,6 +137,8 @@ class Searcher:
 
         clustering = None
 
+        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_GM:
+            clustering = "gm"
         if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_KMEANS:
             clustering = "kmeans"
         if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_AGGLOMERATIVE:
@@ -689,6 +691,25 @@ class Searcher:
                     configs=[
                         {
                             "type": "KMeansMapping",
+                            "params": query["clustering_options"],
+                        }
+                    ],
+                )
+            )
+
+            logging.info(
+                f"[Searcher] Clustering done len={len(entries)} " +
+                f"time={time.time() - start_time}"
+            )
+        elif query["clustering"] == "gm":
+            entries = list(
+                self.mapping_plugin_manager.run(
+                    entries,
+                    query["feature_search"],
+                    ["GaussianMixtureMapping"],
+                    configs=[
+                        {
+                            "type": "GaussianMixtureMapping",
                             "params": query["clustering_options"],
                         }
                     ],
