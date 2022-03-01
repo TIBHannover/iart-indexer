@@ -41,7 +41,7 @@ class GaussianMixtureMapping(MappingPlugin):
         logging.info(f'[GaussianMixtureMapping] k={k}')
 
         gm = GaussianMixture(
-            n_clusters=k,
+            n_components=k,
             random_state=self.random_state,
             init_params='kmeans',
         )
@@ -60,19 +60,20 @@ class GaussianMixtureMapping(MappingPlugin):
                 features.append(a)
 
         features = np.asarray(features)
-        clustering = gm.fit_transform(features)
+        labels = gm.fit_predict(features)
+        scores = gm.score_samples(features)
 
         new_entries = [
             {
                 **e,
-                'cluster': gm.labels_[i].item(),
-                'distance': clustering[i, gm.labels_[i].item()].item(),
+                'cluster': labels[i].item(),
+                'distance': scores[i].item(),
             }
             for i, e in enumerate(entries)
         ]
 
         # sort in clusters, then distance from cluster center
-        new_entries.sort(key=lambda x: x['distance'])
+        new_entries.sort(key=lambda x: x['distance'], reverse=True)
         new_entries.sort(key=lambda x: x['cluster'])
 
         return new_entries
