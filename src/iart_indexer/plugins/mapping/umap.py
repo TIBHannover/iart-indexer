@@ -56,7 +56,7 @@ class UMapMapping(MappingPlugin):
         points = (points - np.amin(points)) / (np.amax(points) - np.amin(points))
 
         num_points = points.shape[0]
-
+        logging.info(f"[UMapMapping::map_to_scipy_grid] num_points: {num_points}")
         if self.grid_square:
             grid_length = math.ceil(math.sqrt(num_points))
             height = grid_length
@@ -66,6 +66,7 @@ class UMapMapping(MappingPlugin):
             width = math.ceil(num_points / height)
             grid_length = np.amax([height, width])
 
+        logging.info(f"[UMapMapping::map_to_scipy_grid] height:{height} width:{width} grid_length:{grid_length}")
         X, Y = np.mgrid[0:width, 0:height]
         positions = np.transpose(np.vstack([X.ravel(), Y.ravel()])) / grid_length
         # mu_x, std_x = norm.fit(points[:,0])

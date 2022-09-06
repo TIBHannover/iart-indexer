@@ -677,7 +677,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
                             faiss.normalize_L2(feature)
 
                             q_result = index["index"].search(feature, k=1000)
-                            ids.extend([index["rev_entries"][np.asscalar(x)] for x in q_result[1][0] if x >= 0])
+                            ids.extend([index["rev_entries"][x.item()] for x in q_result[1][0] if x >= 0])
             else:
                 ids.extend(list(collection["indexes"][0]["entries"].keys()))
 

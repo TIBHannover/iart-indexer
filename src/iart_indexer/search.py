@@ -3,6 +3,9 @@ import time
 import logging
 import faulthandler
 
+import sys
+import traceback
+
 import numpy as np
 
 from typing import Dict, List
@@ -64,242 +67,178 @@ class Searcher:
         return result_features
 
     def parse_query(self, query):
-        result = {}
-        text_search = []
-        range_search = []
-        feature_search = []
-        aggregate_fields = []
+        try:
 
-        # random seed
-        if query.random_seed is not None and str(query.random_seed) != "":
-            seed = str(query.random_seed)
-        else:
-            seed = uuid.uuid4().hex
+            result = {}
+            text_search = []
+            range_search = []
+            feature_search = []
+            aggregate_fields = []
 
-        # parsing whitelists
-        whitelist = []
-        for id in query.ids:
-            whitelist.append(id)
+            # random seed
+            if query.random_seed is not None and str(query.random_seed) != "":
+                seed = str(query.random_seed)
+            else:
+                seed = uuid.uuid4().hex
 
-        if len(whitelist) == 0:
-            whitelist = None
+            # parsing whitelists
+            whitelist = []
+            for id in query.ids:
+                whitelist.append(id)
 
-        # parsing collection
-        collections = query.collections
-        include_default_collection = query.include_default_collection
+            if len(whitelist) == 0:
+                whitelist = None
 
-        # Parse sorting args
-        sorting = None
-        logging.info(f"Sorting: {query.sorting}")
+            # parsing collection
+            collections = query.collections
+            include_default_collection = query.include_default_collection
 
-        if query.sorting == indexer_pb2.SearchRequest.SORTING_CLASSIFIER:
-            sorting = "classifier"
-        if query.sorting == indexer_pb2.SearchRequest.SORTING_FEATURE:
-            sorting = "feature"
-        if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM:
-            sorting = "random"
-        if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM_FEATURE:
-            logging.info("SORTING_RANDOM_FEATURE")
+            # Parse sorting args
+            sorting = None
+            logging.info(f"Sorting: {query.sorting}")
 
-            # Add a random feature query to terms if
-            entry = list(self.database.get_random_entries(seed=seed, size=1))[0]
-            sorting = "feature"
-            random_term = query.terms.add()
-            random_term.feature.image.id = entry["id"]
-            feature_exist = False
+            if query.sorting == indexer_pb2.SearchRequest.SORTING_CLASSIFIER:
+                sorting = "classifier"
+            if query.sorting == indexer_pb2.SearchRequest.SORTING_FEATURE:
+                sorting = "feature"
+            if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM:
+                sorting = "random"
+            if query.sorting == indexer_pb2.SearchRequest.SORTING_RANDOM_FEATURE:
+                logging.info("SORTING_RANDOM_FEATURE")
+
+                # Add a random feature query to terms if
+                entry = list(self.database.get_random_entries(seed=seed, size=1))[0]
+                sorting = "feature"
+                random_term = query.terms.add()
+                random_term.feature.image.id = entry["id"]
+                feature_exist = False
+
+                for term in query.terms:
+                    if term == random_term:
+                        continue
+
+                    term_type = term.WhichOneof("term")
+
+                    if term_type == "feature":
+                        feature_exist = True
+
+                        for p in term.feature.plugins:
+                            plugins = random_term.feature.plugins.add()
+                            plugins.name = p.name
+                            plugins.weight = p.weight
+
+                if not feature_exist:
+                    plugins = random_term.feature.plugins.add()
+                    plugins.name = "clip_embedding_feature"
+                    plugins.weight = 1.0
+
+            # Parse mapping args
+            mapping = None
+
+            if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
+                mapping = "umap"
+
+            mapping_options = dict_from_proto(query.mapping_options)
+
+            clustering = None
+
+            if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_GM:
+                clustering = "gm"
+            if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_KMEANS:
+                clustering = "kmeans"
+            if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_AGGLOMERATIVE:
+                clustering = "agglomerative"
+
+            clustering_options = dict_from_proto(query.clustering_options)
+
+            # Parse additional fields
+            extras = []
+
+            for extra in query.extras:
+                if extra == indexer_pb2.SearchRequest.EXTRA_FEATURES:
+                    extras.append("features")
 
             for term in query.terms:
-                if term == random_term:
-                    continue
-
                 term_type = term.WhichOneof("term")
 
-                if term_type == "feature":
-                    feature_exist = True
-
-                    for p in term.feature.plugins:
-                        plugins = random_term.feature.plugins.add()
-                        plugins.name = p.name
-                        plugins.weight = p.weight
-
-            if not feature_exist:
-                plugins = random_term.feature.plugins.add()
-                plugins.name = "clip_embedding_feature"
-                plugins.weight = 1.0
-
-        # Parse mapping args
-        mapping = None
-
-        if query.mapping == indexer_pb2.SearchRequest.MAPPING_UMAP:
-            mapping = "umap"
-
-        mapping_options = dict_from_proto(query.mapping_options)
-
-        clustering = None
-
-        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_GM:
-            clustering = "gm"
-        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_KMEANS:
-            clustering = "kmeans"
-        if query.clustering == indexer_pb2.SearchRequest.CLUSTERING_AGGLOMERATIVE:
-            clustering = "agglomerative"
-
-        clustering_options = dict_from_proto(query.clustering_options)
-
-        # Parse additional fields
-        extras = []
-
-        for extra in query.extras:
-            if extra == indexer_pb2.SearchRequest.EXTRA_FEATURES:
-                extras.append("features")
-
-        for term in query.terms:
-            term_type = term.WhichOneof("term")
-
-            if term_type == "text":
-                text = term.text
-                field = text.field.lower()
-                flag = "should"
-
-                if text.flag == indexer_pb2.TextSearchTerm.MUST:
-                    flag = "must"
-                if text.flag == indexer_pb2.TextSearchTerm.SHOULD:
+                if term_type == "text":
+                    text = term.text
+                    field = text.field.lower()
                     flag = "should"
-                if text.flag == indexer_pb2.TextSearchTerm.NOT:
-                    flag = "not"
 
-                text_search.append({"field": field, "query": text.query, "flag": flag})
+                    if text.flag == indexer_pb2.TextSearchTerm.MUST:
+                        flag = "must"
+                    if text.flag == indexer_pb2.TextSearchTerm.SHOULD:
+                        flag = "should"
+                    if text.flag == indexer_pb2.TextSearchTerm.NOT:
+                        flag = "not"
 
-            if term_type == "number":
-                number = term.number
-                field = number.field.lower()
+                    text_search.append({"field": field, "query": text.query, "flag": flag})
 
-                query_type = number.WhichOneof("query")
+                if term_type == "number":
+                    number = term.number
+                    field = number.field.lower()
 
-                if query_type == "string_query":
-                    try:
-                        query_term = int(number.string_query)
-                    except:
+                    query_type = number.WhichOneof("query")
+
+                    if query_type == "string_query":
                         try:
-                            query_term = float(number.string_query)
+                            query_term = int(number.string_query)
                         except:
-                            continue
+                            try:
+                                query_term = float(number.string_query)
+                            except:
+                                continue
 
-                if query_type == "int_query":
-                    query_term = number.int_query
-                if query_type == "float_query":
-                    query_term = number.float_query
+                    if query_type == "int_query":
+                        query_term = number.int_query
+                    if query_type == "float_query":
+                        query_term = number.float_query
 
-                # parse relation
-                relation = "eq"
-                if number.relation == indexer_pb2.NumberSearchTerm.GREATER:
-                    relation = "gt"
-                if number.relation == indexer_pb2.NumberSearchTerm.GREATER_EQ:
-                    relation = "gte"
-                if number.relation == indexer_pb2.NumberSearchTerm.EQ:
+                    # parse relation
                     relation = "eq"
-                if number.relation == indexer_pb2.NumberSearchTerm.LESS_EQ:
-                    relation = "lte"
-                if number.relation == indexer_pb2.NumberSearchTerm.LESS:
-                    relation = "lt"
+                    if number.relation == indexer_pb2.NumberSearchTerm.GREATER:
+                        relation = "gt"
+                    if number.relation == indexer_pb2.NumberSearchTerm.GREATER_EQ:
+                        relation = "gte"
+                    if number.relation == indexer_pb2.NumberSearchTerm.EQ:
+                        relation = "eq"
+                    if number.relation == indexer_pb2.NumberSearchTerm.LESS_EQ:
+                        relation = "lte"
+                    if number.relation == indexer_pb2.NumberSearchTerm.LESS:
+                        relation = "lt"
 
-                flag = "should"
-                if number.flag == indexer_pb2.NumberSearchTerm.MUST:
-                    flag = "must"
-                if number.flag == indexer_pb2.NumberSearchTerm.SHOULD:
                     flag = "should"
-                if number.flag == indexer_pb2.NumberSearchTerm.NOT:
-                    flag = "not"
+                    if number.flag == indexer_pb2.NumberSearchTerm.MUST:
+                        flag = "must"
+                    if number.flag == indexer_pb2.NumberSearchTerm.SHOULD:
+                        flag = "should"
+                    if number.flag == indexer_pb2.NumberSearchTerm.NOT:
+                        flag = "not"
 
-                range_search.append({
-                    "field": field,
-                    "query": query_term,
-                    "relation": relation,
-                    "flag": flag,
-                })
+                    range_search.append({
+                        "field": field,
+                        "query": query_term,
+                        "relation": relation,
+                        "flag": flag,
+                    })
 
-            if term_type == "image_text":
-                image_text = term.image_text
+                if term_type == "image_text":
+                    image_text = term.image_text
 
-                feature_results = list(
-                    self.image_text_plugin_manager.run(
-                        [image_text.query]
-                    )
-                )[0]
-
-                if image_text.flag == indexer_pb2.ImageTextSearchTerm.NEGATIVE:
-                    weight_mult = -1.0
-                else:
-                    weight_mult = 1.0
-
-                for p in image_text.plugins:
-                    # feature_results
-                    for f in feature_results["plugins"]:
-                        if p.name.lower() == f._plugin.name.lower():
-                            annotations = []
-
-                            for anno in f._annotations[0]:
-                                result_type = anno.WhichOneof("result")
-
-                                if result_type == "feature":
-                                    annotation_dict = {}
-                                    binary = anno.feature.binary
-                                    feature = list(anno.feature.feature)
-
-                                    feature_search.append(
-                                        {
-                                            "plugin": f._plugin.name,
-                                            "type": anno.feature.type,
-                                            "value": feature,
-                                            "weight": p.weight * weight_mult,
-                                        }
-                                    )
-
-            if term_type == "feature":
-                feature = term.feature
-
-                if feature.flag == indexer_pb2.FeatureSearchTerm.NEGATIVE:
-                    weight_mult = -1.0
-                else:
-                    weight_mult = 1.0
-
-                query_feature = []
-                entry = None
-
-                if feature.image.id is not None and feature.image.id != "":
-                    entry = self.database.get_entry(feature.image.id)
-
-                if entry is not None:
-                    entry = get_features_from_db_entry(entry)
-
-                    for p in feature.plugins:
-                        if p.weight is None or abs(p.weight) < 1e-4:
-                            continue
-
-                        # TODO add weight
-                        for f in entry["feature"]:
-
-                            if p.name.lower() == f["plugin"].lower():
-
-                                feature_search.append(
-                                    {
-                                        **f,
-                                        "weight": p.weight * weight_mult,
-                                    }
-                                )
-
-                # TODO add example search here
-                else:
-                    image = image_from_proto(feature.image)
                     feature_results = list(
-                        self.feature_plugin_manager.run([image])
+                        self.image_text_plugin_manager.run(
+                            [image_text.query]
+                        )
                     )[0]
 
-                    for p in feature.plugins:
+                    if image_text.flag == indexer_pb2.ImageTextSearchTerm.NEGATIVE:
+                        weight_mult = -1.0
+                    else:
+                        weight_mult = 1.0
 
-                        if p.weight is None or abs(p.weight) < 1e-4:
-                            continue
-
+                    for p in image_text.plugins:
+                        # feature_results
                         for f in feature_results["plugins"]:
                             if p.name.lower() == f._plugin.name.lower():
                                 annotations = []
@@ -321,33 +260,112 @@ class Searcher:
                                             }
                                         )
 
-        result.update({"text_search": text_search})
-        result.update({"feature_search": feature_search})
-        result.update({"range_search": range_search})
-        result.update({"sorting": sorting})
-        result.update({"mapping": mapping})
-        result.update({"mapping_options": mapping_options})
-        result.update({"clustering": clustering})
-        result.update({"clustering_options": clustering_options})
-        result.update({"extras": extras})
-        result.update({"seed": seed})
-        result.update({"whitelist": whitelist})
-        result.update({"collections": collections})
-        result.update({"include_default_collection": include_default_collection})
+                if term_type == "feature":
+                    feature = term.feature
 
-        if len(query.aggregate.fields) and query.aggregate.size > 0:
-            aggregate_fields = list(query.aggregate.fields)
-            result.update(
-                {
-                    "aggregate": {
-                        "fields": aggregate_fields,
-                        "size": query.aggregate.size,
-                        "use_query": query.aggregate.use_query,
+                    if feature.flag == indexer_pb2.FeatureSearchTerm.NEGATIVE:
+                        weight_mult = -1.0
+                    else:
+                        weight_mult = 1.0
+
+                    query_feature = []
+                    entry = None
+
+                    if feature.image.id is not None and feature.image.id != "":
+                        entry = self.database.get_entry(feature.image.id)
+
+                    if entry is not None:
+                        entry = get_features_from_db_entry(entry)
+
+                        for p in feature.plugins:
+                            if p.weight is None or abs(p.weight) < 1e-4:
+                                continue
+
+                            # TODO add weight
+                            for f in entry["feature"]:
+
+                                if p.name.lower() == f["plugin"].lower():
+
+                                    feature_search.append(
+                                        {
+                                            **f,
+                                            "weight": p.weight * weight_mult,
+                                        }
+                                    )
+
+                    # TODO add example search here
+                    else:
+                        image = image_from_proto(feature.image)
+                        feature_results = list(
+                            self.feature_plugin_manager.run([image])
+                        )[0]
+
+                        for p in feature.plugins:
+
+                            if p.weight is None or abs(p.weight) < 1e-4:
+                                continue
+
+                            for f in feature_results["plugins"]:
+                                if p.name.lower() == f._plugin.name.lower():
+                                    annotations = []
+
+                                    for anno in f._annotations[0]:
+                                        result_type = anno.WhichOneof("result")
+
+                                        if result_type == "feature":
+                                            annotation_dict = {}
+                                            binary = anno.feature.binary
+                                            feature = list(anno.feature.feature)
+
+                                            feature_search.append(
+                                                {
+                                                    "plugin": f._plugin.name,
+                                                    "type": anno.feature.type,
+                                                    "value": feature,
+                                                    "weight": p.weight * weight_mult,
+                                                }
+                                            )
+
+            result.update({"text_search": text_search})
+            result.update({"feature_search": feature_search})
+            result.update({"range_search": range_search})
+            result.update({"sorting": sorting})
+            result.update({"mapping": mapping})
+            result.update({"mapping_options": mapping_options})
+            result.update({"clustering": clustering})
+            result.update({"clustering_options": clustering_options})
+            result.update({"extras": extras})
+            result.update({"seed": seed})
+            result.update({"whitelist": whitelist})
+            result.update({"collections": collections})
+            result.update({"include_default_collection": include_default_collection})
+
+            if len(query.aggregate.fields) and query.aggregate.size > 0:
+                aggregate_fields = list(query.aggregate.fields)
+                result.update(
+                    {
+                        "aggregate": {
+                            "fields": aggregate_fields,
+                            "size": query.aggregate.size,
+                            "use_query": query.aggregate.use_query,
+                        }
                     }
-                }
+                )
+
+            return result
+
+        except Exception as e:
+            logging.error(f"Searcher::parse_query: {repr(e)}")
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+
+            traceback.print_exception(
+                exc_type,
+                exc_value,
+                exc_traceback,
+                limit=2,
+                file=sys.stdout,
             )
 
-        return result
 
     def build_search_body(
         self,
@@ -573,15 +591,20 @@ class Searcher:
 
         query["feature_search"] = self.merge_feature(query["feature_search"])
         logging.info(f"[Searcher] Merged features time={time.time() - start_time}")
-
+        
+        logging.info(f"[Searcher] {query['feature_search']}")
+        # if len(query["feature_search"]) > 0:
         entries_feature = list(
             self.indexer_plugin_manager.search(
                 query["feature_search"],
                 collections=query["collections"],
                 include_default_collection=query["include_default_collection"],
-                size=1000,
+                size=500,
             )
         )
+        entries_feature = entries_feature[:500]
+
+        logging.info(f"[Searcher] {entries_feature}")
 
         logging.info(
             f"[Searcher] Results from indexer len={len(entries_feature)} " +
@@ -612,7 +635,7 @@ class Searcher:
 
         logging.info(f"[Searcher] Start querying database")
 
-        entries = self.search_db(body=body, size=max(len(whitelist), 1000))
+        entries = self.search_db(body=body, size=max(len(whitelist), 500))
         entries = list(entries)
 
         logging.info(
@@ -638,7 +661,7 @@ class Searcher:
                 seed=query["seed"],
             )
 
-            entries_padding = self.search_db(body=body_padding, size=max(len(whitelist_padding), 1000))
+            entries_padding = self.search_db(body=body_padding, size=max(len(whitelist_padding), 500))
             entries_padding = list(entries_padding)
 
             logging.info(
