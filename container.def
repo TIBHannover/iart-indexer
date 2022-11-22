@@ -9,4 +9,4 @@ From: python:3.8
         pip install elasticsearch
         pip install grpcio
         pip install grpcio-tools
-        pip install poetry                                                                                                                
+        pip install poetry

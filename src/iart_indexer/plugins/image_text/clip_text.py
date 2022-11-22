@@ -44,10 +44,10 @@ def bytes_to_unicode():
     bs = list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1))
     cs = bs[:]
     n = 0
-    for b in range(2 ** 8):
+    for b in range(2**8):
         if b not in bs:
             bs.append(b)
-            cs.append(2 ** 8 + n)
+            cs.append(2**8 + n)
             n += 1
     cs = [chr(n) for n in cs]
     return dict(zip(bs, cs))
@@ -184,8 +184,8 @@ def tokenize(tokenizer: SimpleTokenizer, texts: Union[str, List[str]], context_l
     return result
 
 
-@ImageTextPluginManager.export("ClipEmbeddingFeature")
-class ClipEmbeddingFeature(ImageTextPlugin):
+@ImageTextPluginManager.export("OldClipEmbeddingFeature")
+class OldClipEmbeddingFeature(ImageTextPlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -199,7 +199,7 @@ class ClipEmbeddingFeature(ImageTextPlugin):
     default_version = "0.4"
 
     def __init__(self, **kwargs):
-        super(ClipEmbeddingFeature, self).__init__(**kwargs)
+        super(OldClipEmbeddingFeature, self).__init__(**kwargs)
 
         self.host = self.config["host"]
         self.port = self.config["port"]

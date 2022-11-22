@@ -21,10 +21,11 @@
             "params": {
                 "host": "localhost",
                 "port": 6379,
-                "model_name": "clip_text",
+                "model_name": "multilingual_clip_text",
                 "model_device": "cpu",
-                "model_file": "/data/models/clip_text/clip_text.pt",
-                "bpe_file": "/data/models/clip_text/bpe_simple_vocab_16e6.txt.gz"
+                "model_file": "/data/models/multilingual_clip_text/multilingual_clip_vit_b_32.pt",
+                "tokenizer_model_name": "M-CLIP/XLM-Roberta-Large-Vit-B-32",
+                "max_tries": 5
             }
         }
     ],

@@ -2,8 +2,8 @@ FROM python:3.8
 
 RUN pip install poetry
 
-COPY pyproject.toml poetry.lock ./
-RUN poetry export -f requirements.txt > requirements.txt
+COPY pyproject.toml ./
+RUN poetry export -f requirements.txt  --output requirements.txt
 RUN pip install -r requirements.txt
 
 RUN python -m spacy download en_core_web_sm
