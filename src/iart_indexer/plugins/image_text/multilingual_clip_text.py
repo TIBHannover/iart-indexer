@@ -22,8 +22,8 @@ import transformers
 from typing import Union, List
 
 
-@ImageTextPluginManager.export("ClipEmbeddingFeature")
-class ClipEmbeddingFeature(ImageTextPlugin):
+@ImageTextPluginManager.export("MultilingualClipEmbeddingFeature")
+class MultilingualClipEmbeddingFeature(ImageTextPlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -37,7 +37,7 @@ class ClipEmbeddingFeature(ImageTextPlugin):
     default_version = "0.1"
 
     def __init__(self, **kwargs):
-        super(ClipEmbeddingFeature, self).__init__(**kwargs)
+        super(MultilingualClipEmbeddingFeature, self).__init__(**kwargs)
 
         self.host = self.config["host"]
         self.port = self.config["port"]

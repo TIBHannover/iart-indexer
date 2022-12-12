@@ -184,8 +184,8 @@ def tokenize(tokenizer: SimpleTokenizer, texts: Union[str, List[str]], context_l
     return result
 
 
-@ImageTextPluginManager.export("OldClipEmbeddingFeature")
-class OldClipEmbeddingFeature(ImageTextPlugin):
+@ImageTextPluginManager.export("ClipEmbeddingFeature")
+class ClipEmbeddingFeature(ImageTextPlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -199,7 +199,7 @@ class OldClipEmbeddingFeature(ImageTextPlugin):
     default_version = "0.4"
 
     def __init__(self, **kwargs):
-        super(OldClipEmbeddingFeature, self).__init__(**kwargs)
+        super(ClipEmbeddingFeature, self).__init__(**kwargs)
 
         self.host = self.config["host"]
         self.port = self.config["port"]
