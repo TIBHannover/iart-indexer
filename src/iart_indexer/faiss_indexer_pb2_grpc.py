@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from . import faiss_indexer_pb2 as faiss__indexer__pb2
+from iart_indexer import faiss_indexer_pb2 as faiss__indexer__pb2
 
 
 class FaissIndexerStub(object):
@@ -15,30 +15,30 @@ class FaissIndexerStub(object):
             channel: A grpc.Channel.
         """
         self.list = channel.unary_unary(
-                '/iart.faiss_indexer.FaissIndexer/list',
-                request_serializer=faiss__indexer__pb2.ListRequest.SerializeToString,
-                response_deserializer=faiss__indexer__pb2.ListReply.FromString,
-                )
+            "/iart.faiss_indexer.FaissIndexer/list",
+            request_serializer=faiss__indexer__pb2.ListRequest.SerializeToString,
+            response_deserializer=faiss__indexer__pb2.ListReply.FromString,
+        )
         self.search = channel.unary_unary(
-                '/iart.faiss_indexer.FaissIndexer/search',
-                request_serializer=faiss__indexer__pb2.SearchRequest.SerializeToString,
-                response_deserializer=faiss__indexer__pb2.SearchReply.FromString,
-                )
+            "/iart.faiss_indexer.FaissIndexer/search",
+            request_serializer=faiss__indexer__pb2.SearchRequest.SerializeToString,
+            response_deserializer=faiss__indexer__pb2.SearchReply.FromString,
+        )
         self.indexing = channel.unary_unary(
-                '/iart.faiss_indexer.FaissIndexer/indexing',
-                request_serializer=faiss__indexer__pb2.IndexingRequest.SerializeToString,
-                response_deserializer=faiss__indexer__pb2.IndexingReply.FromString,
-                )
+            "/iart.faiss_indexer.FaissIndexer/indexing",
+            request_serializer=faiss__indexer__pb2.IndexingRequest.SerializeToString,
+            response_deserializer=faiss__indexer__pb2.IndexingReply.FromString,
+        )
         self.train = channel.unary_unary(
-                '/iart.faiss_indexer.FaissIndexer/train',
-                request_serializer=faiss__indexer__pb2.TrainRequest.SerializeToString,
-                response_deserializer=faiss__indexer__pb2.TrainReply.FromString,
-                )
+            "/iart.faiss_indexer.FaissIndexer/train",
+            request_serializer=faiss__indexer__pb2.TrainRequest.SerializeToString,
+            response_deserializer=faiss__indexer__pb2.TrainReply.FromString,
+        )
         self.delete = channel.unary_unary(
-                '/iart.faiss_indexer.FaissIndexer/delete',
-                request_serializer=faiss__indexer__pb2.DeleteRequest.SerializeToString,
-                response_deserializer=faiss__indexer__pb2.DeleteReply.FromString,
-                )
+            "/iart.faiss_indexer.FaissIndexer/delete",
+            request_serializer=faiss__indexer__pb2.DeleteRequest.SerializeToString,
+            response_deserializer=faiss__indexer__pb2.DeleteReply.FromString,
+        )
 
 
 class FaissIndexerServicer(object):
@@ -47,152 +47,211 @@ class FaissIndexerServicer(object):
     def list(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def search(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def indexing(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def train(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def delete(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_FaissIndexerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'list': grpc.unary_unary_rpc_method_handler(
-                    servicer.list,
-                    request_deserializer=faiss__indexer__pb2.ListRequest.FromString,
-                    response_serializer=faiss__indexer__pb2.ListReply.SerializeToString,
-            ),
-            'search': grpc.unary_unary_rpc_method_handler(
-                    servicer.search,
-                    request_deserializer=faiss__indexer__pb2.SearchRequest.FromString,
-                    response_serializer=faiss__indexer__pb2.SearchReply.SerializeToString,
-            ),
-            'indexing': grpc.unary_unary_rpc_method_handler(
-                    servicer.indexing,
-                    request_deserializer=faiss__indexer__pb2.IndexingRequest.FromString,
-                    response_serializer=faiss__indexer__pb2.IndexingReply.SerializeToString,
-            ),
-            'train': grpc.unary_unary_rpc_method_handler(
-                    servicer.train,
-                    request_deserializer=faiss__indexer__pb2.TrainRequest.FromString,
-                    response_serializer=faiss__indexer__pb2.TrainReply.SerializeToString,
-            ),
-            'delete': grpc.unary_unary_rpc_method_handler(
-                    servicer.delete,
-                    request_deserializer=faiss__indexer__pb2.DeleteRequest.FromString,
-                    response_serializer=faiss__indexer__pb2.DeleteReply.SerializeToString,
-            ),
+        "list": grpc.unary_unary_rpc_method_handler(
+            servicer.list,
+            request_deserializer=faiss__indexer__pb2.ListRequest.FromString,
+            response_serializer=faiss__indexer__pb2.ListReply.SerializeToString,
+        ),
+        "search": grpc.unary_unary_rpc_method_handler(
+            servicer.search,
+            request_deserializer=faiss__indexer__pb2.SearchRequest.FromString,
+            response_serializer=faiss__indexer__pb2.SearchReply.SerializeToString,
+        ),
+        "indexing": grpc.unary_unary_rpc_method_handler(
+            servicer.indexing,
+            request_deserializer=faiss__indexer__pb2.IndexingRequest.FromString,
+            response_serializer=faiss__indexer__pb2.IndexingReply.SerializeToString,
+        ),
+        "train": grpc.unary_unary_rpc_method_handler(
+            servicer.train,
+            request_deserializer=faiss__indexer__pb2.TrainRequest.FromString,
+            response_serializer=faiss__indexer__pb2.TrainReply.SerializeToString,
+        ),
+        "delete": grpc.unary_unary_rpc_method_handler(
+            servicer.delete,
+            request_deserializer=faiss__indexer__pb2.DeleteRequest.FromString,
+            response_serializer=faiss__indexer__pb2.DeleteReply.SerializeToString,
+        ),
     }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'iart.faiss_indexer.FaissIndexer', rpc_method_handlers)
+    generic_handler = grpc.method_handlers_generic_handler("iart.faiss_indexer.FaissIndexer", rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class FaissIndexer(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def list(request,
+    def list(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/iart.faiss_indexer.FaissIndexer/list',
+            "/iart.faiss_indexer.FaissIndexer/list",
             faiss__indexer__pb2.ListRequest.SerializeToString,
             faiss__indexer__pb2.ListReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def search(request,
+    def search(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/iart.faiss_indexer.FaissIndexer/search',
+            "/iart.faiss_indexer.FaissIndexer/search",
             faiss__indexer__pb2.SearchRequest.SerializeToString,
             faiss__indexer__pb2.SearchReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def indexing(request,
+    def indexing(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/iart.faiss_indexer.FaissIndexer/indexing',
+            "/iart.faiss_indexer.FaissIndexer/indexing",
             faiss__indexer__pb2.IndexingRequest.SerializeToString,
             faiss__indexer__pb2.IndexingReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def train(request,
+    def train(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/iart.faiss_indexer.FaissIndexer/train',
+            "/iart.faiss_indexer.FaissIndexer/train",
             faiss__indexer__pb2.TrainRequest.SerializeToString,
             faiss__indexer__pb2.TrainReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def delete(request,
+    def delete(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/iart.faiss_indexer.FaissIndexer/delete',
+            "/iart.faiss_indexer.FaissIndexer/delete",
             faiss__indexer__pb2.DeleteRequest.SerializeToString,
             faiss__indexer__pb2.DeleteReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
