@@ -181,7 +181,7 @@ class IconclassLSTMClassifier(ClassifierPlugin):
                     continue
 
                 name = self.generate_label(x)
-                concepts.append(indexer_pb2.Concept(concept=name, type="concept", prob=x["prob"]))
+                concepts.append(indexer_pb2.Concept(concept=name, type="concept", prob=x["prob"].item()))
 
             self.con.delete(f"image_{job_id}")
             self.con.delete(f"seqs_{job_id}")
