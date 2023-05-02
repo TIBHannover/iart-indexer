@@ -42,6 +42,7 @@ class IndexerPluginManager(PluginManager):
 
     def indexing(
         self,
+        index_entries=None,
         collections=None,
         rebuild=False,
         plugins=None,
@@ -56,6 +57,7 @@ class IndexerPluginManager(PluginManager):
             logging.info(f"[IndexerPluginManager]: {plugin.name}")
 
             plugin.indexing(
+                index_entries=index_entries,
                 rebuild=rebuild,
                 collections=collections,
             )
