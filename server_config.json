@@ -1,17 +1,45 @@
 {
-    "cache":{
-        "cache_dir": "/nfs/data/iart/web/models/web/cache_all_210221/"
+    "cache": {
+        "cache_dir": "/nfs/data/iart/web/cache"
     },
     "grpc": {
-        "port": 50051
+        "port": 50052
     },
     "elasticsearch": {
         "host": "localhost",
         "port": 9200,
-        "index": "iart_all",
-        "suggester": "suggester"
+        "index": "iart_210425",
+        "suggester": "suggester_210425"
     },
+    "image_text": [
+        {
+            "type": "ClipEmbeddingFeature",
+            "output": "clip_text",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "clip_text",
+                "model_device": "gpu",
+                "model_file": "/nfs/data/iart/web/models/clip_text/clip_text_gpu.pt",
+                "bpe_file": "/nfs/data/iart/web/models/clip_text/bpe_simple_vocab_16e6.txt.gz"
+            }
+        }
+    ],
     "features": [
+        {
+            "type": "ClipEmbeddingFeature",
+            "output": "clip_image",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "clip_image",
+                "model_device": "gpu",
+                "model_file": "/nfs/data/iart/web/models/clip_image/clip_image_gpu.pt",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244
+            }
+        },
         {
             "type": "ImageNetInceptionFeature",
             "output": "image_net_inception",
@@ -20,9 +48,9 @@
                 "port": 6379,
                 "model_name": "imagenet_inception",
                 "model_device": "gpu",
-                "model_file": "/nfs/data/iart/web/models/web/imagenet_inception/imagenet_inception.pb",
-                "pca_model_name": "imagenet_inception_pca_128",
-                "pca_model_file": "/nfs/data/iart/web/models/web/imagenet_inception/pca_128.onnx",
+                "model_file": "/nfs/data/iart/web/models/imagenet_inception/imagenet_retrieval_gpu.pt",
+                "pca_model_name": "imagenet_inception_pca_256",
+                "pca_model_file": "/nfs/data/iart/web/models/imagenet_inception/pca_256.onnx",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244
@@ -35,7 +63,7 @@
                 "host": "localhost",
                 "port": 6379,
                 "model_name": "yuv_histogram",
-                "model_file": "/nfs/data/iart/web/models/web/yuv_histogram/yuv_histogram.pt",
+                "model_file": "/nfs/data/iart/web/models/yuv_histogram/yuv_histogram.pt",
                 "max_dim": 128,
                 "min_dim": 244
             }
@@ -47,26 +75,58 @@
                 "host": "localhost",
                 "port": 6379,
                 "model_name": "byol_wikipedia",
-                "model_file": "/nfs/data/iart/web/models/web/byol_embedding/byol_wikipedia_gpu.pt",
+                "model_file": "/nfs/data/iart/web/models/byol_embedding/byol_wikipedia_gpu.pt",
                 "model_device": "gpu"
+            }
+        },
+        {
+            "type": "KaggleResnetFeature",
+            "output": "KaggleResnetFeature",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "kaggle_resnet_embedding",
+                "model_device": "gpu",
+                "model_file": "/nfs/data/iart/web/models/kaggle_embedding/kaggle_embedding_gpu.pt",
+                "mapping_file": "/nfs/data/iart/web/models/kaggle_embedding/mapping.jsonl",
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244
             }
         }
     ],
     "classifiers": [
         {
-            "type": "KaggleDenseClassifier",
-            "output": "image_net_inception",
+            "type": "KaggleResnetClassifier",
+            "output": "KaggleResnetClassifier",
             "params": {
                 "host": "localhost",
                 "port": 6379,
-                "model_name": "kaggle_densenet",
+                "model_name": "kaggle_resnet_classifier",
                 "model_device": "gpu",
-                "model_file": "/nfs/data/iart/web/models/web/kaggle_painter/kaggle_densenet.pb",
-                "mapping_file": "/nfs/data/iart/web/models/web/kaggle_painter/kaggle_mapping.json",
+                "model_file": "/nfs/data/iart/web/models/kaggle_classifier/kaggle_classifier_gpu.pt",
+                "mapping_file": "/nfs/data/iart/web/models/kaggle_classifier/mapping.jsonl",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244,
-                "threshold": 0.5
+                "threshold": 0.4
+            }
+        },
+        {
+            "type": "IMet2020ResnetClassifier",
+            "output": "i_met2020_resnet_classifier",
+            "params": {
+                "host": "localhost",
+                "port": 6379,
+                "model_name": "imet2020_resnet",
+                "model_device": "gpu",
+                "model_file": "/nfs/data/iart/web/models/imet2020/imet2020_resnet_gpu.pt",
+                "mapping_file": "/nfs/data/iart/web/models/imet2020/labels.csv",
+                "remove_prefix": true,
+                "multicrop": true,
+                "max_dim": null,
+                "min_dim": 244,
+                "threshold": 0.25
             }
         },
         {
@@ -77,8 +137,8 @@
                 "port": 6379,
                 "model_name": "imagenet_resnet",
                 "model_device": "gpu",
-                "model_file": "/nfs/data/iart/web/models/web/imagenet_resnet/imagenet_resnet_gpu.pt",
-                "mapping_file": "/nfs/data/iart/web/models/web/imagenet_resnet/imagenet_mapping.json",
+                "model_file": "/nfs/data/iart/web/models/imagenet_resnet/imagenet_resnet_gpu.pt",
+                "mapping_file": "/nfs/data/iart/web/models/imagenet_resnet/imagenet_mapping.json",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244,
@@ -86,15 +146,31 @@
             }
         }
     ],
-   "indexes": [
-    {
-      "type": "FaissIndexer",
-      "params": {
-        "indexer_dir": "/nfs/data/iart/web/models/web/faiss_all_210221/",
-        "train_size": 50000
-      }
-    }
-  ]
-
-    
+    "indexes": [
+        {
+            "type": "FaissIndexer",
+            "params": {
+                "indexer_dir": "/nfs/data/iart/web/faiss/",
+                "train_size": 10000
+            }
+        }
+    ],
+    "mappings": [
+        {
+            "type": "FeatureCosineMapping",
+            "params": {}
+        },
+        {
+            "type": "FeatureL2Mapping",
+            "params": {}
+        },
+        {
+            "type": "UMapMapping",
+            "params": {
+                "random_state": 42,
+                "n_neighbors": 3,
+                "min_dist": 0.1
+            }
+        }
+    ]
 }

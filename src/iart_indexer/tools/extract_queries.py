@@ -7,7 +7,6 @@ import logging
 import traceback
 import json
 
-
 import numpy as np
 
 from concurrent import futures
@@ -149,13 +148,14 @@ def main():
     indexer_manager.find()
 
     with open(args.input_path, "r") as f_in:
+        results = []
         for line in f_in:
 
             print(line.strip())
             feature_search = []
             feature_results = list(image_text_manager.run([line]))[0]
             for plugin in feature_results["plugins"]:
-                print(dir(plugin))
+                # print(dir(plugin))
                 for anno in plugin._annotations[0]:
 
                     feature = list(anno.feature.feature)
@@ -167,7 +167,7 @@ def main():
                             "weight": 1.0,
                         }
                     )
-                    print(feature)
+                    # print(feature)
                 # feature_results.feature
                 # feature = list(anno.feature.feature)
             if len(feature_search) > 0:
@@ -180,7 +180,15 @@ def main():
                     )
                 )
                 print(entries_feature)
-            return
+                results.extend(entries_feature)
+    with open(args.output_path, "w") as f:
+        # f.writelines(list(set(results)))
+        for x in list(set(results)):
+            # print(x)
+            f.write(x+'\n')
+    # list(set(results)))
+    # print(len(list(set(results))))
+            # return
     return 0
 
 

@@ -3,7 +3,7 @@ import copy
 import grpc
 import time
 import uuid
-import spacy
+# import spacy
 import msgpack
 import imageio
 import logging
@@ -31,8 +31,8 @@ from iart_indexer.plugins.cache import Cache
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-sp_en = spacy.load("en_core_web_sm")
-sp_de = spacy.load("de_core_news_sm")
+# sp_en = spacy.load("en_core_web_sm")
+# sp_de = spacy.load("de_core_news_sm")
 
 
 def search(args):
@@ -833,8 +833,7 @@ class Server:
                 num_jobs = len(self.commune.futures)
                 num_jobs_done = len([x for x in self.commune.futures if x["future"].done()])
                 logging.info(f"[Server] num_jobs:{num_jobs} num_jobs_done:{num_jobs_done}")
-                logging.info(f"[Server] {[x['future'] for x in self.commune.futures]}")
 
-                time.sleep(10)
+                time.sleep(60*60)
         except KeyboardInterrupt:
             self.server.stop(0)

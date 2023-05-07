@@ -172,7 +172,7 @@ def tokenize(tokenizer: SimpleTokenizer, texts: Union[str, List[str]], context_l
     sot_token = tokenizer.encoder["<|startoftext|>"]
     eot_token = tokenizer.encoder["<|endoftext|>"]
     all_tokens = [[sot_token] + tokenizer.encode(text) + [eot_token] for text in texts]
-    result = np.zeros([len(all_tokens), context_length], dtype=np.long)
+    result = np.zeros([len(all_tokens), context_length], dtype=np.int64)
 
     for i, tokens in enumerate(all_tokens):
         tokens = tokens[:77]

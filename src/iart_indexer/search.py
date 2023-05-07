@@ -355,16 +355,16 @@ class Searcher:
             return result
 
         except Exception as e:
-            logging.error(f"Searcher::parse_query: {repr(e)}")
-            exc_type, exc_value, exc_traceback = sys.exc_info()
+            logging.error(f"Searcher::parse_query: {repr(e)} {traceback.format_exc()}")
+            # exc_type, exc_value, exc_traceback = sys.exc_info()
 
-            traceback.print_exception(
-                exc_type,
-                exc_value,
-                exc_traceback,
-                limit=2,
-                file=sys.stdout,
-            )
+            # traceback.print_exception(
+            #     exc_type,
+            #     exc_value,
+            #     exc_traceback,
+            #     limit=2,
+            #     file=sys.stdout,
+            # )
 
 
     def build_search_body(
@@ -594,6 +594,8 @@ class Searcher:
         
         logging.info(f"[Searcher] {query['feature_search']}")
         # if len(query["feature_search"]) > 0:
+
+        logging.info(f"[Searcher] a")
         entries_feature = list(
             self.indexer_plugin_manager.search(
                 query["feature_search"],
@@ -602,14 +604,15 @@ class Searcher:
                 size=500,
             )
         )
-        entries_feature = entries_feature[:500]
 
-        logging.info(f"[Searcher] {entries_feature}")
+        logging.info(f"[Searcher] b")
 
         logging.info(
             f"[Searcher] Results from indexer len={len(entries_feature)} " +
             f"time={time.time() - start_time}"
         )
+
+        entries_feature = entries_feature[:500]
 
         if query["whitelist"] is not None:
             if len(entries_feature) > 0:

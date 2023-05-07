@@ -19,7 +19,7 @@ import multiprocessing as mp
 from tqdm import tqdm
 from multiprocessing.pool import ThreadPool
 
-import utils
+from iart_indexer import utils
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer import faiss_indexer_pb2, faiss_indexer_pb2_grpc

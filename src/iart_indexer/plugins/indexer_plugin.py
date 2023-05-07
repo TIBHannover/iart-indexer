@@ -74,7 +74,7 @@ class IndexerPluginManager(PluginManager):
 
         for plugin in self.plugin_list:
             plugin = plugin["plugin"]
-
+            logging.info('KKKK')
             entries = plugin.search(
                 queries, collections=collections, include_default_collection=include_default_collection, size=size
             )
