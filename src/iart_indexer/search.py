@@ -51,10 +51,7 @@ class Searcher:
             if type not in plugin_feature[plugin]:
                 plugin_feature[plugin][type] = []
 
-            plugin_feature[plugin][type].append({
-                "value": np.asarray(value),
-                "weight": weight
-            })
+            plugin_feature[plugin][type].append({"value": np.asarray(value), "weight": weight})
 
         result_features = []
 
@@ -216,21 +213,19 @@ class Searcher:
                     if number.flag == indexer_pb2.NumberSearchTerm.NOT:
                         flag = "not"
 
-                    range_search.append({
-                        "field": field,
-                        "query": query_term,
-                        "relation": relation,
-                        "flag": flag,
-                    })
+                    range_search.append(
+                        {
+                            "field": field,
+                            "query": query_term,
+                            "relation": relation,
+                            "flag": flag,
+                        }
+                    )
 
                 if term_type == "image_text":
                     image_text = term.image_text
 
-                    feature_results = list(
-                        self.image_text_plugin_manager.run(
-                            [image_text.query]
-                        )
-                    )[0]
+                    feature_results = list(self.image_text_plugin_manager.run([image_text.query]))[0]
 
                     if image_text.flag == indexer_pb2.ImageTextSearchTerm.NEGATIVE:
                         weight_mult = -1.0
@@ -296,9 +291,7 @@ class Searcher:
                     # TODO add example search here
                     else:
                         image = image_from_proto(feature.image)
-                        feature_results = list(
-                            self.feature_plugin_manager.run([image])
-                        )[0]
+                        feature_results = list(self.feature_plugin_manager.run([image]))[0]
 
                         for p in feature.plugins:
 
@@ -365,7 +358,6 @@ class Searcher:
             #     limit=2,
             #     file=sys.stdout,
             # )
-
 
     def build_search_body(
         self,
@@ -530,7 +522,7 @@ class Searcher:
                                         Q("ids", type="_doc", values=whitelist),
                                     ],
                                 ),
-                            ]
+                            ],
                         )
                     )
                 else:
@@ -591,7 +583,7 @@ class Searcher:
 
         query["feature_search"] = self.merge_feature(query["feature_search"])
         logging.info(f"[Searcher] Merged features time={time.time() - start_time}")
-        
+
         logging.info(f"[Searcher] {query['feature_search']}")
         # if len(query["feature_search"]) > 0:
 
@@ -608,11 +600,10 @@ class Searcher:
         logging.info(f"[Searcher] b")
 
         logging.info(
-            f"[Searcher] Results from indexer len={len(entries_feature)} " +
-            f"time={time.time() - start_time}"
+            f"[Searcher] Results from indexer len={len(entries_feature)} " + f"time={time.time() - start_time}"
         )
 
-        entries_feature = entries_feature[:500]
+        # entries_feature = entries_feature[:500]
 
         if query["whitelist"] is not None:
             if len(entries_feature) > 0:
@@ -641,10 +632,7 @@ class Searcher:
         entries = self.search_db(body=body, size=max(len(whitelist), 500))
         entries = list(entries)
 
-        logging.info(
-            f"[Searcher] Database search done len={len(entries)} " +
-            f"time={time.time() - start_time}"
-        )
+        logging.info(f"[Searcher] Database search done len={len(entries)} " + f"time={time.time() - start_time}")
 
         entries = [{**x, "padded": False} for x in entries]
 
@@ -668,8 +656,8 @@ class Searcher:
             entries_padding = list(entries_padding)
 
             logging.info(
-                f"[Searcher] Database search for padding done len={len(entries_padding)} " +
-                f"time={time.time() - start_time}"
+                f"[Searcher] Database search for padding done len={len(entries_padding)} "
+                + f"time={time.time() - start_time}"
             )
 
             entris_lut = (x["id"] for x in entries)
@@ -681,12 +669,7 @@ class Searcher:
                 entries.append({**x, "padded": True})
 
         if query["sorting"] == "feature":
-            entries = list(
-                self.mapping_plugin_manager.run(
-                    entries, query["feature_search"],
-                    ["FeatureCosineMapping"]
-                )
-            )
+            entries = list(self.mapping_plugin_manager.run(entries, query["feature_search"], ["FeatureCosineMapping"]))
 
         if query["mapping"] == "umap":
             entries = list(
@@ -703,10 +686,7 @@ class Searcher:
                 )
             )
 
-            logging.info(
-                f"[Searcher] Mapping done len={len(entries)} " +
-                f"time={time.time() - start_time}"
-            )
+            logging.info(f"[Searcher] Mapping done len={len(entries)} " + f"time={time.time() - start_time}")
 
         if query["clustering"] == "kmeans":
             entries = list(
@@ -723,10 +703,7 @@ class Searcher:
                 )
             )
 
-            logging.info(
-                f"[Searcher] Clustering done len={len(entries)} " +
-                f"time={time.time() - start_time}"
-            )
+            logging.info(f"[Searcher] Clustering done len={len(entries)} " + f"time={time.time() - start_time}")
         elif query["clustering"] == "gm":
             entries = list(
                 self.mapping_plugin_manager.run(
@@ -742,10 +719,7 @@ class Searcher:
                 )
             )
 
-            logging.info(
-                f"[Searcher] Clustering done len={len(entries)} " +
-                f"time={time.time() - start_time}"
-            )
+            logging.info(f"[Searcher] Clustering done len={len(entries)} " + f"time={time.time() - start_time}")
 
         result.update({"entries": list(entries)})
 
@@ -765,19 +739,13 @@ class Searcher:
 
             result.update({"aggregations": aggregations})
 
-            logging.info(
-                f"[Searcher] Aggregator done len={len(entries)} " + 
-                f"time={time.time() - start_time}"
-            )
+            logging.info(f"[Searcher] Aggregator done len={len(entries)} " + f"time={time.time() - start_time}")
 
         # Clean outputs if not requested
         for entry in entries:
             if "features" not in query["extras"]:
                 del entry["feature"]
 
-        logging.info(
-            f"[Searcher] Search done len={len(entries)} " +
-            f"time={time.time() - start_time}"
-        )
+        logging.info(f"[Searcher] Search done len={len(entries)} " + f"time={time.time() - start_time}")
 
         return result

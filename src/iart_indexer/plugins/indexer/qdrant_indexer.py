@@ -59,7 +59,7 @@ class QDrantIndexer(IndexerPlugin):
         existing_collections = [x.name for x in self.client.get_collections().collections]
         logging.info(f"[QDrantIndexer] Existing collections={existing_collections}")
 
-        alias_uuid = uuid.uuid4().hex
+        alias_uuid = "342ffe349e8f4addb0c2b49ffe467f27"  # uuid.uuid4().hex
         collection_batch = {}
         collection_alias_map = {}
 
@@ -165,6 +165,16 @@ class QDrantIndexer(IndexerPlugin):
                 continue
 
     def search(self, queries, collections=None, include_default_collection=True, size=100):
+
+        if include_default_collection:
+            collections = [
+                "aa51afededa94c64b41c421df478f0a4",
+                "25acc1c22c7a4014b56306dc685d00a2",
+                "0cfa4f9bdf064188b7473a5a304ee59d",
+                "782addafc7ee41d5b0b2a9334657af34",
+                "5061f00bb06b49308d7f22c2c4641e5d",
+            ]
+
         # print(f"############################# {collections} {include_default_collection}", flush=True)
         existing_collections = [x.name for x in self.client.get_collections().collections]
         results = []
@@ -185,6 +195,12 @@ class QDrantIndexer(IndexerPlugin):
                 results.extend(result)
                 # print(f"++++++++++++++++ {result}", flush=True)
 
-        results = [x.id for x in results]
+        results = sorted(results, key=lambda x: -x.score)
+        for x in results[:10]:
+            print(dir(x.id), flush=True)
+            print(x, flush=True)
+        results = [uuid.UUID(x.id).hex for x in results]
+        for x in results[:10]:
+            print(x, flush=True)
 
         return results
