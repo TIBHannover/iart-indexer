@@ -82,17 +82,21 @@ class FaissIndexer(IndexerPlugin):
         stub.indexing(faiss_indexer_pb2.IndexingRequest(collections=collections))
 
     def search(self, queries, collections=None, include_default_collection=True, size=100):
+
+        logging.info("KKKK1")
         request = faiss_indexer_pb2.SearchRequest(
             collections=collections,
             include_default_collection=include_default_collection,
         )
 
+        logging.info("KKKK2")
         for q in queries:
             query = request.queries.add()
             query.plugin = q["plugin"]
             query.type = q["type"]
             query.value.extend(q["value"])
 
+        logging.info("KKKK3")
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
             options=[
@@ -101,8 +105,11 @@ class FaissIndexer(IndexerPlugin):
             ],
         )
 
+        logging.info("KKKK4")
         stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
+        logging.info("KKKK5")
         reply = stub.search(request)
+        logging.info("KKKK6")
         result = copy.deepcopy(list(reply.ids))
 
         return result
@@ -111,7 +118,6 @@ class FaissIndexer(IndexerPlugin):
         request = faiss_indexer_pb2.DeleteRequest(
             collections=collections,
         )
-
 
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -207,7 +213,7 @@ class FeatureReader:
             for k, v in feature_cache.items():
                 collection_id, plugin, type = k.split(".")
                 results.append({"collection_id": collection_id, "plugin": plugin, "type": type, "entries": v})
-            
+
             yield results
 
 
@@ -300,10 +306,12 @@ class FaissIndexerIndexingJob:
                 f"[FaissIndexerIndexingJob] Start indexing job config={config} config={faiss_config} collections={collections_to_index}"
             )
             database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
-
+            print("[FaissIndexerIndexingJob] 1", flush=True)
             # copy all indexes to local variables
             trained_collection = FaissCommune.copy_collection(indexer.trained_collection)
+            print("[FaissIndexerIndexingJob] 2", flush=True)
             collections = {k: FaissCommune.copy_collection(v) for k, v in indexer.collections.items()}
+            print("[FaissIndexerIndexingJob] 3", flush=True)
             # deafult collection should be part of collections
             default_collection_id = indexer.default_collection
 
@@ -317,7 +325,7 @@ class FaissIndexerIndexingJob:
                 default_collection_id = default_collection["id"]
                 default_collection["collection_id"] = default_collection_id
                 collections[default_collection_id] = default_collection
-
+            print("[FaissIndexerIndexingJob] 4", flush=True)
             # only update collections
             collections_to_update = set()
             # rebuild collections
@@ -350,7 +358,7 @@ class FaissIndexerIndexingJob:
                             index["rev_entries"] = {v: k for k, v in index["entries"].items()}
                             logging.info(f"Index: {collection_id} {index['type']} {len(index['entries'])}")
                             collections_to_update.add(collection_id)
-
+            print("[FaissIndexerIndexingJob] 5", flush=True)
             new_collections = []
             new_default_collection_id = None
             for k, collection in collections.items():
@@ -409,7 +417,6 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
         self.one_index_per_collection = self.faiss_config["one_index_per_collection"]
         self.one_index_for_public = self.faiss_config["one_index_for_public"]
         self.number_of_probs = self.faiss_config["number_of_probs"]
-
 
         # create some folders
         os.makedirs(self.indexer_dir, exist_ok=True)
@@ -530,7 +537,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
             f"[FaissServer] Update collections done default_collection={self.default_collection} "
             + f"collections={[{'id':c['id'], 'collection_id':k} for k,c in self.collections.items()]}"
         )
-    
+
     def delete_collections(self, collections):
         logging.info(
             f"[FaissServer] Delete collections collections={collections} "
@@ -568,6 +575,7 @@ class FaissCommune(faiss_indexer_pb2_grpc.FaissIndexerServicer):
 
     @staticmethod
     def copy_collection(collection, new_ids=False):
+        print("[copy_collection] ", flush=True)
         new_collection = copy.deepcopy({k: v for k, v in collection.items() if k != "indexes"})
 
         if "indexes" in collection:

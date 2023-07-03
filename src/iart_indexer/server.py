@@ -3,7 +3,7 @@ import copy
 import grpc
 import time
 import uuid
-import spacy
+# import spacy
 import msgpack
 import imageio
 import logging
@@ -31,8 +31,8 @@ from iart_indexer.plugins.cache import Cache
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-sp_en = spacy.load("en_core_web_sm")
-sp_de = spacy.load("de_core_news_sm")
+# sp_en = spacy.load("en_core_web_sm")
+# sp_de = spacy.load("de_core_news_sm")
 
 
 def search(args):
@@ -250,36 +250,26 @@ def build_indexer(args):
         config = args.get("config")
         rebuild = args.get("rebuild")
         collections = args.get("collections")
-        logging.info(f"[IndexerJob] Start parameters rebuild={rebuild} collections={collections}")
 
         database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
-        indexer = globals().get("indexer_manager")
-
-        class TrainEntryReader:
-            def __iter__(self):
-                for entry in database.raw_all(
+        if collections is None or len(collections) <= 0:
+            collections = [
+                x["key"]
+                for x in database.raw_aggregate(
                     {
-                        "query": {
-                            "function_score": {
-                                "query": {
-                                    "nested": {
-                                        "path": "collection",
-                                        "query": {
-                                            "match": {
-                                                "collection.is_public": True,
-                                            },
-                                        },
-                                    },
-                                },
-                                "random_score": {
-                                    "seed": 42,
-                                },
-                            },
-                        },
-                        "size": 1000,
+                        "aggs": {
+                            "c": {
+                                "nested": {"path": "collection"},
+                                "aggs": {"c": {"terms": {"field": "collection.id.keyword"}}},
+                            }
+                        }
                     }
-                ):
-                    yield get_features_from_db_entry(entry, return_collection=True)
+                )["aggregations"]["c"]["c"]["buckets"]
+            ]
+
+            # collections =
+        logging.info(f"[IndexerJob] Start parameters rebuild={rebuild} collections={collections}")
+        indexer = globals().get("indexer_manager")
 
         class EntryReader:
             def __init__(self, collections=None):
@@ -318,8 +308,12 @@ def build_indexer(args):
                 for entry in database.raw_all(query):
                     yield get_features_from_db_entry(entry, return_collection=True)
 
+        # for e in EntryReader(collections):
+        #     print(e)
+        # print(len(list(EntryReader(collections))))
+        # return
+
         indexer.indexing(
-            train_entries=TrainEntryReader(),
             index_entries=EntryReader(collections),
             collections=collections,
             rebuild=rebuild,
@@ -787,21 +781,26 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         logging.info(request.id)
 
         database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
-        result = database.raw_delete({
-                    "query": {
-                        "nested": {
-                            "path": "collection",
-                            "query": {"terms": {"collection.id": [request.id]}},
-                        }}})
+        result = database.raw_delete(
+            {
+                "query": {
+                    "nested": {
+                        "path": "collection",
+                        "query": {"terms": {"collection.id": [request.id]}},
+                    }
+                }
+            }
+        )
 
         logging.info(f"[Server] {result}")
 
-        result = indexer_pb2.CollectionDeleteReply()#collections,ids)
+        result = indexer_pb2.CollectionDeleteReply()  # collections,ids)
 
         # start indexing all
         self.managers["indexer_manager"].delete([request.id])
 
         return result
+
 
 class Server:
     def __init__(self, config):
@@ -834,8 +833,7 @@ class Server:
                 num_jobs = len(self.commune.futures)
                 num_jobs_done = len([x for x in self.commune.futures if x["future"].done()])
                 logging.info(f"[Server] num_jobs:{num_jobs} num_jobs_done:{num_jobs_done}")
-                logging.info(f"[Server] {[x['future'] for x in self.commune.futures]}")
 
-                time.sleep(10)
+                time.sleep(60*60)
         except KeyboardInterrupt:
             self.server.stop(0)

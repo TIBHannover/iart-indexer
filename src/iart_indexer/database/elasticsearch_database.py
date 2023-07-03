@@ -349,7 +349,7 @@ class ElasticSearchDatabase(Database):
 
             body.update({"sort": sort_list})
         try:
-            results = self.es.search(index=self.index, body=body, size=size)
+            results = self.es.search(index=self.index, body=body, size=min(size,1000))
             for x in results["hits"]["hits"]:
                 yield x["_source"]
         except exceptions.NotFoundError:
@@ -360,7 +360,7 @@ class ElasticSearchDatabase(Database):
         if not self.es.indices.exists(index=self.index):
             return []
         try:
-            results = self.es.search(index=self.index, body=body, size=size)
+            results = self.es.search(index=self.index, body=body, size=min(size,1000))
             for x in results["hits"]["hits"]:
                 yield x["_source"]
         except exceptions.NotFoundError:
