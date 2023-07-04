@@ -1,32 +1,13 @@
-import os
-import re
-import math
 import uuid
 import logging
-import msgpack
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 
-import traceback
-
 import numpy as np
-import copy
-
-from datetime import datetime
 
 from iart_indexer.plugins import IndexerPlugin, IndexerPluginManager
-from iart_indexer.utils import get_element, get_features_from_db_entry
-
-import time
-from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
-from iart_indexer import faiss_indexer_pb2_grpc, faiss_indexer_pb2
-import grpc
-from concurrent import futures
-from threading import Lock
-
-from itertools import zip_longest
-
+from iart_indexer.utils import get_element
 
 @IndexerPluginManager.export("QDrantIndexer")
 class QDrantIndexer(IndexerPlugin):
@@ -64,6 +45,7 @@ class QDrantIndexer(IndexerPlugin):
         collection_alias_map = {}
 
         for i, entry in enumerate(index_entries):
+            print(entry, flush=True)
             entry_id = entry["id"]
             collection_id = entry["collection"]["id"]
 
@@ -204,3 +186,7 @@ class QDrantIndexer(IndexerPlugin):
             print(x, flush=True)
 
         return results
+
+    def delete(self, collections):
+        for collection_id in collections:
+            self.client.delete_collection(collection_name=collection_id + "_342ffe349e8f4addb0c2b49ffe467f27")

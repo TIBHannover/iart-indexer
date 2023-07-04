@@ -497,27 +497,22 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             db_bulk_cache = []
 
         # start indexing all
-        self.managers["indexer_manager"].indexing(collections)
+        # self.managers["indexer_manager"].indexing(collections)
 
-    def build_suggester(self, request, context):
-        database = ElasticSearchDatabase(config=self.config.get("elasticsearch", {}))
-        suggester = ElasticSearchSuggester(config=self.config.get("elasticsearch", {}))
+        logging.info(f"rebuild {collections}")
         job_id = uuid.uuid4().hex
-
         variable = {
-            "database": database,
-            "suggester": suggester,
-            "field_names": list(request.field_names),
+            "config": self.config,
+            "rebuild": True,
+            "collections": list(collections),
             "future": None,
             "id": job_id,
         }
 
-        future = self.process_pool.submit(build_suggestion_job, variable)
-
+        future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
         variable["future"] = future
         self.futures.append(variable)
 
-        return indexer_pb2.SuggesterReply(id=job_id)
 
     def status(self, request, context):
         futures_lut = {x["id"]: i for i, x in enumerate(self.futures)}
@@ -647,28 +642,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         return result
 
-    def suggest(self, request, context):
-        jsonObj = MessageToJson(request)
-        logging.info(jsonObj)
-
-        suggester = ElasticSearchSuggester(config=self.config.get("elasticsearch", {}))
-
-        suggestions = suggester.complete(request.query)
-        logging.info(suggestions)
-
-        result = indexer_pb2.SuggestReply()
-
-        for group in suggestions:
-            if len(group["options"]) < 1:
-                continue
-
-            g = result.groups.add()
-            g.group = group["type"]
-
-            for suggestion in group["options"]:
-                g.suggestions.append(suggestion)
-
-        return result
 
     def build_indexer(self, request, context):
         logging.info("BUILD_INDEXER")
