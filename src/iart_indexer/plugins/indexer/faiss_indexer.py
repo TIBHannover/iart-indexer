@@ -5,8 +5,10 @@ import uuid
 import logging
 import msgpack
 
-import faiss
-
+try:
+    import faiss
+except:
+    logging.warning("faiss not installed")
 import traceback
 
 import numpy as np
