@@ -402,6 +402,22 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
 
+    def analyze(self, request, context):
+        logging.info('Received analyze request, plugins: {request.plugins}')
+        feature_result = indexer_pb2.FeatureResult(
+            plugin="x",
+            type="x",
+            binary="x",
+            feature=[0.0, 0.1]
+        )
+        result = indexer_pb2.PluginResult(
+            plugin="y",
+            type="y",
+            version="y",
+            feature=feature_result
+        )
+        return indexer_pb2.AnalyzeReply(results=[result])
+
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
 

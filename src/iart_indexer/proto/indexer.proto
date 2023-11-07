@@ -20,6 +20,8 @@ service Indexer {
 
   rpc suggest(SuggestRequest) returns (SuggestReply) {}
 
+  rpc analyze(AnalyzeRequest) returns (AnalyzeReply) {}
+
   rpc build_indexer(BuildIndexerRequest) returns (BuildIndexerReply) {}
   rpc build_feature_cache(BuildFeatureCacheRequest)
       returns (BuildFeatureCacheReply) {}
@@ -357,3 +359,11 @@ message CollectionDeleteReply {
 
 message CollectionListRequest {}
 message CollectionListReply { repeated Collection collections = 1; }
+
+message AnalyzeRequest {
+  bytes image = 1;
+  repeated string plugin_names = 2;
+}
+message AnalyzeReply {
+  repeated PluginResult results = 1;
+}
