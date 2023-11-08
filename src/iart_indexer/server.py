@@ -403,20 +403,22 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         self.max_results = config.get("indexer", {}).get("max_results", 100)
 
     def analyze(self, request, context):
-        logging.info('Received analyze request, plugins: {request.plugins}')
-        feature_result = indexer_pb2.FeatureResult(
-            plugin="x",
-            type="x",
-            binary="x",
-            feature=[0.0, 0.1]
-        )
-        result = indexer_pb2.PluginResult(
-            plugin="y",
-            type="y",
-            version="y",
-            feature=feature_result
-        )
-        return indexer_pb2.AnalyzeReply(results=[result])
+        logging.info(f'Received analyze request, plugins: {request.plugin_names}')
+        image = imageio.imread(request.image)
+        plugins = [
+            self.managers['classifier_manager'].plugins()[plugin]
+            for plugin in request.plugin_names
+        ]
+        plugins = [
+            {'plugin': plugin(), 'version': plugin.version}
+            for plugin in plugins
+        ]
+
+        results = list(self.managers['classifier_manager'].run([image], [plugins], plugins=plugins))
+        results = results[0]['plugins']
+        results = [result._annotations[0][0] for result in results]
+
+        return indexer_pb2.AnalyzeReply(results=results)
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
