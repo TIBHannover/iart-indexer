@@ -4,9 +4,8 @@
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
-from google.protobuf import message as _message
-from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf.internal import builder as _builder
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -14,572 +13,142 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rindexer.proto\x12\x0ciart.indexer\"9\n\nCollection\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tis_public\x18\x03 \x01(\x08\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\xdf\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x1e\n\x03roi\x18\x04 \x01(\x0b\x32\x11.iart.indexer.RoI\x12&\n\x04meta\x18\x05 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x06 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.CollectionB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\"K\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\'\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x15.iart.indexer.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\xad\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x34\n\nclassifier\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.ClassifierResultH\x00\x12.\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x1b.iart.indexer.FeatureResultH\x00\x42\x08\n\x06result\"^\n\x0bImageResult\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\x12+\n\x07results\x18\x02 \x03(\x0b\x32\x1a.iart.indexer.PluginResult\"<\n\x0eIndexingResult\x12*\n\x07results\x18\x01 \x03(\x0b\x32\x19.iart.indexer.ImageResult\"V\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12,\n\x08settings\x18\x03 \x03(\x0b\x32\x1a.iart.indexer.PluginConfig\"\x14\n\x12ListPluginsRequest\"=\n\x10ListPluginsReply\x12)\n\x07plugins\x18\x01 \x03(\x0b\x32\x18.iart.indexer.PluginInfo\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"Y\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x30\n\x08indexing\x18\x02 \x01(\x0b\x32\x1c.iart.indexer.IndexingResultH\x00\x42\x08\n\x06result\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb9\x01\n\x11\x46\x65\x61tureSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\"\n\x05image\x18\x02 \x01(\x0b\x32\x13.iart.indexer.Image\x12\x32\n\x04\x66lag\x18\x03 \x01(\x0e\x32$.iart.indexer.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\x86\x01\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12/\n\x04\x66lag\x18\x03 \x01(\x0e\x32!.iart.indexer.TextSearchTerm.Flag\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\"\xa8\x01\n\x13ImageTextSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\x34\n\x04\x66lag\x18\x03 \x01(\x0e\x32&.iart.indexer.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xcb\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12\x39\n\x08relation\x18\x05 \x01(\x0e\x32\'.iart.indexer.NumberSearchTerm.Relation\x12\x31\n\x04\x66lag\x18\x06 \x01(\x0e\x32#.iart.indexer.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x06\n\x02\x45Q\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x0e\n\nGREATER_EQ\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\x42\x07\n\x05query\"\xe1\x01\n\nSearchTerm\x12,\n\x04text\x18\x01 \x01(\x0b\x32\x1c.iart.indexer.TextSearchTermH\x00\x12\x30\n\x06number\x18\x02 \x01(\x0b\x32\x1e.iart.indexer.NumberSearchTermH\x00\x12\x37\n\nimage_text\x18\x03 \x01(\x0b\x32!.iart.indexer.ImageTextSearchTermH\x00\x12\x32\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x1f.iart.indexer.FeatureSearchTermH\x00\x42\x06\n\x04term\"C\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\x12\x11\n\tuse_query\x18\x03 \x01(\x08\"\xe1\x06\n\rSearchRequest\x12\'\n\x05terms\x18\x01 \x03(\x0b\x32\x18.iart.indexer.SearchTerm\x12\x34\n\x07sorting\x18\x02 \x01(\x0e\x32#.iart.indexer.SearchRequest.Sorting\x12\x34\n\x07mapping\x18\x03 \x01(\x0e\x32#.iart.indexer.SearchRequest.Mapping\x12\x31\n\taggregate\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.AggregateRequest\x12\x13\n\x0brandom_seed\x18\x05 \x01(\t\x12\x31\n\x06\x65xtras\x18\x06 \x03(\x0e\x32!.iart.indexer.SearchRequest.Extra\x12\x31\n\x0fmapping_options\x18\x07 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12:\n\nclustering\x18\x08 \x01(\x0e\x32&.iart.indexer.SearchRequest.Clustering\x12\x34\n\x12\x63lustering_options\x18\t \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x13\n\x0b\x63ollections\x18\n \x03(\t\x12\"\n\x1ainclude_default_collection\x18\x0b \x01(\x08\x12\x0b\n\x03ids\x18\x0c \x03(\t\"\x97\x01\n\x07Sorting\x12\x13\n\x0fSORTING_DEFAULT\x10\x00\x12\x16\n\x12SORTING_CLASSIFIER\x10\x01\x12\x13\n\x0fSORTING_FEATURE\x10\x02\x12\x12\n\x0eSORTING_RANDOM\x10\x03\x12\x1a\n\x16SORTING_RANDOM_FEATURE\x10\x04\x12\x1a\n\x16SORTING_RANDOM_CLUSTER\x10\x05\"0\n\x07Mapping\x12\x13\n\x0fMAPPING_DEFAULT\x10\x00\x12\x10\n\x0cMAPPING_UMAP\x10\x01\"l\n\nClustering\x12\x16\n\x12\x43LUSTERING_DEFAULT\x10\x00\x12\x11\n\rCLUSTERING_GM\x10\x01\x12\x15\n\x11\x43LUSTERING_KMEANS\x10\x02\x12\x1c\n\x18\x43LUSTERING_AGGLOMERATIVE\x10\x03\"\x1b\n\x05\x45xtra\x12\x12\n\x0e\x45XTRA_FEATURES\x10\x00\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xc9\x02\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\x12\x0f\n\x07\x63luster\x18\x07 \x01(\x03\x12\x10\n\x08\x64istance\x18\x08 \x01(\x02\x12,\n\ncollection\x18\t \x01(\x0b\x32\x18.iart.indexer.Collection\x12\x0e\n\x06padded\x18\n \x01(\x08\"P\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12)\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"{\n\x15ListSearchResultReply\x12\x30\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1f.iart.indexer.SearchResultEntry\x12\x30\n\taggregate\x18\x02 \x03(\x0b\x32\x1d.iart.indexer.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\":\n\x0cSuggestReply\x12*\n\x06groups\x18\x01 \x03(\x0b\x32\x1a.iart.indexer.SuggestGroup\";\n\x13\x42uildIndexerRequest\x12\x0f\n\x07rebuild\x18\x01 \x01(\x08\x12\x13\n\x0b\x63ollections\x18\x02 \x03(\t\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\x1d\n\x0b\x44umpRequest\x12\x0e\n\x06origin\x18\x01 \x01(\t\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"5\n\x0fIndexingRequest\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"9\n\x0e\x41ggregateReply\x12\'\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x18.iart.indexer.ValueField\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xf8\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.Collection\"\x1b\n\rDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\r\n\x0b\x44\x65leteReply\"%\n\x17\x43ollectionDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\x15\x43ollectionDeleteReply\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t\"\x17\n\x15\x43ollectionListRequest\"D\n\x13\x43ollectionListReply\x12-\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x18.iart.indexer.Collection2\xfd\t\n\x07Indexer\x12R\n\x0clist_plugins\x12 .iart.indexer.ListPluginsRequest\x1a\x1e.iart.indexer.ListPluginsReply\"\x00\x12\x42\n\x06status\x12\x1b.iart.indexer.StatusRequest\x1a\x19.iart.indexer.StatusReply\"\x00\x12Q\n\x0f\x62uild_suggester\x12\x1e.iart.indexer.SuggesterRequest\x1a\x1c.iart.indexer.SuggesterReply\"\x00\x12\x42\n\x06search\x12\x1b.iart.indexer.SearchRequest\x1a\x19.iart.indexer.SearchReply\"\x00\x12\x62\n\x12list_search_result\x12%.iart.indexer.ListSearchResultRequest\x1a#.iart.indexer.ListSearchResultReply\"\x00\x12K\n\taggregate\x12\x1e.iart.indexer.AggregateRequest\x1a\x1c.iart.indexer.AggregateReply\"\x00\x12\x45\n\x07suggest\x12\x1c.iart.indexer.SuggestRequest\x1a\x1a.iart.indexer.SuggestReply\"\x00\x12U\n\rbuild_indexer\x12!.iart.indexer.BuildIndexerRequest\x1a\x1f.iart.indexer.BuildIndexerReply\"\x00\x12\x65\n\x13\x62uild_feature_cache\x12&.iart.indexer.BuildFeatureCacheRequest\x1a$.iart.indexer.BuildFeatureCacheReply\"\x00\x12L\n\x08indexing\x12\x1d.iart.indexer.IndexingRequest\x1a\x1b.iart.indexer.IndexingReply\"\x00(\x01\x30\x01\x12>\n\x04\x64ump\x12\x19.iart.indexer.DumpRequest\x1a\x17.iart.indexer.DumpReply\"\x00\x30\x01\x12@\n\x04load\x12\x19.iart.indexer.LoadRequest\x1a\x17.iart.indexer.LoadReply\"\x00(\x01\x30\x01\x12\x39\n\x03get\x12\x18.iart.indexer.GetRequest\x1a\x16.iart.indexer.GetReply\"\x00\x12\x42\n\x06\x64\x65lete\x12\x1b.iart.indexer.DeleteRequest\x1a\x19.iart.indexer.DeleteReply\"\x00\x12\x61\n\x11\x63ollection_delete\x12%.iart.indexer.CollectionDeleteRequest\x1a#.iart.indexer.CollectionDeleteReply\"\x00\x12[\n\x0f\x63ollection_list\x12#.iart.indexer.CollectionListRequest\x1a!.iart.indexer.CollectionListReply\"\x00\x42\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rindexer.proto\x12\x0ciart.indexer\"9\n\nCollection\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tis_public\x18\x03 \x01(\x08\")\n\tPluginRun\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x02\":\n\x03RoI\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\r\n\x05width\x18\x03 \x01(\x02\x12\x0e\n\x06height\x18\x04 \x01(\x02\"`\n\nValueField\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x14\n\nstring_val\x18\x02 \x01(\tH\x00\x12\x11\n\x07int_val\x18\x03 \x01(\x05H\x00\x12\x13\n\tfloat_val\x18\x04 \x01(\x02H\x00\x42\x07\n\x05value\"\xdf\x01\n\x05Image\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x04path\x18\x02 \x01(\tH\x00\x12\x11\n\x07\x65ncoded\x18\x03 \x01(\x0cH\x00\x12\x1e\n\x03roi\x18\x04 \x01(\x0b\x32\x11.iart.indexer.RoI\x12&\n\x04meta\x18\x05 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x06 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.CollectionB\x07\n\x05image\"J\n\x0cPluginConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x65\x66\x61ult\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\r\n\x05state\x18\x04 \x01(\t\"6\n\x07\x43oncept\x12\x0f\n\x07\x63oncept\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04prob\x18\x03 \x01(\x02\"K\n\x10\x43lassifierResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\'\n\x08\x63oncepts\x18\x02 \x03(\x0b\x32\x15.iart.indexer.Concept\"N\n\rFeatureResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0e\n\x06\x62inary\x18\x03 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x04 \x03(\x02\"\xad\x01\n\x0cPluginResult\x12\x0e\n\x06plugin\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x34\n\nclassifier\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.ClassifierResultH\x00\x12.\n\x07\x66\x65\x61ture\x18\x05 \x01(\x0b\x32\x1b.iart.indexer.FeatureResultH\x00\x42\x08\n\x06result\"^\n\x0bImageResult\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\x12+\n\x07results\x18\x02 \x03(\x0b\x32\x1a.iart.indexer.PluginResult\"<\n\x0eIndexingResult\x12*\n\x07results\x18\x01 \x03(\x0b\x32\x19.iart.indexer.ImageResult\"V\n\nPluginInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12,\n\x08settings\x18\x03 \x03(\x0b\x32\x1a.iart.indexer.PluginConfig\"\x14\n\x12ListPluginsRequest\"=\n\x10ListPluginsReply\x12)\n\x07plugins\x18\x01 \x03(\x0b\x32\x18.iart.indexer.PluginInfo\"\x1b\n\rStatusRequest\x12\n\n\x02id\x18\x01 \x01(\t\"Y\n\x0bStatusReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x30\n\x08indexing\x18\x02 \x01(\x0b\x32\x1c.iart.indexer.IndexingResultH\x00\x42\x08\n\x06result\"\'\n\x10SuggesterRequest\x12\x13\n\x0b\x66ield_names\x18\x01 \x03(\t\"\x1c\n\x0eSuggesterReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xb9\x01\n\x11\x46\x65\x61tureSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\"\n\x05image\x18\x02 \x01(\x0b\x32\x13.iart.indexer.Image\x12\x32\n\x04\x66lag\x18\x03 \x01(\x0e\x32$.iart.indexer.FeatureSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\x86\x01\n\x0eTextSearchTerm\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05\x66ield\x18\x02 \x01(\t\x12/\n\x04\x66lag\x18\x03 \x01(\x0e\x32!.iart.indexer.TextSearchTerm.Flag\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\"\xa8\x01\n\x13ImageTextSearchTerm\x12(\n\x07plugins\x18\x01 \x03(\x0b\x32\x17.iart.indexer.PluginRun\x12\r\n\x05query\x18\x02 \x01(\t\x12\x34\n\x04\x66lag\x18\x03 \x01(\x0e\x32&.iart.indexer.ImageTextSearchTerm.Flag\"\"\n\x04\x46lag\x12\x0c\n\x08POSITIVE\x10\x00\x12\x0c\n\x08NEGATIVE\x10\x01\"\xcb\x02\n\x10NumberSearchTerm\x12\r\n\x05\x66ield\x18\x01 \x01(\t\x12\x16\n\x0cstring_query\x18\x02 \x01(\tH\x00\x12\x13\n\tint_query\x18\x03 \x01(\x05H\x00\x12\x15\n\x0b\x66loat_query\x18\x04 \x01(\x02H\x00\x12\x39\n\x08relation\x18\x05 \x01(\x0e\x32\'.iart.indexer.NumberSearchTerm.Relation\x12\x31\n\x04\x66lag\x18\x06 \x01(\x0e\x32#.iart.indexer.NumberSearchTerm.Flag\"F\n\x08Relation\x12\x06\n\x02\x45Q\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x0e\n\nGREATER_EQ\x10\x02\x12\x0b\n\x07LESS_EQ\x10\x03\x12\x08\n\x04LESS\x10\x04\"%\n\x04\x46lag\x12\x08\n\x04MUST\x10\x00\x12\n\n\x06SHOULD\x10\x01\x12\x07\n\x03NOT\x10\x02\x42\x07\n\x05query\"\xe1\x01\n\nSearchTerm\x12,\n\x04text\x18\x01 \x01(\x0b\x32\x1c.iart.indexer.TextSearchTermH\x00\x12\x30\n\x06number\x18\x02 \x01(\x0b\x32\x1e.iart.indexer.NumberSearchTermH\x00\x12\x37\n\nimage_text\x18\x03 \x01(\x0b\x32!.iart.indexer.ImageTextSearchTermH\x00\x12\x32\n\x07\x66\x65\x61ture\x18\x04 \x01(\x0b\x32\x1f.iart.indexer.FeatureSearchTermH\x00\x42\x06\n\x04term\"C\n\x10\x41ggregateRequest\x12\x0e\n\x06\x66ields\x18\x01 \x03(\t\x12\x0c\n\x04size\x18\x02 \x01(\x05\x12\x11\n\tuse_query\x18\x03 \x01(\x08\"\xe1\x06\n\rSearchRequest\x12\'\n\x05terms\x18\x01 \x03(\x0b\x32\x18.iart.indexer.SearchTerm\x12\x34\n\x07sorting\x18\x02 \x01(\x0e\x32#.iart.indexer.SearchRequest.Sorting\x12\x34\n\x07mapping\x18\x03 \x01(\x0e\x32#.iart.indexer.SearchRequest.Mapping\x12\x31\n\taggregate\x18\x04 \x01(\x0b\x32\x1e.iart.indexer.AggregateRequest\x12\x13\n\x0brandom_seed\x18\x05 \x01(\t\x12\x31\n\x06\x65xtras\x18\x06 \x03(\x0e\x32!.iart.indexer.SearchRequest.Extra\x12\x31\n\x0fmapping_options\x18\x07 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12:\n\nclustering\x18\x08 \x01(\x0e\x32&.iart.indexer.SearchRequest.Clustering\x12\x34\n\x12\x63lustering_options\x18\t \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x13\n\x0b\x63ollections\x18\n \x03(\t\x12\"\n\x1ainclude_default_collection\x18\x0b \x01(\x08\x12\x0b\n\x03ids\x18\x0c \x03(\t\"\x97\x01\n\x07Sorting\x12\x13\n\x0fSORTING_DEFAULT\x10\x00\x12\x16\n\x12SORTING_CLASSIFIER\x10\x01\x12\x13\n\x0fSORTING_FEATURE\x10\x02\x12\x12\n\x0eSORTING_RANDOM\x10\x03\x12\x1a\n\x16SORTING_RANDOM_FEATURE\x10\x04\x12\x1a\n\x16SORTING_RANDOM_CLUSTER\x10\x05\"0\n\x07Mapping\x12\x13\n\x0fMAPPING_DEFAULT\x10\x00\x12\x10\n\x0cMAPPING_UMAP\x10\x01\"l\n\nClustering\x12\x16\n\x12\x43LUSTERING_DEFAULT\x10\x00\x12\x11\n\rCLUSTERING_GM\x10\x01\x12\x15\n\x11\x43LUSTERING_KMEANS\x10\x02\x12\x1c\n\x18\x43LUSTERING_AGGLOMERATIVE\x10\x03\"\x1b\n\x05\x45xtra\x12\x12\n\x0e\x45XTRA_FEATURES\x10\x00\"\x19\n\x0bSearchReply\x12\n\n\x02id\x18\x01 \x01(\t\"\xc9\x02\n\x11SearchResultEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12\x13\n\x0b\x63oordinates\x18\x06 \x03(\x02\x12\x0f\n\x07\x63luster\x18\x07 \x01(\x03\x12\x10\n\x08\x64istance\x18\x08 \x01(\x02\x12,\n\ncollection\x18\t \x01(\x0b\x32\x18.iart.indexer.Collection\x12\x0e\n\x06padded\x18\n \x01(\x08\"P\n\x0f\x41ggregateResult\x12\x12\n\nfield_name\x18\x01 \x01(\t\x12)\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\"%\n\x17ListSearchResultRequest\x12\n\n\x02id\x18\x01 \x01(\t\"{\n\x15ListSearchResultReply\x12\x30\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1f.iart.indexer.SearchResultEntry\x12\x30\n\taggregate\x18\x02 \x03(\x0b\x32\x1d.iart.indexer.AggregateResult\"2\n\x0cSuggestGroup\x12\r\n\x05group\x18\x01 \x01(\t\x12\x13\n\x0bsuggestions\x18\x02 \x03(\t\"\x1f\n\x0eSuggestRequest\x12\r\n\x05query\x18\x01 \x01(\t\":\n\x0cSuggestReply\x12*\n\x06groups\x18\x01 \x03(\x0b\x32\x1a.iart.indexer.SuggestGroup\";\n\x13\x42uildIndexerRequest\x12\x0f\n\x07rebuild\x18\x01 \x01(\x08\x12\x13\n\x0b\x63ollections\x18\x02 \x03(\t\"\x13\n\x11\x42uildIndexerReply\"\x1a\n\x18\x42uildFeatureCacheRequest\"\x18\n\x16\x42uildFeatureCacheReply\"\x1d\n\x0b\x44umpRequest\x12\x0e\n\x06origin\x18\x01 \x01(\t\"\x1a\n\tDumpReply\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\x1c\n\x0bLoadRequest\x12\r\n\x05\x65ntry\x18\x01 \x01(\x0c\"\'\n\tLoadReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"5\n\x0fIndexingRequest\x12\"\n\x05image\x18\x01 \x01(\x0b\x32\x13.iart.indexer.Image\"+\n\rIndexingReply\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\n\n\x02id\x18\x02 \x01(\t\"9\n\x0e\x41ggregateReply\x12\'\n\x05\x66ield\x18\x01 \x03(\x0b\x32\x18.iart.indexer.ValueField\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\xf8\x01\n\x08GetReply\x12\n\n\x02id\x18\x01 \x01(\t\x12&\n\x04meta\x18\x02 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12(\n\x06origin\x18\x03 \x03(\x0b\x32\x18.iart.indexer.ValueField\x12\x32\n\nclassifier\x18\x04 \x03(\x0b\x32\x1e.iart.indexer.ClassifierResult\x12,\n\x07\x66\x65\x61ture\x18\x05 \x03(\x0b\x32\x1b.iart.indexer.FeatureResult\x12,\n\ncollection\x18\x07 \x01(\x0b\x32\x18.iart.indexer.Collection\"\x1b\n\rDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\r\n\x0b\x44\x65leteReply\"%\n\x17\x43ollectionDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\x15\x43ollectionDeleteReply\x12\x13\n\x0b\x63ollections\x18\x01 \x03(\t\x12\x0b\n\x03ids\x18\x02 \x03(\t\"\x17\n\x15\x43ollectionListRequest\"D\n\x13\x43ollectionListReply\x12-\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x18.iart.indexer.Collection\"5\n\x0e\x41nalyzeRequest\x12\r\n\x05image\x18\x01 \x01(\x0c\x12\x14\n\x0cplugin_names\x18\x02 \x03(\t\";\n\x0c\x41nalyzeReply\x12+\n\x07results\x18\x01 \x03(\x0b\x32\x1a.iart.indexer.PluginResult2\xc4\n\n\x07Indexer\x12R\n\x0clist_plugins\x12 .iart.indexer.ListPluginsRequest\x1a\x1e.iart.indexer.ListPluginsReply\"\x00\x12\x42\n\x06status\x12\x1b.iart.indexer.StatusRequest\x1a\x19.iart.indexer.StatusReply\"\x00\x12Q\n\x0f\x62uild_suggester\x12\x1e.iart.indexer.SuggesterRequest\x1a\x1c.iart.indexer.SuggesterReply\"\x00\x12\x42\n\x06search\x12\x1b.iart.indexer.SearchRequest\x1a\x19.iart.indexer.SearchReply\"\x00\x12\x62\n\x12list_search_result\x12%.iart.indexer.ListSearchResultRequest\x1a#.iart.indexer.ListSearchResultReply\"\x00\x12K\n\taggregate\x12\x1e.iart.indexer.AggregateRequest\x1a\x1c.iart.indexer.AggregateReply\"\x00\x12\x45\n\x07suggest\x12\x1c.iart.indexer.SuggestRequest\x1a\x1a.iart.indexer.SuggestReply\"\x00\x12\x45\n\x07\x61nalyze\x12\x1c.iart.indexer.AnalyzeRequest\x1a\x1a.iart.indexer.AnalyzeReply\"\x00\x12U\n\rbuild_indexer\x12!.iart.indexer.BuildIndexerRequest\x1a\x1f.iart.indexer.BuildIndexerReply\"\x00\x12\x65\n\x13\x62uild_feature_cache\x12&.iart.indexer.BuildFeatureCacheRequest\x1a$.iart.indexer.BuildFeatureCacheReply\"\x00\x12L\n\x08indexing\x12\x1d.iart.indexer.IndexingRequest\x1a\x1b.iart.indexer.IndexingReply\"\x00(\x01\x30\x01\x12>\n\x04\x64ump\x12\x19.iart.indexer.DumpRequest\x1a\x17.iart.indexer.DumpReply\"\x00\x30\x01\x12@\n\x04load\x12\x19.iart.indexer.LoadRequest\x1a\x17.iart.indexer.LoadReply\"\x00(\x01\x30\x01\x12\x39\n\x03get\x12\x18.iart.indexer.GetRequest\x1a\x16.iart.indexer.GetReply\"\x00\x12\x42\n\x06\x64\x65lete\x12\x1b.iart.indexer.DeleteRequest\x1a\x19.iart.indexer.DeleteReply\"\x00\x12\x61\n\x11\x63ollection_delete\x12%.iart.indexer.CollectionDeleteRequest\x1a#.iart.indexer.CollectionDeleteReply\"\x00\x12[\n\x0f\x63ollection_list\x12#.iart.indexer.CollectionListRequest\x1a!.iart.indexer.CollectionListReply\"\x00\x42\x02P\x01\x62\x06proto3')
 
-
-
-_COLLECTION = DESCRIPTOR.message_types_by_name['Collection']
-_PLUGINRUN = DESCRIPTOR.message_types_by_name['PluginRun']
-_ROI = DESCRIPTOR.message_types_by_name['RoI']
-_VALUEFIELD = DESCRIPTOR.message_types_by_name['ValueField']
-_IMAGE = DESCRIPTOR.message_types_by_name['Image']
-_PLUGINCONFIG = DESCRIPTOR.message_types_by_name['PluginConfig']
-_CONCEPT = DESCRIPTOR.message_types_by_name['Concept']
-_CLASSIFIERRESULT = DESCRIPTOR.message_types_by_name['ClassifierResult']
-_FEATURERESULT = DESCRIPTOR.message_types_by_name['FeatureResult']
-_PLUGINRESULT = DESCRIPTOR.message_types_by_name['PluginResult']
-_IMAGERESULT = DESCRIPTOR.message_types_by_name['ImageResult']
-_INDEXINGRESULT = DESCRIPTOR.message_types_by_name['IndexingResult']
-_PLUGININFO = DESCRIPTOR.message_types_by_name['PluginInfo']
-_LISTPLUGINSREQUEST = DESCRIPTOR.message_types_by_name['ListPluginsRequest']
-_LISTPLUGINSREPLY = DESCRIPTOR.message_types_by_name['ListPluginsReply']
-_STATUSREQUEST = DESCRIPTOR.message_types_by_name['StatusRequest']
-_STATUSREPLY = DESCRIPTOR.message_types_by_name['StatusReply']
-_SUGGESTERREQUEST = DESCRIPTOR.message_types_by_name['SuggesterRequest']
-_SUGGESTERREPLY = DESCRIPTOR.message_types_by_name['SuggesterReply']
-_FEATURESEARCHTERM = DESCRIPTOR.message_types_by_name['FeatureSearchTerm']
-_TEXTSEARCHTERM = DESCRIPTOR.message_types_by_name['TextSearchTerm']
-_IMAGETEXTSEARCHTERM = DESCRIPTOR.message_types_by_name['ImageTextSearchTerm']
-_NUMBERSEARCHTERM = DESCRIPTOR.message_types_by_name['NumberSearchTerm']
-_SEARCHTERM = DESCRIPTOR.message_types_by_name['SearchTerm']
-_AGGREGATEREQUEST = DESCRIPTOR.message_types_by_name['AggregateRequest']
-_SEARCHREQUEST = DESCRIPTOR.message_types_by_name['SearchRequest']
-_SEARCHREPLY = DESCRIPTOR.message_types_by_name['SearchReply']
-_SEARCHRESULTENTRY = DESCRIPTOR.message_types_by_name['SearchResultEntry']
-_AGGREGATERESULT = DESCRIPTOR.message_types_by_name['AggregateResult']
-_LISTSEARCHRESULTREQUEST = DESCRIPTOR.message_types_by_name['ListSearchResultRequest']
-_LISTSEARCHRESULTREPLY = DESCRIPTOR.message_types_by_name['ListSearchResultReply']
-_SUGGESTGROUP = DESCRIPTOR.message_types_by_name['SuggestGroup']
-_SUGGESTREQUEST = DESCRIPTOR.message_types_by_name['SuggestRequest']
-_SUGGESTREPLY = DESCRIPTOR.message_types_by_name['SuggestReply']
-_BUILDINDEXERREQUEST = DESCRIPTOR.message_types_by_name['BuildIndexerRequest']
-_BUILDINDEXERREPLY = DESCRIPTOR.message_types_by_name['BuildIndexerReply']
-_BUILDFEATURECACHEREQUEST = DESCRIPTOR.message_types_by_name['BuildFeatureCacheRequest']
-_BUILDFEATURECACHEREPLY = DESCRIPTOR.message_types_by_name['BuildFeatureCacheReply']
-_DUMPREQUEST = DESCRIPTOR.message_types_by_name['DumpRequest']
-_DUMPREPLY = DESCRIPTOR.message_types_by_name['DumpReply']
-_LOADREQUEST = DESCRIPTOR.message_types_by_name['LoadRequest']
-_LOADREPLY = DESCRIPTOR.message_types_by_name['LoadReply']
-_INDEXINGREQUEST = DESCRIPTOR.message_types_by_name['IndexingRequest']
-_INDEXINGREPLY = DESCRIPTOR.message_types_by_name['IndexingReply']
-_AGGREGATEREPLY = DESCRIPTOR.message_types_by_name['AggregateReply']
-_GETREQUEST = DESCRIPTOR.message_types_by_name['GetRequest']
-_GETREPLY = DESCRIPTOR.message_types_by_name['GetReply']
-_DELETEREQUEST = DESCRIPTOR.message_types_by_name['DeleteRequest']
-_DELETEREPLY = DESCRIPTOR.message_types_by_name['DeleteReply']
-_COLLECTIONDELETEREQUEST = DESCRIPTOR.message_types_by_name['CollectionDeleteRequest']
-_COLLECTIONDELETEREPLY = DESCRIPTOR.message_types_by_name['CollectionDeleteReply']
-_COLLECTIONLISTREQUEST = DESCRIPTOR.message_types_by_name['CollectionListRequest']
-_COLLECTIONLISTREPLY = DESCRIPTOR.message_types_by_name['CollectionListReply']
-_FEATURESEARCHTERM_FLAG = _FEATURESEARCHTERM.enum_types_by_name['Flag']
-_TEXTSEARCHTERM_FLAG = _TEXTSEARCHTERM.enum_types_by_name['Flag']
-_IMAGETEXTSEARCHTERM_FLAG = _IMAGETEXTSEARCHTERM.enum_types_by_name['Flag']
-_NUMBERSEARCHTERM_RELATION = _NUMBERSEARCHTERM.enum_types_by_name['Relation']
-_NUMBERSEARCHTERM_FLAG = _NUMBERSEARCHTERM.enum_types_by_name['Flag']
-_SEARCHREQUEST_SORTING = _SEARCHREQUEST.enum_types_by_name['Sorting']
-_SEARCHREQUEST_MAPPING = _SEARCHREQUEST.enum_types_by_name['Mapping']
-_SEARCHREQUEST_CLUSTERING = _SEARCHREQUEST.enum_types_by_name['Clustering']
-_SEARCHREQUEST_EXTRA = _SEARCHREQUEST.enum_types_by_name['Extra']
-Collection = _reflection.GeneratedProtocolMessageType('Collection', (_message.Message,), {
-  'DESCRIPTOR' : _COLLECTION,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.Collection)
-  })
-_sym_db.RegisterMessage(Collection)
-
-PluginRun = _reflection.GeneratedProtocolMessageType('PluginRun', (_message.Message,), {
-  'DESCRIPTOR' : _PLUGINRUN,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.PluginRun)
-  })
-_sym_db.RegisterMessage(PluginRun)
-
-RoI = _reflection.GeneratedProtocolMessageType('RoI', (_message.Message,), {
-  'DESCRIPTOR' : _ROI,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.RoI)
-  })
-_sym_db.RegisterMessage(RoI)
-
-ValueField = _reflection.GeneratedProtocolMessageType('ValueField', (_message.Message,), {
-  'DESCRIPTOR' : _VALUEFIELD,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ValueField)
-  })
-_sym_db.RegisterMessage(ValueField)
-
-Image = _reflection.GeneratedProtocolMessageType('Image', (_message.Message,), {
-  'DESCRIPTOR' : _IMAGE,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.Image)
-  })
-_sym_db.RegisterMessage(Image)
-
-PluginConfig = _reflection.GeneratedProtocolMessageType('PluginConfig', (_message.Message,), {
-  'DESCRIPTOR' : _PLUGINCONFIG,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.PluginConfig)
-  })
-_sym_db.RegisterMessage(PluginConfig)
-
-Concept = _reflection.GeneratedProtocolMessageType('Concept', (_message.Message,), {
-  'DESCRIPTOR' : _CONCEPT,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.Concept)
-  })
-_sym_db.RegisterMessage(Concept)
-
-ClassifierResult = _reflection.GeneratedProtocolMessageType('ClassifierResult', (_message.Message,), {
-  'DESCRIPTOR' : _CLASSIFIERRESULT,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ClassifierResult)
-  })
-_sym_db.RegisterMessage(ClassifierResult)
-
-FeatureResult = _reflection.GeneratedProtocolMessageType('FeatureResult', (_message.Message,), {
-  'DESCRIPTOR' : _FEATURERESULT,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.FeatureResult)
-  })
-_sym_db.RegisterMessage(FeatureResult)
-
-PluginResult = _reflection.GeneratedProtocolMessageType('PluginResult', (_message.Message,), {
-  'DESCRIPTOR' : _PLUGINRESULT,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.PluginResult)
-  })
-_sym_db.RegisterMessage(PluginResult)
-
-ImageResult = _reflection.GeneratedProtocolMessageType('ImageResult', (_message.Message,), {
-  'DESCRIPTOR' : _IMAGERESULT,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ImageResult)
-  })
-_sym_db.RegisterMessage(ImageResult)
-
-IndexingResult = _reflection.GeneratedProtocolMessageType('IndexingResult', (_message.Message,), {
-  'DESCRIPTOR' : _INDEXINGRESULT,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.IndexingResult)
-  })
-_sym_db.RegisterMessage(IndexingResult)
-
-PluginInfo = _reflection.GeneratedProtocolMessageType('PluginInfo', (_message.Message,), {
-  'DESCRIPTOR' : _PLUGININFO,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.PluginInfo)
-  })
-_sym_db.RegisterMessage(PluginInfo)
-
-ListPluginsRequest = _reflection.GeneratedProtocolMessageType('ListPluginsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LISTPLUGINSREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ListPluginsRequest)
-  })
-_sym_db.RegisterMessage(ListPluginsRequest)
-
-ListPluginsReply = _reflection.GeneratedProtocolMessageType('ListPluginsReply', (_message.Message,), {
-  'DESCRIPTOR' : _LISTPLUGINSREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ListPluginsReply)
-  })
-_sym_db.RegisterMessage(ListPluginsReply)
-
-StatusRequest = _reflection.GeneratedProtocolMessageType('StatusRequest', (_message.Message,), {
-  'DESCRIPTOR' : _STATUSREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.StatusRequest)
-  })
-_sym_db.RegisterMessage(StatusRequest)
-
-StatusReply = _reflection.GeneratedProtocolMessageType('StatusReply', (_message.Message,), {
-  'DESCRIPTOR' : _STATUSREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.StatusReply)
-  })
-_sym_db.RegisterMessage(StatusReply)
-
-SuggesterRequest = _reflection.GeneratedProtocolMessageType('SuggesterRequest', (_message.Message,), {
-  'DESCRIPTOR' : _SUGGESTERREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SuggesterRequest)
-  })
-_sym_db.RegisterMessage(SuggesterRequest)
-
-SuggesterReply = _reflection.GeneratedProtocolMessageType('SuggesterReply', (_message.Message,), {
-  'DESCRIPTOR' : _SUGGESTERREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SuggesterReply)
-  })
-_sym_db.RegisterMessage(SuggesterReply)
-
-FeatureSearchTerm = _reflection.GeneratedProtocolMessageType('FeatureSearchTerm', (_message.Message,), {
-  'DESCRIPTOR' : _FEATURESEARCHTERM,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.FeatureSearchTerm)
-  })
-_sym_db.RegisterMessage(FeatureSearchTerm)
-
-TextSearchTerm = _reflection.GeneratedProtocolMessageType('TextSearchTerm', (_message.Message,), {
-  'DESCRIPTOR' : _TEXTSEARCHTERM,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.TextSearchTerm)
-  })
-_sym_db.RegisterMessage(TextSearchTerm)
-
-ImageTextSearchTerm = _reflection.GeneratedProtocolMessageType('ImageTextSearchTerm', (_message.Message,), {
-  'DESCRIPTOR' : _IMAGETEXTSEARCHTERM,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ImageTextSearchTerm)
-  })
-_sym_db.RegisterMessage(ImageTextSearchTerm)
-
-NumberSearchTerm = _reflection.GeneratedProtocolMessageType('NumberSearchTerm', (_message.Message,), {
-  'DESCRIPTOR' : _NUMBERSEARCHTERM,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.NumberSearchTerm)
-  })
-_sym_db.RegisterMessage(NumberSearchTerm)
-
-SearchTerm = _reflection.GeneratedProtocolMessageType('SearchTerm', (_message.Message,), {
-  'DESCRIPTOR' : _SEARCHTERM,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SearchTerm)
-  })
-_sym_db.RegisterMessage(SearchTerm)
-
-AggregateRequest = _reflection.GeneratedProtocolMessageType('AggregateRequest', (_message.Message,), {
-  'DESCRIPTOR' : _AGGREGATEREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.AggregateRequest)
-  })
-_sym_db.RegisterMessage(AggregateRequest)
-
-SearchRequest = _reflection.GeneratedProtocolMessageType('SearchRequest', (_message.Message,), {
-  'DESCRIPTOR' : _SEARCHREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SearchRequest)
-  })
-_sym_db.RegisterMessage(SearchRequest)
-
-SearchReply = _reflection.GeneratedProtocolMessageType('SearchReply', (_message.Message,), {
-  'DESCRIPTOR' : _SEARCHREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SearchReply)
-  })
-_sym_db.RegisterMessage(SearchReply)
-
-SearchResultEntry = _reflection.GeneratedProtocolMessageType('SearchResultEntry', (_message.Message,), {
-  'DESCRIPTOR' : _SEARCHRESULTENTRY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SearchResultEntry)
-  })
-_sym_db.RegisterMessage(SearchResultEntry)
-
-AggregateResult = _reflection.GeneratedProtocolMessageType('AggregateResult', (_message.Message,), {
-  'DESCRIPTOR' : _AGGREGATERESULT,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.AggregateResult)
-  })
-_sym_db.RegisterMessage(AggregateResult)
-
-ListSearchResultRequest = _reflection.GeneratedProtocolMessageType('ListSearchResultRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LISTSEARCHRESULTREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ListSearchResultRequest)
-  })
-_sym_db.RegisterMessage(ListSearchResultRequest)
-
-ListSearchResultReply = _reflection.GeneratedProtocolMessageType('ListSearchResultReply', (_message.Message,), {
-  'DESCRIPTOR' : _LISTSEARCHRESULTREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.ListSearchResultReply)
-  })
-_sym_db.RegisterMessage(ListSearchResultReply)
-
-SuggestGroup = _reflection.GeneratedProtocolMessageType('SuggestGroup', (_message.Message,), {
-  'DESCRIPTOR' : _SUGGESTGROUP,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SuggestGroup)
-  })
-_sym_db.RegisterMessage(SuggestGroup)
-
-SuggestRequest = _reflection.GeneratedProtocolMessageType('SuggestRequest', (_message.Message,), {
-  'DESCRIPTOR' : _SUGGESTREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SuggestRequest)
-  })
-_sym_db.RegisterMessage(SuggestRequest)
-
-SuggestReply = _reflection.GeneratedProtocolMessageType('SuggestReply', (_message.Message,), {
-  'DESCRIPTOR' : _SUGGESTREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.SuggestReply)
-  })
-_sym_db.RegisterMessage(SuggestReply)
-
-BuildIndexerRequest = _reflection.GeneratedProtocolMessageType('BuildIndexerRequest', (_message.Message,), {
-  'DESCRIPTOR' : _BUILDINDEXERREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.BuildIndexerRequest)
-  })
-_sym_db.RegisterMessage(BuildIndexerRequest)
-
-BuildIndexerReply = _reflection.GeneratedProtocolMessageType('BuildIndexerReply', (_message.Message,), {
-  'DESCRIPTOR' : _BUILDINDEXERREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.BuildIndexerReply)
-  })
-_sym_db.RegisterMessage(BuildIndexerReply)
-
-BuildFeatureCacheRequest = _reflection.GeneratedProtocolMessageType('BuildFeatureCacheRequest', (_message.Message,), {
-  'DESCRIPTOR' : _BUILDFEATURECACHEREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.BuildFeatureCacheRequest)
-  })
-_sym_db.RegisterMessage(BuildFeatureCacheRequest)
-
-BuildFeatureCacheReply = _reflection.GeneratedProtocolMessageType('BuildFeatureCacheReply', (_message.Message,), {
-  'DESCRIPTOR' : _BUILDFEATURECACHEREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.BuildFeatureCacheReply)
-  })
-_sym_db.RegisterMessage(BuildFeatureCacheReply)
-
-DumpRequest = _reflection.GeneratedProtocolMessageType('DumpRequest', (_message.Message,), {
-  'DESCRIPTOR' : _DUMPREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.DumpRequest)
-  })
-_sym_db.RegisterMessage(DumpRequest)
-
-DumpReply = _reflection.GeneratedProtocolMessageType('DumpReply', (_message.Message,), {
-  'DESCRIPTOR' : _DUMPREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.DumpReply)
-  })
-_sym_db.RegisterMessage(DumpReply)
-
-LoadRequest = _reflection.GeneratedProtocolMessageType('LoadRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LOADREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.LoadRequest)
-  })
-_sym_db.RegisterMessage(LoadRequest)
-
-LoadReply = _reflection.GeneratedProtocolMessageType('LoadReply', (_message.Message,), {
-  'DESCRIPTOR' : _LOADREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.LoadReply)
-  })
-_sym_db.RegisterMessage(LoadReply)
-
-IndexingRequest = _reflection.GeneratedProtocolMessageType('IndexingRequest', (_message.Message,), {
-  'DESCRIPTOR' : _INDEXINGREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.IndexingRequest)
-  })
-_sym_db.RegisterMessage(IndexingRequest)
-
-IndexingReply = _reflection.GeneratedProtocolMessageType('IndexingReply', (_message.Message,), {
-  'DESCRIPTOR' : _INDEXINGREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.IndexingReply)
-  })
-_sym_db.RegisterMessage(IndexingReply)
-
-AggregateReply = _reflection.GeneratedProtocolMessageType('AggregateReply', (_message.Message,), {
-  'DESCRIPTOR' : _AGGREGATEREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.AggregateReply)
-  })
-_sym_db.RegisterMessage(AggregateReply)
-
-GetRequest = _reflection.GeneratedProtocolMessageType('GetRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.GetRequest)
-  })
-_sym_db.RegisterMessage(GetRequest)
-
-GetReply = _reflection.GeneratedProtocolMessageType('GetReply', (_message.Message,), {
-  'DESCRIPTOR' : _GETREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.GetReply)
-  })
-_sym_db.RegisterMessage(GetReply)
-
-DeleteRequest = _reflection.GeneratedProtocolMessageType('DeleteRequest', (_message.Message,), {
-  'DESCRIPTOR' : _DELETEREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.DeleteRequest)
-  })
-_sym_db.RegisterMessage(DeleteRequest)
-
-DeleteReply = _reflection.GeneratedProtocolMessageType('DeleteReply', (_message.Message,), {
-  'DESCRIPTOR' : _DELETEREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.DeleteReply)
-  })
-_sym_db.RegisterMessage(DeleteReply)
-
-CollectionDeleteRequest = _reflection.GeneratedProtocolMessageType('CollectionDeleteRequest', (_message.Message,), {
-  'DESCRIPTOR' : _COLLECTIONDELETEREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.CollectionDeleteRequest)
-  })
-_sym_db.RegisterMessage(CollectionDeleteRequest)
-
-CollectionDeleteReply = _reflection.GeneratedProtocolMessageType('CollectionDeleteReply', (_message.Message,), {
-  'DESCRIPTOR' : _COLLECTIONDELETEREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.CollectionDeleteReply)
-  })
-_sym_db.RegisterMessage(CollectionDeleteReply)
-
-CollectionListRequest = _reflection.GeneratedProtocolMessageType('CollectionListRequest', (_message.Message,), {
-  'DESCRIPTOR' : _COLLECTIONLISTREQUEST,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.CollectionListRequest)
-  })
-_sym_db.RegisterMessage(CollectionListRequest)
-
-CollectionListReply = _reflection.GeneratedProtocolMessageType('CollectionListReply', (_message.Message,), {
-  'DESCRIPTOR' : _COLLECTIONLISTREPLY,
-  '__module__' : 'indexer_pb2'
-  # @@protoc_insertion_point(class_scope:iart.indexer.CollectionListReply)
-  })
-_sym_db.RegisterMessage(CollectionListReply)
-
-_INDEXER = DESCRIPTOR.services_by_name['Indexer']
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'indexer_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _COLLECTION._serialized_start=31
-  _COLLECTION._serialized_end=88
-  _PLUGINRUN._serialized_start=90
-  _PLUGINRUN._serialized_end=131
-  _ROI._serialized_start=133
-  _ROI._serialized_end=191
-  _VALUEFIELD._serialized_start=193
-  _VALUEFIELD._serialized_end=289
-  _IMAGE._serialized_start=292
-  _IMAGE._serialized_end=515
-  _PLUGINCONFIG._serialized_start=517
-  _PLUGINCONFIG._serialized_end=591
-  _CONCEPT._serialized_start=593
-  _CONCEPT._serialized_end=647
-  _CLASSIFIERRESULT._serialized_start=649
-  _CLASSIFIERRESULT._serialized_end=724
-  _FEATURERESULT._serialized_start=726
-  _FEATURERESULT._serialized_end=804
-  _PLUGINRESULT._serialized_start=807
-  _PLUGINRESULT._serialized_end=980
-  _IMAGERESULT._serialized_start=982
-  _IMAGERESULT._serialized_end=1076
-  _INDEXINGRESULT._serialized_start=1078
-  _INDEXINGRESULT._serialized_end=1138
-  _PLUGININFO._serialized_start=1140
-  _PLUGININFO._serialized_end=1226
-  _LISTPLUGINSREQUEST._serialized_start=1228
-  _LISTPLUGINSREQUEST._serialized_end=1248
-  _LISTPLUGINSREPLY._serialized_start=1250
-  _LISTPLUGINSREPLY._serialized_end=1311
-  _STATUSREQUEST._serialized_start=1313
-  _STATUSREQUEST._serialized_end=1340
-  _STATUSREPLY._serialized_start=1342
-  _STATUSREPLY._serialized_end=1431
-  _SUGGESTERREQUEST._serialized_start=1433
-  _SUGGESTERREQUEST._serialized_end=1472
-  _SUGGESTERREPLY._serialized_start=1474
-  _SUGGESTERREPLY._serialized_end=1502
-  _FEATURESEARCHTERM._serialized_start=1505
-  _FEATURESEARCHTERM._serialized_end=1690
-  _FEATURESEARCHTERM_FLAG._serialized_start=1656
-  _FEATURESEARCHTERM_FLAG._serialized_end=1690
-  _TEXTSEARCHTERM._serialized_start=1693
-  _TEXTSEARCHTERM._serialized_end=1827
-  _TEXTSEARCHTERM_FLAG._serialized_start=1790
-  _TEXTSEARCHTERM_FLAG._serialized_end=1827
-  _IMAGETEXTSEARCHTERM._serialized_start=1830
-  _IMAGETEXTSEARCHTERM._serialized_end=1998
-  _IMAGETEXTSEARCHTERM_FLAG._serialized_start=1656
-  _IMAGETEXTSEARCHTERM_FLAG._serialized_end=1690
-  _NUMBERSEARCHTERM._serialized_start=2001
-  _NUMBERSEARCHTERM._serialized_end=2332
-  _NUMBERSEARCHTERM_RELATION._serialized_start=2214
-  _NUMBERSEARCHTERM_RELATION._serialized_end=2284
-  _NUMBERSEARCHTERM_FLAG._serialized_start=1790
-  _NUMBERSEARCHTERM_FLAG._serialized_end=1827
-  _SEARCHTERM._serialized_start=2335
-  _SEARCHTERM._serialized_end=2560
-  _AGGREGATEREQUEST._serialized_start=2562
-  _AGGREGATEREQUEST._serialized_end=2629
-  _SEARCHREQUEST._serialized_start=2632
-  _SEARCHREQUEST._serialized_end=3497
-  _SEARCHREQUEST_SORTING._serialized_start=3157
-  _SEARCHREQUEST_SORTING._serialized_end=3308
-  _SEARCHREQUEST_MAPPING._serialized_start=3310
-  _SEARCHREQUEST_MAPPING._serialized_end=3358
-  _SEARCHREQUEST_CLUSTERING._serialized_start=3360
-  _SEARCHREQUEST_CLUSTERING._serialized_end=3468
-  _SEARCHREQUEST_EXTRA._serialized_start=3470
-  _SEARCHREQUEST_EXTRA._serialized_end=3497
-  _SEARCHREPLY._serialized_start=3499
-  _SEARCHREPLY._serialized_end=3524
-  _SEARCHRESULTENTRY._serialized_start=3527
-  _SEARCHRESULTENTRY._serialized_end=3856
-  _AGGREGATERESULT._serialized_start=3858
-  _AGGREGATERESULT._serialized_end=3938
-  _LISTSEARCHRESULTREQUEST._serialized_start=3940
-  _LISTSEARCHRESULTREQUEST._serialized_end=3977
-  _LISTSEARCHRESULTREPLY._serialized_start=3979
-  _LISTSEARCHRESULTREPLY._serialized_end=4102
-  _SUGGESTGROUP._serialized_start=4104
-  _SUGGESTGROUP._serialized_end=4154
-  _SUGGESTREQUEST._serialized_start=4156
-  _SUGGESTREQUEST._serialized_end=4187
-  _SUGGESTREPLY._serialized_start=4189
-  _SUGGESTREPLY._serialized_end=4247
-  _BUILDINDEXERREQUEST._serialized_start=4249
-  _BUILDINDEXERREQUEST._serialized_end=4308
-  _BUILDINDEXERREPLY._serialized_start=4310
-  _BUILDINDEXERREPLY._serialized_end=4329
-  _BUILDFEATURECACHEREQUEST._serialized_start=4331
-  _BUILDFEATURECACHEREQUEST._serialized_end=4357
-  _BUILDFEATURECACHEREPLY._serialized_start=4359
-  _BUILDFEATURECACHEREPLY._serialized_end=4383
-  _DUMPREQUEST._serialized_start=4385
-  _DUMPREQUEST._serialized_end=4414
-  _DUMPREPLY._serialized_start=4416
-  _DUMPREPLY._serialized_end=4442
-  _LOADREQUEST._serialized_start=4444
-  _LOADREQUEST._serialized_end=4472
-  _LOADREPLY._serialized_start=4474
-  _LOADREPLY._serialized_end=4513
-  _INDEXINGREQUEST._serialized_start=4515
-  _INDEXINGREQUEST._serialized_end=4568
-  _INDEXINGREPLY._serialized_start=4570
-  _INDEXINGREPLY._serialized_end=4613
-  _AGGREGATEREPLY._serialized_start=4615
-  _AGGREGATEREPLY._serialized_end=4672
-  _GETREQUEST._serialized_start=4674
-  _GETREQUEST._serialized_end=4698
-  _GETREPLY._serialized_start=4701
-  _GETREPLY._serialized_end=4949
-  _DELETEREQUEST._serialized_start=4951
-  _DELETEREQUEST._serialized_end=4978
-  _DELETEREPLY._serialized_start=4980
-  _DELETEREPLY._serialized_end=4993
-  _COLLECTIONDELETEREQUEST._serialized_start=4995
-  _COLLECTIONDELETEREQUEST._serialized_end=5032
-  _COLLECTIONDELETEREPLY._serialized_start=5034
-  _COLLECTIONDELETEREPLY._serialized_end=5091
-  _COLLECTIONLISTREQUEST._serialized_start=5093
-  _COLLECTIONLISTREQUEST._serialized_end=5116
-  _COLLECTIONLISTREPLY._serialized_start=5118
-  _COLLECTIONLISTREPLY._serialized_end=5186
-  _INDEXER._serialized_start=5189
-  _INDEXER._serialized_end=6466
+  _globals['_COLLECTION']._serialized_start=31
+  _globals['_COLLECTION']._serialized_end=88
+  _globals['_PLUGINRUN']._serialized_start=90
+  _globals['_PLUGINRUN']._serialized_end=131
+  _globals['_ROI']._serialized_start=133
+  _globals['_ROI']._serialized_end=191
+  _globals['_VALUEFIELD']._serialized_start=193
+  _globals['_VALUEFIELD']._serialized_end=289
+  _globals['_IMAGE']._serialized_start=292
+  _globals['_IMAGE']._serialized_end=515
+  _globals['_PLUGINCONFIG']._serialized_start=517
+  _globals['_PLUGINCONFIG']._serialized_end=591
+  _globals['_CONCEPT']._serialized_start=593
+  _globals['_CONCEPT']._serialized_end=647
+  _globals['_CLASSIFIERRESULT']._serialized_start=649
+  _globals['_CLASSIFIERRESULT']._serialized_end=724
+  _globals['_FEATURERESULT']._serialized_start=726
+  _globals['_FEATURERESULT']._serialized_end=804
+  _globals['_PLUGINRESULT']._serialized_start=807
+  _globals['_PLUGINRESULT']._serialized_end=980
+  _globals['_IMAGERESULT']._serialized_start=982
+  _globals['_IMAGERESULT']._serialized_end=1076
+  _globals['_INDEXINGRESULT']._serialized_start=1078
+  _globals['_INDEXINGRESULT']._serialized_end=1138
+  _globals['_PLUGININFO']._serialized_start=1140
+  _globals['_PLUGININFO']._serialized_end=1226
+  _globals['_LISTPLUGINSREQUEST']._serialized_start=1228
+  _globals['_LISTPLUGINSREQUEST']._serialized_end=1248
+  _globals['_LISTPLUGINSREPLY']._serialized_start=1250
+  _globals['_LISTPLUGINSREPLY']._serialized_end=1311
+  _globals['_STATUSREQUEST']._serialized_start=1313
+  _globals['_STATUSREQUEST']._serialized_end=1340
+  _globals['_STATUSREPLY']._serialized_start=1342
+  _globals['_STATUSREPLY']._serialized_end=1431
+  _globals['_SUGGESTERREQUEST']._serialized_start=1433
+  _globals['_SUGGESTERREQUEST']._serialized_end=1472
+  _globals['_SUGGESTERREPLY']._serialized_start=1474
+  _globals['_SUGGESTERREPLY']._serialized_end=1502
+  _globals['_FEATURESEARCHTERM']._serialized_start=1505
+  _globals['_FEATURESEARCHTERM']._serialized_end=1690
+  _globals['_FEATURESEARCHTERM_FLAG']._serialized_start=1656
+  _globals['_FEATURESEARCHTERM_FLAG']._serialized_end=1690
+  _globals['_TEXTSEARCHTERM']._serialized_start=1693
+  _globals['_TEXTSEARCHTERM']._serialized_end=1827
+  _globals['_TEXTSEARCHTERM_FLAG']._serialized_start=1790
+  _globals['_TEXTSEARCHTERM_FLAG']._serialized_end=1827
+  _globals['_IMAGETEXTSEARCHTERM']._serialized_start=1830
+  _globals['_IMAGETEXTSEARCHTERM']._serialized_end=1998
+  _globals['_IMAGETEXTSEARCHTERM_FLAG']._serialized_start=1656
+  _globals['_IMAGETEXTSEARCHTERM_FLAG']._serialized_end=1690
+  _globals['_NUMBERSEARCHTERM']._serialized_start=2001
+  _globals['_NUMBERSEARCHTERM']._serialized_end=2332
+  _globals['_NUMBERSEARCHTERM_RELATION']._serialized_start=2214
+  _globals['_NUMBERSEARCHTERM_RELATION']._serialized_end=2284
+  _globals['_NUMBERSEARCHTERM_FLAG']._serialized_start=1790
+  _globals['_NUMBERSEARCHTERM_FLAG']._serialized_end=1827
+  _globals['_SEARCHTERM']._serialized_start=2335
+  _globals['_SEARCHTERM']._serialized_end=2560
+  _globals['_AGGREGATEREQUEST']._serialized_start=2562
+  _globals['_AGGREGATEREQUEST']._serialized_end=2629
+  _globals['_SEARCHREQUEST']._serialized_start=2632
+  _globals['_SEARCHREQUEST']._serialized_end=3497
+  _globals['_SEARCHREQUEST_SORTING']._serialized_start=3157
+  _globals['_SEARCHREQUEST_SORTING']._serialized_end=3308
+  _globals['_SEARCHREQUEST_MAPPING']._serialized_start=3310
+  _globals['_SEARCHREQUEST_MAPPING']._serialized_end=3358
+  _globals['_SEARCHREQUEST_CLUSTERING']._serialized_start=3360
+  _globals['_SEARCHREQUEST_CLUSTERING']._serialized_end=3468
+  _globals['_SEARCHREQUEST_EXTRA']._serialized_start=3470
+  _globals['_SEARCHREQUEST_EXTRA']._serialized_end=3497
+  _globals['_SEARCHREPLY']._serialized_start=3499
+  _globals['_SEARCHREPLY']._serialized_end=3524
+  _globals['_SEARCHRESULTENTRY']._serialized_start=3527
+  _globals['_SEARCHRESULTENTRY']._serialized_end=3856
+  _globals['_AGGREGATERESULT']._serialized_start=3858
+  _globals['_AGGREGATERESULT']._serialized_end=3938
+  _globals['_LISTSEARCHRESULTREQUEST']._serialized_start=3940
+  _globals['_LISTSEARCHRESULTREQUEST']._serialized_end=3977
+  _globals['_LISTSEARCHRESULTREPLY']._serialized_start=3979
+  _globals['_LISTSEARCHRESULTREPLY']._serialized_end=4102
+  _globals['_SUGGESTGROUP']._serialized_start=4104
+  _globals['_SUGGESTGROUP']._serialized_end=4154
+  _globals['_SUGGESTREQUEST']._serialized_start=4156
+  _globals['_SUGGESTREQUEST']._serialized_end=4187
+  _globals['_SUGGESTREPLY']._serialized_start=4189
+  _globals['_SUGGESTREPLY']._serialized_end=4247
+  _globals['_BUILDINDEXERREQUEST']._serialized_start=4249
+  _globals['_BUILDINDEXERREQUEST']._serialized_end=4308
+  _globals['_BUILDINDEXERREPLY']._serialized_start=4310
+  _globals['_BUILDINDEXERREPLY']._serialized_end=4329
+  _globals['_BUILDFEATURECACHEREQUEST']._serialized_start=4331
+  _globals['_BUILDFEATURECACHEREQUEST']._serialized_end=4357
+  _globals['_BUILDFEATURECACHEREPLY']._serialized_start=4359
+  _globals['_BUILDFEATURECACHEREPLY']._serialized_end=4383
+  _globals['_DUMPREQUEST']._serialized_start=4385
+  _globals['_DUMPREQUEST']._serialized_end=4414
+  _globals['_DUMPREPLY']._serialized_start=4416
+  _globals['_DUMPREPLY']._serialized_end=4442
+  _globals['_LOADREQUEST']._serialized_start=4444
+  _globals['_LOADREQUEST']._serialized_end=4472
+  _globals['_LOADREPLY']._serialized_start=4474
+  _globals['_LOADREPLY']._serialized_end=4513
+  _globals['_INDEXINGREQUEST']._serialized_start=4515
+  _globals['_INDEXINGREQUEST']._serialized_end=4568
+  _globals['_INDEXINGREPLY']._serialized_start=4570
+  _globals['_INDEXINGREPLY']._serialized_end=4613
+  _globals['_AGGREGATEREPLY']._serialized_start=4615
+  _globals['_AGGREGATEREPLY']._serialized_end=4672
+  _globals['_GETREQUEST']._serialized_start=4674
+  _globals['_GETREQUEST']._serialized_end=4698
+  _globals['_GETREPLY']._serialized_start=4701
+  _globals['_GETREPLY']._serialized_end=4949
+  _globals['_DELETEREQUEST']._serialized_start=4951
+  _globals['_DELETEREQUEST']._serialized_end=4978
+  _globals['_DELETEREPLY']._serialized_start=4980
+  _globals['_DELETEREPLY']._serialized_end=4993
+  _globals['_COLLECTIONDELETEREQUEST']._serialized_start=4995
+  _globals['_COLLECTIONDELETEREQUEST']._serialized_end=5032
+  _globals['_COLLECTIONDELETEREPLY']._serialized_start=5034
+  _globals['_COLLECTIONDELETEREPLY']._serialized_end=5091
+  _globals['_COLLECTIONLISTREQUEST']._serialized_start=5093
+  _globals['_COLLECTIONLISTREQUEST']._serialized_end=5116
+  _globals['_COLLECTIONLISTREPLY']._serialized_start=5118
+  _globals['_COLLECTIONLISTREPLY']._serialized_end=5186
+  _globals['_ANALYZEREQUEST']._serialized_start=5188
+  _globals['_ANALYZEREQUEST']._serialized_end=5241
+  _globals['_ANALYZEREPLY']._serialized_start=5243
+  _globals['_ANALYZEREPLY']._serialized_end=5302
+  _globals['_INDEXER']._serialized_start=5305
+  _globals['_INDEXER']._serialized_end=6653
 # @@protoc_insertion_point(module_scope)

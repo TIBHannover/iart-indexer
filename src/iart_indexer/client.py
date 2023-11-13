@@ -252,6 +252,15 @@ class Client:
 
         return result
 
+    def analyze(self):
+        channel = grpc.insecure_channel(f"{self.host}:{self.port}")
+        stub = indexer_pb2_grpc.IndexerStub(channel)
+        request = indexer_pb2.AnalyzeRequest()
+        request.image = b''  # open('path/to/image.jpg', "rb").read()
+        request.plugin_names.append('IconclassCLIPClassifier')
+        response = stub.analyze(request)
+        return response
+
     def copy_images(self, paths, image_paths=None, image_output=None):
         if not isinstance(paths, (list, set)):
             ext = os.path.splitext(paths)[1]

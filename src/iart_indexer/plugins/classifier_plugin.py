@@ -42,14 +42,14 @@ class ClassifierPluginManager(PluginManager):
 
     def run(self, images, filter_plugins=None, plugins=None, configs=None, batchsize=128):
         if plugins is None and configs is None:
-            plugin_list = self.plugin_list
+            plugins = self.plugin_list
 
         if filter_plugins is None:
             filter_plugins = [] * len(images)
         # TODO use batch size
         for (image, filters) in zip(images, filter_plugins):
             plugin_result_list = {"image": image, "plugins": []}
-            for plugin in plugin_list:
+            for plugin in plugins:
 
                 plugin = plugin["plugin"]
                 plugin_version = version.parse(str(plugin.version))
