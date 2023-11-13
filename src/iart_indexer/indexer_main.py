@@ -37,6 +37,7 @@ def parse_args():
             "bulk_indexing",
             "build_suggester",
             "get",
+            "analyze",
             "faiss_train",
             "faiss_indexing",
             "faiss_delete",
@@ -189,6 +190,22 @@ def main():
             client.faiss_indexing(args.collections)
         elif args.task == "faiss_delete":
             client.faiss_delete(args.collections)
+
+        elif args.task == "analyze":
+            available_plugins = client.plugin_list()
+            plugins = []
+            plugins_selected = None
+            if args.plugins:
+                plugins_selected = [x.lower() for x in args.plugins]
+            for t, plugin_list in available_plugins.items():
+                for plugin in plugin_list:
+                    if plugins_selected is not None:
+                        if plugin.lower() in plugins_selected:
+                            plugins.append(plugin)
+                    else:
+                        plugins.append(plugin)
+            print(client.analyze(args.image_paths, plugins))
+            
 
     elif args.mode == "server":
         server = Server(config)

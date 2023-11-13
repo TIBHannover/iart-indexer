@@ -252,12 +252,14 @@ class Client:
 
         return result
 
-    def analyze(self):
+    def analyze(self, image_paths,
+        plugins: list = None):
         channel = grpc.insecure_channel(f"{self.host}:{self.port}")
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.AnalyzeRequest()
-        request.image = b''  # open('path/to/image.jpg', "rb").read()
-        request.plugin_names.append('IconclassCLIPClassifier')
+        request.image = open(image_paths, "rb").read()
+        for p in plugins:
+            request.plugin_names.append(p)
         response = stub.analyze(request)
         return response
 
