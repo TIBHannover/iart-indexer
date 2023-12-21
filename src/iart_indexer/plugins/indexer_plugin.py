@@ -4,11 +4,11 @@ import sys
 import logging
 import importlib
 
-from iart_indexer.plugins.manager import PluginManager
-from iart_indexer.plugins.plugin import Plugin
+from iart_indexer.utils.plugin.manager import Manager
+from iart_indexer.utils.plugin.plugin import Plugin
 
 
-class IndexerPluginManager(PluginManager):
+class IndexerPluginManager(Manager):
     _indexer_plugins = {}
 
     def __init__(self, **kwargs):
@@ -62,7 +62,6 @@ class IndexerPluginManager(PluginManager):
                 collections=collections,
             )
 
-
     def search(
         self,
         queries,
@@ -74,7 +73,6 @@ class IndexerPluginManager(PluginManager):
 
         for plugin in self.plugin_list:
             plugin = plugin["plugin"]
-            logging.info('KKKK')
             entries = plugin.search(
                 queries, collections=collections, include_default_collection=include_default_collection, size=size
             )
@@ -83,7 +81,6 @@ class IndexerPluginManager(PluginManager):
 
         return result_list
 
-    
     def delete(
         self,
         collections=None,
@@ -99,7 +96,6 @@ class IndexerPluginManager(PluginManager):
             plugin.delete(
                 collections=collections,
             )
-
 
 
 class IndexerPlugin(Plugin):

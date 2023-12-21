@@ -1,8 +1,10 @@
 import re
 import copy
 import grpc
+import sys
 import time
 import uuid
+
 # import spacy
 import msgpack
 import imageio
@@ -10,18 +12,14 @@ import logging
 import traceback
 import threading
 
-import numpy as np
+from iart_indexer.inference import InferenceServerFactory
 
 from concurrent import futures
-from multiprocessing.pool import Pool
 from google.protobuf.json_format import MessageToJson, MessageToDict, ParseDict
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
 from iart_indexer.database.elasticsearch_database import ElasticSearchDatabase
-from iart_indexer.database.elasticsearch_suggester import ElasticSearchSuggester
-from iart_indexer.plugins import *
-from iart_indexer.plugins import ClassifierPlugin, FeaturePlugin, ImageTextPluginManager
-from iart_indexer.plugins import IndexerPluginManager
+from iart_indexer.plugins import IndexerPluginManager, MappingPluginManager, ComputePluginManager
 from iart_indexer.utils import image_from_proto, meta_from_proto, meta_to_proto, classifier_to_proto, feature_to_proto
 from iart_indexer.utils import get_features_from_db_entry, get_classifier_from_db_entry, read_chunk, image_normalize
 from iart_indexer.jobs import IndexingJob
@@ -46,8 +44,7 @@ def search(args):
 
         database = ElasticSearchDatabase(config=config.get("elasticsearch", {}))
 
-        image_text_plugin_manager = globals().get("image_text_manager")
-        feature_plugin_manager = globals().get("feature_manager")
+        compute_manager = globals().get("compute_manager")
         mapping_plugin_manager = globals().get("mapping_manager")
         indexer_plugin_manager = globals().get("indexer_manager")
 
@@ -57,8 +54,7 @@ def search(args):
         aggregator = Aggregator(database)
         searcher = Searcher(
             database,
-            feature_plugin_manager,
-            image_text_plugin_manager,
+            compute_manager,
             classifier_plugin_manager,
             indexer_plugin_manager,
             mapping_plugin_manager,
@@ -354,20 +350,15 @@ def build_feature_cache(args):
 def init_plugins(config):
     data_dict = {}
 
-    image_text_manager = ImageTextPluginManager(configs=config.get("image_text", []))
-    image_text_manager.find()
+    inference_server_config = config.get("inference_server", {})
+    inference_server = InferenceServerFactory.build(
+        inference_server_config["type"], config=inference_server_config["params"]
+    )
+    data_dict["inference_server"] = inference_server
 
-    data_dict["image_text_manager"] = image_text_manager
+    compute_manager = ComputePluginManager(configs=config.get("compute_plugins", []))
 
-    feature_manager = FeaturePluginManager(configs=config.get("features", []))
-    feature_manager.find()
-
-    data_dict["feature_manager"] = feature_manager
-
-    classifier_manager = ClassifierPluginManager(configs=config.get("classifiers", []))
-    classifier_manager.find()
-
-    data_dict["classifier_manager"] = classifier_manager
+    data_dict["compute_manager"] = compute_manager
 
     indexer_manager = IndexerPluginManager(configs=config.get("indexes", []))
     indexer_manager.find()
@@ -403,35 +394,21 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         self.max_results = config.get("indexer", {}).get("max_results", 100)
 
     def analyze(self, request, context):
-        logging.info(f'Received analyze request, plugins: {request.plugin_names}')
-        image = imageio.imread(request.image)
-        plugins = [
-            self.managers['classifier_manager'].plugins()[plugin]
-            for plugin in request.plugin_names
-        ]
-        plugins = [
-            {'plugin': plugin(), 'version': plugin.version}
-            for plugin in plugins
-        ]
+        logging.info(f"Received analyze request, plugins: {request.plugin}")
 
-        results = list(self.managers['classifier_manager'].run([image], [plugins], plugins=plugins))
-        results = results[0]['plugins']
-        results = [result._annotations[0][0] for result in results]
+        results = self.managers["inference_server"](self.managers["compute_manager"], request.plugin, request)
 
-        return indexer_pb2.AnalyzeReply(results=results)
+        # results = list(self.managers["compute_manager"].run([image], [plugins], plugins=plugins))
+        print(results, flush=True)
+
+        return results
 
     def list_plugins(self, request, context):
         reply = indexer_pb2.ListPluginsReply()
 
-        for plugin_name, plugin_class in self.managers["feature_manager"].plugins().items():
+        for plugin_name, plugin_class in self.managers["compute_manager"].plugins().items():
             pluginInfo = reply.plugins.add()
             pluginInfo.name = plugin_name
-            pluginInfo.type = "feature"
-
-        for plugin_name, plugin_class in self.managers["classifier_manager"].plugins().items():
-            pluginInfo = reply.plugins.add()
-            pluginInfo.name = plugin_name
-            pluginInfo.type = "classifier"
 
         return reply
 
@@ -530,7 +507,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
         future = self.process_pool.submit(build_indexer, copy.deepcopy(variable))
         variable["future"] = future
         self.futures.append(variable)
-
 
     def status(self, request, context):
         futures_lut = {x["id"]: i for i, x in enumerate(self.futures)}
@@ -659,7 +635,6 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
             f.int_val = x["value"]
 
         return result
-
 
     def build_indexer(self, request, context):
         logging.info("BUILD_INDEXER")
@@ -815,7 +790,17 @@ class Server:
         port = grpc_config.get("port", 50051)
         self.server.add_insecure_port(f"[::]:{port}")
 
+        self.compute_manager = ComputePluginManager(configs=config.get("compute_plugins", []))
+
+        print(self.compute_manager.plugin_list, flush=True)
+
+        inference_server_config = config.get("inference_server", {})
+        self.inference_server = InferenceServerFactory.build(
+            inference_server_config["type"], config=inference_server_config["params"]
+        )
+
     def run(self):
+        self.inference_server.start(self.compute_manager)
         self.server.start()
         logging.info("[Server] Ready")
 
@@ -825,6 +810,6 @@ class Server:
                 num_jobs_done = len([x for x in self.commune.futures if x["future"].done()])
                 logging.info(f"[Server] num_jobs:{num_jobs} num_jobs_done:{num_jobs_done}")
 
-                time.sleep(60*60)
+                time.sleep(60 * 60)
         except KeyboardInterrupt:
             self.server.stop(0)

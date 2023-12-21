@@ -3,10 +3,7 @@ import imageio
 import traceback
 from packaging import version
 
-from google.protobuf.json_format import MessageToJson, MessageToDict, ParseDict
-
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
-from iart_indexer.plugins import ClassifierPluginManager, FeaturePluginManager
 from iart_indexer.utils import image_normalize
 
 
@@ -17,7 +14,6 @@ class IndexingJob:
 
     @classmethod
     def init_worker(cls, config):
-
         feature_manager = FeaturePluginManager(configs=config.get("features", []))
         feature_manager.find()
 
@@ -30,7 +26,6 @@ class IndexingJob:
 
     @classmethod
     def __call__(cls, entry):
-
         classifier_manager = getattr(cls, "classifier_manager")
         feature_manager = getattr(cls, "feature_manager")
         try:
@@ -54,9 +49,7 @@ class IndexingJob:
 
         annotations = []
         for f in features["plugins"]:
-
             for anno in f._annotations:
-
                 for result in anno:
                     plugin_annotations = []
 
@@ -82,9 +75,7 @@ class IndexingJob:
 
         annotations = []
         for c in classifications["plugins"]:
-
             for anno in c._annotations:
-
                 for result in anno:
                     plugin_annotations = []
                     for concept in result.classifier.concepts:

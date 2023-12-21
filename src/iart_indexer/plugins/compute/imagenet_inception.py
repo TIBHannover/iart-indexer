@@ -9,14 +9,14 @@ import pickle
 import logging
 
 from iart_indexer import indexer_pb2
-from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
+from iart_indexer.plugins import ComputePlugin, ComputePluginManager, ComputePluginResult
 from iart_indexer.utils import image_from_proto, image_resize, image_crop
 
 import time
 
 
-@FeaturePluginManager.export("ImageNetInceptionFeature")
-class ImageNetInceptionFeature(FeaturePlugin):
+# @ComputePluginManager.export("ImageNetInceptionFeature")
+class ImageNetInceptionFeature(ComputePlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -98,7 +98,6 @@ class ImageNetInceptionFeature(FeaturePlugin):
         return True
 
     def call(self, entries):
-
         result_entries = []
         result_annotations = []
         for entry in entries:
@@ -137,7 +136,7 @@ class ImageNetInceptionFeature(FeaturePlugin):
             self.con.delete(f"feature_{job_id}")
 
             entry_annotation.append(
-                indexer_pb2.PluginResult(
+                indexer_pb2.ComputePluginResult(
                     plugin=self.name,
                     type=self._type,
                     version=str(self._version),
@@ -150,4 +149,4 @@ class ImageNetInceptionFeature(FeaturePlugin):
             result_annotations.append(entry_annotation)
             result_entries.append(entry)
 
-        return PluginResult(self, result_entries, result_annotations)
+        return ComputePluginResult(self, result_entries, result_annotations)

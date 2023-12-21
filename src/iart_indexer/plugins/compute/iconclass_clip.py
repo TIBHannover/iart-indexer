@@ -17,13 +17,13 @@ import pickle
 
 import scipy
 
-from iart_indexer.plugins import ClassifierPlugin, ClassifierPluginManager, PluginResult
+from iart_indexer.plugins import ComputePlugin, ComputePluginManager, ComputePluginResult
 from iart_indexer.utils import image_from_proto, image_resize, image_crop
 from iart_indexer import indexer_pb2
 
 
-@ClassifierPluginManager.export("IconclassCLIPClassifier")
-class IconclassCLIPClassifier(ClassifierPlugin):
+# @ComputePluginManager.export("IconclassCLIPClassifier")
+class IconclassCLIPClassifier(ComputePlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -110,7 +110,6 @@ class IconclassCLIPClassifier(ClassifierPlugin):
         return f"{seq}; {tags}; {desc}"
 
     def call(self, entries):
-
         result_entries = []
         result_annotations = []
         for entry in entries:
@@ -159,7 +158,7 @@ class IconclassCLIPClassifier(ClassifierPlugin):
             result_annotations.append(entry_annotation)
             result_entries.append(entry)
 
-        return PluginResult(self, result_entries, result_annotations)
+        return ComputePluginResult(self, result_entries, result_annotations)
 
 
 # import math

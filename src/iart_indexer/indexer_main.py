@@ -11,7 +11,6 @@ import imageio
 
 from iart_indexer.client import Client
 from iart_indexer.server import Server
-from iart_indexer.plugins.indexer.faiss_indexer import FaissServer
 
 
 def parse_args():
@@ -38,9 +37,6 @@ def parse_args():
             "build_suggester",
             "get",
             "analyze",
-            "faiss_train",
-            "faiss_indexing",
-            "faiss_delete",
             "search",
             "aggregate",
             "build_feature_cache",
@@ -69,9 +65,7 @@ def parse_args():
     parser.add_argument("--collections", nargs="+", help="id for entry query")
 
     parser.add_argument("-c", "--config", help="config path")
-    parser.add_argument(
-        "-m", "--mode", choices=["client", "server", "faiss_server"], default="client", help="verbose output"
-    )
+    parser.add_argument("-m", "--mode", choices=["client", "server"], default="client", help="verbose output")
     args = parser.parse_args()
     return args
 
@@ -184,13 +178,6 @@ def main():
                 )
             )
 
-        elif args.task == "faiss_train":
-            client.faiss_train(args.collections)
-        elif args.task == "faiss_indexing":
-            client.faiss_indexing(args.collections)
-        elif args.task == "faiss_delete":
-            client.faiss_delete(args.collections)
-
         elif args.task == "analyze":
             available_plugins = client.plugin_list()
             plugins = []
@@ -204,16 +191,12 @@ def main():
                             plugins.append(plugin)
                     else:
                         plugins.append(plugin)
-            print(client.analyze(args.image_paths, plugins))
-            
+            print(client.analyze(args.image_paths, plugins[0]))
 
     elif args.mode == "server":
         server = Server(config)
         server.run()
 
-    elif args.mode == "faiss_server":
-        server = FaissServer(config)
-        server.run()
     return 0
 
 

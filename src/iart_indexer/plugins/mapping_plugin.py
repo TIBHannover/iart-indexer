@@ -4,11 +4,21 @@ import re
 import sys
 import logging
 
-from iart_indexer.plugins.manager import PluginManager
-from iart_indexer.plugins.plugin import Plugin
+from iart_indexer.utils.plugin.manager import Manager
+from iart_indexer.utils.plugin.plugin import Plugin
 
 
-class MappingPluginManager(PluginManager):
+class MappingPlugin(Plugin):
+    _type = "mapping"
+
+    def __init__(self, **kwargs):
+        super(MappingPlugin, self).__init__(**kwargs)
+
+    def __call__(self, entries, query):
+        return self.call(entries, query)
+
+
+class MappingPluginManager(Manager):
     _mapping_plugins = {}
 
     def __init__(self, **kwargs):
@@ -37,7 +47,6 @@ class MappingPluginManager(PluginManager):
                     a.register(self)
 
     def run(self, entries, query, plugins=None, configs=None, batchsize=128):
-        
         plugin_list = self.init_plugins(plugins, configs)
         if len(plugin_list) > 1:
             logging.error("Only one mapping plugin should excecuted")
@@ -57,16 +66,3 @@ class MappingPluginManager(PluginManager):
             plugin_results = plugin(entries, query)
             for entry in plugin_results:
                 yield entry
-
-
-class MappingPlugin(Plugin):
-    _type = "mapping"
-
-    def __init__(self, **kwargs):
-        super(MappingPlugin, self).__init__(**kwargs)
-
-    def __call__(self, entries, query):
-        return self.call(entries, query)
-
-
-# __all__ = []

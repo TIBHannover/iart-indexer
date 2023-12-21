@@ -11,12 +11,12 @@ import json
 import logging
 
 from iart_indexer import indexer_pb2
-from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
+from iart_indexer.plugins import ComputePlugin, ComputePluginManager, ComputePluginResult
 from iart_indexer.utils import image_from_proto, image_resize, image_crop
 
 
-@FeaturePluginManager.export("KaggleResnetFeature")
-class KaggleResnetFeature(FeaturePlugin):
+# @ComputePluginManager.export("KaggleResnetFeature")
+class KaggleResnetFeature(ComputePlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -34,18 +34,11 @@ class KaggleResnetFeature(FeaturePlugin):
 
     def __init__(self, **kwargs):
         super(KaggleResnetFeature, self).__init__(**kwargs)
-        self.host = self.config["host"]
-        self.port = self.config["port"]
-
-        self.model_name = self.config["model_name"]
-        self.model_device = self.config["model_device"]
-        self.model_file = self.config["model_file"]
 
         self.mapping_file = self.config["mapping_file"]
 
         self.max_dim = self.config["max_dim"]
         self.min_dim = self.config["min_dim"]
-        self.max_tries = self.config["max_tries"]
 
         self.heads_name = ["style", "genre"]
         self.mappings = []
@@ -60,39 +53,7 @@ class KaggleResnetFeature(FeaturePlugin):
                     if m["head"] == d["type"]:
                         m["mappings"].append(d)
 
-        try_count = self.max_tries
-        while try_count > 0:
-            try:
-                self.con = rai.Client(host=self.host, port=self.port)
-
-                if not self.check_rai():
-                    self.register_rai()
-                return
-            except:
-                try_count -= 1
-                time.sleep(4)
-
-    def register_rai(self):
-        model = ml2rt.load_model(self.model_file)
-
-        self.con.modelset(
-            self.model_name,
-            backend="torch",
-            device=self.model_device,
-            data=model,
-            batch=16,
-        )
-
-    def check_rai(self):
-        result = self.con.modelscan()
-
-        if self.model_name not in [x[0] for x in result]:
-            return False
-
-        return True
-
     def call(self, entries):
-
         result_entries = []
         result_annotations = []
         for entry in entries:
@@ -116,33 +77,23 @@ class KaggleResnetFeature(FeaturePlugin):
 
             output = np.squeeze(embedding_head1)
 
-            output_bin = (output > 0).astype(np.int32).tolist()
-            output_bin_str = "".join([str(x) for x in output_bin])
-
             entry_annotation.append(
-                indexer_pb2.PluginResult(
+                indexer_pb2.ComputePluginResult(
                     plugin=self.name,
                     type=self._type,
                     version=str(self._version),
-                    feature=indexer_pb2.FeatureResult(
-                        type="style_embedding", binary=output_bin_str, feature=output.tolist()
-                    ),
+                    feature=indexer_pb2.FeatureResult(type="style_embedding", feature=output.tolist()),
                 )
             )
 
             output = np.squeeze(embedding_head2)
 
-            output_bin = (output > 0).astype(np.int32).tolist()
-            output_bin_str = "".join([str(x) for x in output_bin])
-
             entry_annotation.append(
-                indexer_pb2.PluginResult(
+                indexer_pb2.ComputePluginResult(
                     plugin=self.name,
                     type=self._type,
                     version=str(self._version),
-                    feature=indexer_pb2.FeatureResult(
-                        type="genre_embedding", binary=output_bin_str, feature=output.tolist()
-                    ),
+                    feature=indexer_pb2.FeatureResult(type="genre_embedding", feature=output.tolist()),
                 )
             )
 
@@ -153,4 +104,4 @@ class KaggleResnetFeature(FeaturePlugin):
             result_annotations.append(entry_annotation)
             result_entries.append(entry)
 
-        return PluginResult(self, result_entries, result_annotations)
+        return ComputePluginResult(self, result_entries, result_annotations)

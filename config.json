@@ -5,6 +5,10 @@
     "cache": {
         "cache_dir": "/cache"
     },
+    "inference_server": {
+        "type": "ray",
+        "params": {}
+    },
     "grpc": {
         "port": 50051
     },
@@ -14,27 +18,32 @@
         "index": "iart",
         "suggester": "suggester"
     },
-    "image_text": [
+    "compute_plugins": [
         {
             "type": "ClipEmbeddingFeature",
             "output": "clip_text",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": []
+                },
                 "model_name": "clip_text",
                 "model_device": "cpu",
                 "model_file": "/data/models/clip_text/clip_text.pt",
                 "bpe_file": "/data/models/clip_text/bpe_simple_vocab_16e6.txt.gz"
             }
-        }
-    ],
-    "features": [
+        },
         {
             "type": "ClipEmbeddingFeature",
             "output": "clip_image",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "open_clip_torch",
+                        "imageio",
+                        "transformers"
+                    ]
+                },
                 "model_name": "clip_image",
                 "model_device": "cpu",
                 "model_file": "/data/models/clip_image/clip_image.pt",
@@ -47,8 +56,12 @@
             "type": "ImageNetInceptionFeature",
             "output": "image_net_inception",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "imagenet_inception",
                 "model_device": "cpu",
                 "model_file": "/data/models/imagenet_inception/imagenet_resnet_emb.pt",
@@ -63,8 +76,12 @@
             "type": "YUVHistogramFeature",
             "output": "yuv_histogram",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "yuv_histogram",
                 "model_file": "/data/models/yuv_histogram/yuv_histogram.pt",
                 "max_dim": 128,
@@ -75,8 +92,12 @@
             "type": "ByolEmbeddingFeature",
             "output": "byol_wikipedia",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "byol_wikipedia",
                 "model_file": "/data/models/byol_embedding/byol_wikipedia.pt",
                 "model_device": "cpu"
@@ -86,8 +107,12 @@
             "type": "KaggleResnetFeature",
             "output": "KaggleResnetFeature",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "kaggle_resnet_embedding",
                 "model_device": "cpu",
                 "model_file": "/data/models/kaggle_embedding/kaggle_embedding.pt",
@@ -96,15 +121,17 @@
                 "max_dim": null,
                 "min_dim": 244
             }
-        }
-    ],
-    "classifiers": [
+        },
         {
             "type": "IconclassCLIPClassifier",
             "output": "IconclassCLIPClassifier",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "iconclass_clip",
                 "model_device": "cpu",
                 "model_file": "/data/models/iconclass_clip/clip_image.pt",
@@ -120,8 +147,12 @@
             "type": "IconclassLSTMClassifier",
             "output": "IconclassLSTMClassifier",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "iconclass_lstm",
                 "model_device": "cpu",
                 "model_file": "/data/models/iconclass_lstm/iconclass_lstm.pt",
@@ -137,8 +168,12 @@
             "type": "KaggleResnetClassifier",
             "output": "KaggleResnetClassifier",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "kaggle_resnet_classifier",
                 "model_device": "cpu",
                 "model_file": "/data/models/kaggle_classifier/kaggle_classifier.pt",
@@ -153,8 +188,12 @@
             "type": "IMet2020ResnetClassifier",
             "output": "i_met2020_resnet_classifier",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "imet2020_resnet",
                 "model_device": "cpu",
                 "model_file": "/data/models/imet2020/imet2020_resnet.pt",
@@ -170,8 +209,12 @@
             "type": "ImageNetResnetClassifier",
             "output": "image_net_resnet_inception",
             "params": {
-                "host": "localhost",
-                "port": 6379,
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "imageio"
+                    ]
+                },
                 "model_name": "imagenet_resnet",
                 "model_device": "cpu",
                 "model_file": "/data/models/imagenet_resnet/imagenet_resnet.pt",

@@ -1,5 +1,4 @@
 import math
-import uuid
 import logging
 
 import numpy as np
@@ -13,9 +12,7 @@ import random
 
 from sklearn.preprocessing import MinMaxScaler
 
-from iart_indexer import indexer_pb2
-from iart_indexer.plugins import MappingPlugin, MappingPluginManager, PluginResult
-from iart_indexer.utils import image_from_proto, image_resize
+from iart_indexer.plugins import MappingPlugin, MappingPluginManager
 
 
 @MappingPluginManager.export("UMapMapping")

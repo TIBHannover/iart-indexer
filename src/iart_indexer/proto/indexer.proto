@@ -40,6 +40,17 @@ service Indexer {
   rpc collection_list(CollectionListRequest) returns (CollectionListReply) {}
 }
 
+enum DataType {
+  UNKOWN_TYPE = 0;
+  STRING_TYPE = 1;
+  INT_TYPE = 2;
+  FLOAT_TYPE = 3;
+  BOOL_TYPE = 4;
+  BYTES_TYPE = 5;
+  IMAGE_TYPE = 6;
+  BOUNDING_BOX_TYPE = 7;
+}
+
 message Collection {
   string id = 1;
   string name = 2;
@@ -100,11 +111,12 @@ message ClassifierResult {
 }
 
 // TODO maybe move this to feature list
+message BinaryFeatureResult { string binary = 1; }
+
 message FeatureResult {
-  string plugin = 1;
-  string type = 2;
-  string binary = 3;
-  repeated float feature = 4;
+  string type = 1;
+  repeated int32 shape = 2;
+  repeated float feature = 3;
 }
 
 message PluginResult {
@@ -114,6 +126,7 @@ message PluginResult {
   oneof result {
     ClassifierResult classifier = 4;
     FeatureResult feature = 5;
+    BinaryFeatureResult binary_eature = 6;
   }
 }
 
@@ -253,7 +266,9 @@ message SearchRequest {
   AggregateRequest aggregate = 4;
   string random_seed = 5;
 
-  enum Extra { EXTRA_FEATURES = 0; }
+  enum Extra {
+    EXTRA_FEATURES = 0;
+  }
 
   repeated Extra extras = 6;
 
@@ -329,13 +344,6 @@ message IndexingReply {
   string id = 2;
 }
 
-// message AggregateRequest {
-//   string type = 1;
-//   string part = 2;
-//   string field_name = 3;
-//   int32 size = 4;
-// }
-
 message AggregateReply { repeated ValueField field = 1; }
 
 message GetRequest { string id = 1; }
@@ -360,10 +368,24 @@ message CollectionDeleteReply {
 message CollectionListRequest {}
 message CollectionListReply { repeated Collection collections = 1; }
 
+message PluginParameter {
+  string name = 1;
+  bytes content = 2;
+  repeated int32 shape = 3;
+  DataType type = 4;
+}
+
+message PluginInput {
+  string name = 1;
+  bytes content = 2;
+  repeated int32 shape = 3;
+  DataType type = 4;
+}
+
 message AnalyzeRequest {
-  bytes image = 1;
-  repeated string plugin_names = 2;
+  string plugin = 1;
+  repeated PluginParameter parameters = 2;
+  repeated PluginInput inputs = 3;
 }
-message AnalyzeReply {
-  repeated PluginResult results = 1;
-}
+
+message AnalyzeReply { repeated PluginResult results = 1; }

@@ -5,7 +5,6 @@ import PIL
 
 def image_normalize(image):
     if len(image.shape) == 2:
-
         return np.stack([image] * 3, -1)
 
     if len(image.shape) == 3:
@@ -20,8 +19,16 @@ def image_normalize(image):
     return image
 
 
-def image_crop(image, size=None):
+def image_pad(image):
+    height, width = image.shape[:2]  # WHC
 
+    pad_x = max(0, (height - width) // 2)
+    pad_y = max(0, (width - height) // 2)
+
+    return np.pad(image, ((pad_y, pad_y), (pad_x, pad_x), (0, 0)), "constant", constant_values=0)
+
+
+def image_crop(image, size=None):
     image = PIL.Image.fromarray(image)
     width, height = image.size  # Get dimensions
 

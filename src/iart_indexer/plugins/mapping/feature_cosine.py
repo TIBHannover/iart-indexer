@@ -1,12 +1,7 @@
-import math
-import uuid
 import logging
 
 import numpy as np
-
-from iart_indexer import indexer_pb2
-from iart_indexer.plugins import MappingPlugin, MappingPluginManager, PluginResult
-from iart_indexer.utils import image_from_proto, image_resize
+from iart_indexer.plugins import MappingPlugin, MappingPluginManager
 
 
 @MappingPluginManager.export("FeatureCosineMapping")
@@ -19,7 +14,6 @@ class FeatureCosineMapping(MappingPlugin):
         super(FeatureCosineMapping, self).__init__(**kwargs)
 
     def call(self, entries, query):
-
         if query is not None:
             new_entries = []
             for e in entries:

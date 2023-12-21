@@ -7,7 +7,7 @@ import numpy as np
 import redisai as rai
 
 from iart_indexer import indexer_pb2
-from iart_indexer.plugins import ImageTextPlugin, ImageTextPluginManager, PluginResult
+from iart_indexer.plugins import ComputePlugin, ComputePluginManager, ComputePluginResult
 
 # Preprocessing from CLIP github
 import os
@@ -22,8 +22,8 @@ import transformers
 from typing import Union, List
 
 
-@ImageTextPluginManager.export("MultilingualClipEmbeddingFeature")
-class MultilingualClipEmbeddingFeature(ImageTextPlugin):
+# @ComputePluginManager.export("MultilingualClipEmbeddingFeature")
+class MultilingualClipEmbeddingFeature(ComputePlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -117,7 +117,7 @@ class MultilingualClipEmbeddingFeature(ImageTextPlugin):
             self.con.delete(f"output_{job_id}")
 
             entry_annotation.append(
-                indexer_pb2.PluginResult(
+                indexer_pb2.ComputePluginResult(
                     plugin=self.name,
                     type=self._type,
                     version=str(self._version),
@@ -130,4 +130,4 @@ class MultilingualClipEmbeddingFeature(ImageTextPlugin):
             result_annotations.append(entry_annotation)
             result_entries.append(text)
 
-        return PluginResult(self, result_entries, result_annotations)
+        return ComputePluginResult(self, result_entries, result_annotations)

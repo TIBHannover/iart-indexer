@@ -1,14 +1,11 @@
 import os
-import re
 import csv
-import sys
 import time
 import uuid
 import grpc
 import json
 import shutil
 import struct
-import random
 import msgpack
 import logging
 import imageio
@@ -22,7 +19,6 @@ from multiprocessing.pool import ThreadPool
 from iart_indexer import utils
 
 from iart_indexer import indexer_pb2, indexer_pb2_grpc
-from iart_indexer import faiss_indexer_pb2, faiss_indexer_pb2_grpc
 from iart_indexer.utils import image_resize
 
 
@@ -55,7 +51,7 @@ def get_entry_with_path(entry, image_paths):
             try:
                 shutil.copy(entry_path, entry["path"])
                 os.remove(entry_path)
-                
+
                 return entry
             except:
                 pass
@@ -77,8 +73,7 @@ def list_images(paths, name_as_hash=False):
 
     entries = [
         {
-            "id": os.path.splitext(os.path.basename(path))[0]
-                if name_as_hash else uuid.uuid4().hex,
+            "id": os.path.splitext(os.path.basename(path))[0] if name_as_hash else uuid.uuid4().hex,
             "filename": os.path.basename(path),
             "path": os.path.abspath(path),
             "meta": [],
@@ -96,7 +91,8 @@ def list_json(paths, image_paths=None):
     with open(paths, "r", encoding="utf-8") as f:
         for entry in json.load(f):
             entry = get_entry_with_path(entry, image_paths)
-            if entry: entries.append(entry)
+            if entry:
+                entries.append(entry)
 
         logging.info(f"{len(entries)}")
 
@@ -111,7 +107,8 @@ def list_jsonl(paths, image_paths=None):
             entry = json.loads(line)
 
             entry = get_entry_with_path(entry, image_paths)
-            if entry: entries.append(entry)
+            if entry:
+                entries.append(entry)
 
         logging.info(f"{len(entries)}")
 
@@ -140,19 +137,15 @@ def list_csv(paths, image_paths=None):
                 prev[part] = v
 
             entry = get_entry_with_path(entry, image_paths)
-            if entry: entries.append(entry)
+            if entry:
+                entries.append(entry)
 
         logging.info(f"{len(entries)}")
 
     return entries
 
 
-def copy_image_hash(
-    image_path,
-    image_output,
-    hash_value=None,
-    resolutions=[{"min_dim": -1, "suffix": ""}]
-):
+def copy_image_hash(image_path, image_output, hash_value=None, resolutions=[{"min_dim": -1, "suffix": ""}]):
     try:
         if hash_value is None:
             hash_value = uuid.uuid4().hex
@@ -182,12 +175,7 @@ def copy_image_hash(
         return None
 
 
-def copy_image(
-    entry,
-    image_output,
-    image_paths=None,
-    resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]
-):
+def copy_image(entry, image_output, image_paths=None, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]):
     path = entry["path"]
     copy_result = copy_image_hash(path, image_output, entry["id"], resolutions)
 
@@ -201,18 +189,17 @@ def copy_image(
 
 
 def copy_images(
-    entries,
-    image_output,
-    image_paths=None,
-    resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]
+    entries, image_output, image_paths=None, resolutions=[{"min_dim": 200, "suffix": "_m"}, {"suffix": ""}]
 ):
     entires_result = []
 
     with mp.Pool(8) as p:
         for entry in p.imap(
             functools.partial(
-                copy_image, image_output=image_output,
-                image_paths=image_paths, resolutions=resolutions,
+                copy_image,
+                image_output=image_output,
+                image_paths=image_paths,
+                resolutions=resolutions,
             ),
             entries,
         ):
@@ -226,10 +213,7 @@ def split_batch(entries, batch_size=512):
     if batch_size < 1:
         return [entries]
 
-    return [
-        entries[x * batch_size : (x + 1) * batch_size]
-        for x in range(len(entries) // batch_size + 1)
-    ]
+    return [entries[x * batch_size : (x + 1) * batch_size] for x in range(len(entries) // batch_size + 1)]
 
 
 class Client:
@@ -252,14 +236,15 @@ class Client:
 
         return result
 
-    def analyze(self, image_paths,
-        plugins: list = None):
+    def analyze(self, image_paths, plugin: str = None):
         channel = grpc.insecure_channel(f"{self.host}:{self.port}")
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.AnalyzeRequest()
-        request.image = open(image_paths, "rb").read()
-        for p in plugins:
-            request.plugin_names.append(p)
+        image_input = request.inputs.add()
+        image_input.name = "image"
+        image_input.content = open(image_paths, "rb").read()
+        image_input.type = indexer_pb2.IMAGE_TYPE
+        request.plugin = plugin
         response = stub.analyze(request)
         return response
 
@@ -395,7 +380,7 @@ class Client:
             options=[
                 ("grpc.max_send_message_length", 50 * 1024 * 1024),
                 ("grpc.max_receive_message_length", 50 * 1024 * 1024),
-                ("grpc.keepalive_time_ms", 2 ** 31 - 1),
+                ("grpc.keepalive_time_ms", 2**31 - 1),
             ],
         )
         stub = indexer_pb2_grpc.IndexerStub(channel)
@@ -576,41 +561,6 @@ class Client:
 
         return response
 
-    def faiss_train(self, collections):
-        channel = grpc.insecure_channel(
-            f"{self.host}:{self.port}",
-            options=[
-                ("grpc.max_send_message_length", 50 * 1024 * 1024),
-                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
-            ],
-        )
-
-        stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
-        request = faiss_indexer_pb2.TrainRequest(collections=collections)
-
-        response = stub.train(request)
-
-        return response
-
-    def faiss_indexing(self, collections):
-        channel = grpc.insecure_channel(
-            f"{self.host}:{self.port}",
-            options=[
-                ("grpc.max_send_message_length", 50 * 1024 * 1024),
-                ("grpc.max_receive_message_length", 50 * 1024 * 1024),
-            ],
-        )
-
-        stub = faiss_indexer_pb2_grpc.FaissIndexerStub(channel)
-        request = faiss_indexer_pb2.IndexingRequest(collections=collections)
-
-        response = stub.indexing(request)
-
-        return response
-
-    def faiss_delete(self, collections):
-        pass
-
     def build_feature_cache(self):
         channel = grpc.insecure_channel(
             f"{self.host}:{self.port}",
@@ -668,7 +618,7 @@ class Client:
                     yield indexer_pb2.LoadRequest(entry=msgpack.packb(entry))
 
         time_start = time.time()
-        
+
         blacklist = set()
         try_count = 20
         count = 0
@@ -705,7 +655,7 @@ class Client:
 
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.AggregateRequest(type=type, part=part, field_name=field_name, size=size)
-        
+
         response = stub.aggregate(request)
 
         return response

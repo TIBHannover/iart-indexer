@@ -1,20 +1,17 @@
 import math
 import uuid
 
-
-import ml2rt
 import numpy as np
-import redisai as rai
 
 from iart_indexer import indexer_pb2
-from iart_indexer.plugins import FeaturePlugin, FeaturePluginManager, PluginResult
+from iart_indexer.plugins import ComputePlugin, ComputePluginManager, ComputePluginResult
 from iart_indexer.utils import image_from_proto, image_resize
 
 import time
 
 
-@FeaturePluginManager.export("ByolEmbeddingFeature")
-class ByolEmbeddingFeature(FeaturePlugin):
+# @ComputePluginManager.export("ByolEmbeddingFeature")
+class ByolEmbeddingFeature(ComputePlugin):
     default_config = {
         "host": "localhost",
         "port": 6379,
@@ -70,7 +67,6 @@ class ByolEmbeddingFeature(FeaturePlugin):
         return False
 
     def call(self, entries):
-
         result_entries = []
         result_annotations = []
         for entry in entries:
@@ -91,7 +87,7 @@ class ByolEmbeddingFeature(FeaturePlugin):
             self.con.delete(f"output_{job_id}")
 
             entry_annotation.append(
-                indexer_pb2.PluginResult(
+                indexer_pb2.ComputePluginResult(
                     plugin=self.name,
                     type=self._type,
                     version=str(self._version),
@@ -104,4 +100,4 @@ class ByolEmbeddingFeature(FeaturePlugin):
             result_annotations.append(entry_annotation)
             result_entries.append(entry)
 
-        return PluginResult(self, result_entries, result_annotations)
+        return ComputePluginResult(self, result_entries, result_annotations)
