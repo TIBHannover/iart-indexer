@@ -236,16 +236,21 @@ class Client:
 
         return result
 
-    def analyze(self, image_paths, plugin: str = None):
+    def analyse(self, inputs, plugin: str = None):
         channel = grpc.insecure_channel(f"{self.host}:{self.port}")
         stub = indexer_pb2_grpc.IndexerStub(channel)
-        request = indexer_pb2.AnalyzeRequest()
-        image_input = request.inputs.add()
-        image_input.name = "image"
-        image_input.content = open(image_paths, "rb").read()
-        image_input.type = indexer_pb2.IMAGE_TYPE
+        request = indexer_pb2.AnalyseRequest()
+        for i in inputs:
+            input_field = request.inputs.add()
+            if i["type"] == "image":
+                input_field.name = "image"
+                input_field.image.content = open(i["path"], "rb").read()
+            elif i["type"] == "string":
+                input_field.name = "text"
+                input_field.string.text = i["text"]
+
         request.plugin = plugin
-        response = stub.analyze(request)
+        response = stub.analyse(request)
         return response
 
     def copy_images(self, paths, image_paths=None, image_output=None):

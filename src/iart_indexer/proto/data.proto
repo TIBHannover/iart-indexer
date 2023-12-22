@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package iart.indexer;
+
+message ImageData {
+  bytes content = 2;
+  string type = 3;
+}
+
+message StringData { string text = 2; }
+
+message Concept {
+  string concept = 1;
+  string type = 2;
+  float prob = 3;
+}
+
+message ClassifierResult {
+  string plugin = 1;
+  repeated Concept concepts = 2;
+}
+
+message BinaryFeature { string binary = 1; }
+
+message Feature {
+  string type = 1;
+  repeated int32 shape = 2;
+  repeated float feature = 3;
+}
+
+message BoundingBox {
+  float x = 1;
+  float y = 2;
+  float w = 3;
+  float h = 4;
+  float score = 5;
+}
+
+enum PoseType {
+  POSE_TYPE_COCO = 0;
+}
+
+message Pose {
+  PoseType type = 1;
+  repeated float x = 2;
+  repeated float y = 3;
+  repeated float scores = 4;
+}
+
+message PluginData {
+  string id = 1;
+  string name = 2;
+  oneof data {
+    ImageData image = 3;
+    StringData string = 4;
+    ClassifierResult classifier = 5;
+    Feature feature = 6;
+    BinaryFeature binary_eature = 7;
+    BoundingBox bounding_box = 8;
+    Pose pose = 9;
+  }
+}

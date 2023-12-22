@@ -20,7 +20,7 @@
     },
     "compute_plugins": [
         {
-            "type": "ClipEmbeddingFeature",
+            "type": "ClipTextEmbeddingFeature",
             "output": "clip_text",
             "params": {
                 "inference": {
@@ -33,7 +33,7 @@
             }
         },
         {
-            "type": "ClipEmbeddingFeature",
+            "type": "ClipImageEmbeddingFeature",
             "output": "clip_image",
             "params": {
                 "inference": {

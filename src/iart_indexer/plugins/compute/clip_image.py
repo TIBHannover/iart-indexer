@@ -11,7 +11,7 @@ import imageio
 from typing import Dict
 
 
-from iart_indexer import indexer_pb2
+from iart_indexer import indexer_pb2, data_pb2
 from iart_indexer.plugins import ComputePlugin, ComputePluginManager, ComputePluginResult
 from iart_indexer.utils import image_from_proto, image_resize, image_crop, image_pad
 
@@ -107,7 +107,7 @@ default_parameters = {
 }
 
 
-@ComputePluginManager.export("ClipEmbeddingFeature")
+@ComputePluginManager.export("ClipImageEmbeddingFeature")
 class ClipEmbeddingFeature(ComputePlugin, config=default_config, parameters=default_parameters, version="0.4"):
     def __init__(self, **kwargs):
         super(ClipEmbeddingFeature, self).__init__(**kwargs)
@@ -139,7 +139,7 @@ class ClipEmbeddingFeature(ComputePlugin, config=default_config, parameters=defa
             self.model = model.visual
             self.preprocess = ImagePreprozessorWrapper(model, format=torch.float32)
 
-        result = indexer_pb2.AnalyzeReply()
+        result = indexer_pb2.AnalyseReply()
         for entry in inputs["image"]:
             # image = image_from_proto(entry)
             image = iio.imread(entry)
@@ -157,15 +157,18 @@ class ClipEmbeddingFeature(ComputePlugin, config=default_config, parameters=defa
             # normalize
             output = embedding / np.linalg.norm(np.asarray(embedding))
             output = output.flatten()
-            feature_result = indexer_pb2.FeatureResult(type="clip_embedding", shape=output.shape)
-            feature_result.feature.extend(output.flatten().tolist())
+            data = data_pb2.PluginData(
+                id=uuid.uuid4().hex,
+                name="clip_embedding",
+                feature=data_pb2.Feature(type="clip_embedding", shape=output.shape, feature=output.tolist()),
+            )
 
             result.results.append(
                 indexer_pb2.PluginResult(
                     plugin=self.name,
                     type="",
                     version="",
-                    feature=feature_result,
+                    result=data,
                 )
             )
 

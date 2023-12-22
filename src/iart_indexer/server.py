@@ -393,8 +393,8 @@ class Commune(indexer_pb2_grpc.IndexerServicer):
 
         self.max_results = config.get("indexer", {}).get("max_results", 100)
 
-    def analyze(self, request, context):
-        logging.info(f"Received analyze request, plugins: {request.plugin}")
+    def analyse(self, request, context):
+        logging.info(f"Received analyse request, plugins: {request.plugin}")
 
         results = self.managers["inference_server"](self.managers["compute_manager"], request.plugin, request)
 

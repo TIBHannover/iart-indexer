@@ -16,9 +16,9 @@ class Deployment:
     async def __call__(self, request) -> Dict[str, str]:
         data = await request.json()
 
-        from iart_indexer.indexer_pb2 import AnalyzeRequest
+        from iart_indexer.indexer_pb2 import AnalyseRequest
 
-        r = ParseDict(data["inputs"], AnalyzeRequest())
+        r = ParseDict(data["inputs"], AnalyseRequest())
         inputs, parameters = self.map_analyser_request(r)
 
         results = self.plugin(inputs, parameters=parameters)
@@ -33,8 +33,11 @@ class Deployment:
         for input in request.inputs:
             if input.name not in input_dict:
                 input_dict[input.name] = []
-            # TODO convert datatype
-            input_dict[input.name].append(input.content)
+            # logging.error(input)
+            if input.WhichOneof("data") == "image":
+                input_dict[input.name].append(input.image.content)
+            if input.WhichOneof("data") == "string":
+                input_dict[input.name].append(input.string.text)
 
         parameter_dict = {}
         for parameter in request.parameters:
@@ -127,7 +130,7 @@ class RayInferenceServer(InferenceServer):
                     "inputs": MessageToDict(request),
                 },
             ).json(),
-            indexer_pb2.AnalyzeReply(),
+            indexer_pb2.AnalyseReply(),
         )
         logging.error("WWWWWWWWWWWWWWW")
 

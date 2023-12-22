@@ -7,6 +7,8 @@ option java_multiple_files = true;
 
 package iart.indexer;
 
+import "data.proto";
+
 service Indexer {
   rpc list_plugins(ListPluginsRequest) returns (ListPluginsReply) {}
   rpc status(StatusRequest) returns (StatusReply) {}
@@ -20,7 +22,7 @@ service Indexer {
 
   rpc suggest(SuggestRequest) returns (SuggestReply) {}
 
-  rpc analyze(AnalyzeRequest) returns (AnalyzeReply) {}
+  rpc analyse(AnalyseRequest) returns (AnalyseReply) {}
 
   rpc build_indexer(BuildIndexerRequest) returns (BuildIndexerReply) {}
   rpc build_feature_cache(BuildFeatureCacheRequest)
@@ -99,35 +101,11 @@ message PluginConfig {
   string state = 4;
 }
 
-message Concept {
-  string concept = 1;
-  string type = 2;
-  float prob = 3;
-}
-
-message ClassifierResult {
-  string plugin = 1;
-  repeated Concept concepts = 2;
-}
-
-// TODO maybe move this to feature list
-message BinaryFeatureResult { string binary = 1; }
-
-message FeatureResult {
-  string type = 1;
-  repeated int32 shape = 2;
-  repeated float feature = 3;
-}
-
 message PluginResult {
   string plugin = 1;
   string type = 2;
   string version = 3;
-  oneof result {
-    ClassifierResult classifier = 4;
-    FeatureResult feature = 5;
-    BinaryFeatureResult binary_eature = 6;
-  }
+  PluginData result = 4;
 }
 
 message ImageResult {
@@ -288,7 +266,7 @@ message SearchResultEntry {
   repeated ValueField meta = 2;
   repeated ValueField origin = 3;
   repeated ClassifierResult classifier = 4;
-  repeated FeatureResult feature = 5;
+  repeated Feature feature = 5;
   repeated float coordinates = 6;
   int64 cluster = 7;
   float distance = 8;
@@ -352,7 +330,7 @@ message GetReply {
   repeated ValueField meta = 2;
   repeated ValueField origin = 3;
   repeated ClassifierResult classifier = 4;
-  repeated FeatureResult feature = 5;
+  repeated Feature feature = 5;
   Collection collection = 7;
 }
 
@@ -375,17 +353,10 @@ message PluginParameter {
   DataType type = 4;
 }
 
-message PluginInput {
-  string name = 1;
-  bytes content = 2;
-  repeated int32 shape = 3;
-  DataType type = 4;
-}
-
-message AnalyzeRequest {
+message AnalyseRequest {
   string plugin = 1;
   repeated PluginParameter parameters = 2;
-  repeated PluginInput inputs = 3;
+  repeated PluginData inputs = 3;
 }
 
-message AnalyzeReply { repeated PluginResult results = 1; }
+message AnalyseReply { repeated PluginResult results = 1; }
