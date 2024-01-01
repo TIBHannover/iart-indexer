@@ -10,6 +10,8 @@ from packaging import version
 from typing import Any, Dict, Type
 from iart_indexer.utils import convert_name
 
+from iart_indexer import indexer_pb2
+
 
 class ComputePluginResult:
     def __init__(self, plugin, entries, annotations):
@@ -39,7 +41,16 @@ class ComputePlugin(Plugin):
         cls._parameters = parameters
         cls._name = convert_name(cls.__name__)
 
-    def __init__(self, config: Dict = None):
+    def __init__(
+        self,
+        compute_plugin_manager: "ComputePluginManager",
+        inference_server: "InferenceServer",
+        config: Dict = None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self._compute_plugin_manager = compute_plugin_manager
+        self._inference_server = inference_server
         self._config = self._default_config
         if config is not None:
             self._config.update(config)
@@ -54,11 +65,77 @@ class ComputePlugin(Plugin):
     def provides(cls):
         return cls._provides
 
-    def __init__(self, **kwargs) -> None:
-        super(ComputePlugin, self).__init__(**kwargs)
+    @property
+    def compute_plugin_manager(self):
+        return self._compute_plugin_manager
 
-    def __call__(self, inputs, parameters: Dict = None) -> ComputePluginResult:
-        return self.call(inputs, parameters)
+    @property
+    def inference_server(self):
+        return self._inference_server
+
+    @staticmethod
+    def map_analyser_request_to_dict(request):
+        input_dict = {}
+        for input in request.inputs:
+            if input.name not in input_dict:
+                input_dict[input.name] = []
+            # logging.error(input)
+            if input.WhichOneof("data") == "image":
+                input_dict[input.name].append({"type": "image", "content": input.image.content})
+            if input.WhichOneof("data") == "string":
+                input_dict[input.name].append({"type": "string", "content": input.string.text})
+
+        parameter_dict = {}
+        for parameter in request.parameters:
+            if parameter.name not in parameter_dict:
+                parameter_dict[parameter.name] = []
+            # TODO convert datatype
+            if parameter.type == indexer_pb2.FLOAT_TYPE:
+                parameter_dict[parameter.name] = float(parameter.content)
+            if parameter.type == indexer_pb2.INT_TYPE:
+                parameter_dict[parameter.name] = int(parameter.content)
+            if parameter.type == indexer_pb2.STRING_TYPE:
+                parameter_dict[parameter.name] = str(parameter.content)
+            if parameter.type == indexer_pb2.BOOL_TYPE:
+                parameter_dict[parameter.name] = bool(parameter.content)
+
+        return input_dict, parameter_dict
+
+    @staticmethod
+    def map_dict_to_analyser_request(inputs, parameters):
+        request = indexer_pb2.AnalyseRequest()
+        for key, values in inputs.items():
+            for value in values:
+                input_field = request.inputs.add()
+                if value["type"] == "image":
+                    input_field.name = "image"
+                    if "path" in value:
+                        input_field.image.content = open(value["path"], "rb").read()
+                    elif "content" in value:
+                        input_field.image.content = value["content"]
+                    else:
+                        logging.error("Missing image content")
+
+                elif value["type"] == "string":
+                    input_field.name = "text"
+                    input_field.string.text = value["content"]
+
+        for key, value in parameters.items():
+            parameter = request.parameters.add()
+            parameter.content = str(value)
+            parameter.name = key
+
+            if isinstance(value, float):
+                parameter.type = indexer_pb2.FLOAT_TYPE
+            if isinstance(value, int):
+                parameter.type = indexer_pb2.INT_TYPE
+            if isinstance(value, str):
+                parameter.type = indexer_pb2.STRING_TYPE
+
+        return request
+
+    def __call__(self, analyse_request: indexer_pb2.AnalyseRequest) -> ComputePluginResult:
+        return self.call(analyse_request)
 
 
 # __all__ = []

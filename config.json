@@ -20,16 +20,26 @@
     },
     "compute_plugins": [
         {
-            "type": "ClipTextEmbeddingFeature",
+            "type": "ClipClassification",
             "output": "clip_text",
             "params": {
                 "inference": {
                     "requirements": []
-                },
-                "model_name": "clip_text",
-                "model_device": "cpu",
-                "model_file": "/data/models/clip_text/clip_text.pt",
-                "bpe_file": "/data/models/clip_text/bpe_simple_vocab_16e6.txt.gz"
+                }
+            }
+        },
+        {
+            "type": "ClipTextEmbeddingFeature",
+            "output": "clip_text",
+            "params": {
+                "inference": {
+                    "requirements": [
+                        "torch",
+                        "open_clip_torch",
+                        "imageio",
+                        "transformers"
+                    ]
+                }
             }
         },
         {
@@ -44,9 +54,6 @@
                         "transformers"
                     ]
                 },
-                "model_name": "clip_image",
-                "model_device": "cpu",
-                "model_file": "/data/models/clip_image/clip_image.pt",
                 "multicrop": true,
                 "max_dim": null,
                 "min_dim": 244

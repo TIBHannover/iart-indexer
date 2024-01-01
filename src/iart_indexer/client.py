@@ -236,7 +236,7 @@ class Client:
 
         return result
 
-    def analyse(self, inputs, plugin: str = None):
+    def analyse(self, inputs, parameters, plugin: str = None):
         channel = grpc.insecure_channel(f"{self.host}:{self.port}")
         stub = indexer_pb2_grpc.IndexerStub(channel)
         request = indexer_pb2.AnalyseRequest()
@@ -248,6 +248,15 @@ class Client:
             elif i["type"] == "string":
                 input_field.name = "text"
                 input_field.string.text = i["text"]
+
+        for p in parameters:
+            parameter_field = request.parameters.add()
+            if p["type"] == "bounding_box":
+                parameter_field.name = "bounding_box"
+                parameter_field.image.content = open(i["path"], "rb").read()
+            elif p["type"] == "string":
+                parameter_field.name = "text"
+                parameter_field.string.text = i["text"]
 
         request.plugin = plugin
         response = stub.analyse(request)

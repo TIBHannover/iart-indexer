@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument("--plugins", nargs="+", help="")
     parser.add_argument("--image_paths", help="")
     parser.add_argument("--analyse_inputs", help="")
+    parser.add_argument("--analyse_parameters", help="")
     parser.add_argument("--query", help="")
     parser.add_argument("--batch", default=512, type=int, help="split images in batch")
 
@@ -192,7 +193,7 @@ def main():
                             plugins.append(plugin)
                     else:
                         plugins.append(plugin)
-            print(client.analyse(json.loads(args.analyse_inputs), plugins[0]))
+            print(client.analyse(json.loads(args.analyse_inputs), json.loads(args.analyse_parameters), plugins[0]))
 
     elif args.mode == "server":
         server = Server(config)

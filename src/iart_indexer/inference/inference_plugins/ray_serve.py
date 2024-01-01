@@ -18,42 +18,11 @@ class Deployment:
 
         from iart_indexer.indexer_pb2 import AnalyseRequest
 
-        r = ParseDict(data["inputs"], AnalyseRequest())
-        inputs, parameters = self.map_analyser_request(r)
+        analyse_request = ParseDict(data["inputs"], AnalyseRequest())
 
-        results = self.plugin(inputs, parameters=parameters)
+        results = self.plugin(analyse_request)
 
         return MessageToDict(results)
-
-    @staticmethod
-    def map_analyser_request(request):
-        from iart_indexer import indexer_pb2
-
-        input_dict = {}
-        for input in request.inputs:
-            if input.name not in input_dict:
-                input_dict[input.name] = []
-            # logging.error(input)
-            if input.WhichOneof("data") == "image":
-                input_dict[input.name].append(input.image.content)
-            if input.WhichOneof("data") == "string":
-                input_dict[input.name].append(input.string.text)
-
-        parameter_dict = {}
-        for parameter in request.parameters:
-            if parameter.name not in parameter_dict:
-                parameter_dict[parameter.name] = []
-            # TODO convert datatype
-            if parameter.type == indexer_pb2.FLOAT_TYPE:
-                parameter_dict[parameter.name] = float(parameter.content)
-            if parameter.type == indexer_pb2.INT_TYPE:
-                parameter_dict[parameter.name] = int(parameter.content)
-            if parameter.type == indexer_pb2.STRING_TYPE:
-                parameter_dict[parameter.name] = str(parameter.content)
-            if parameter.type == indexer_pb2.BOOL_TYPE:
-                parameter_dict[parameter.name] = bool(parameter.content)
-
-        return input_dict, parameter_dict
 
 
 def app_builder(args) -> Application:
@@ -93,7 +62,9 @@ class RayInferenceServer(InferenceServer):
             serve.run(
                 app_builder(
                     {
-                        "plugin": plugin_cls(config=plugin_config),
+                        "plugin": plugin_cls(
+                            config=plugin_config, compute_plugin_manager=compute_plugin_manager, inference_server=self
+                        ),
                         "options": {
                             "name": plugin_cls.name,
                             "ray_actor_options": {"runtime_env": {"pip": requirements}},
@@ -132,12 +103,6 @@ class RayInferenceServer(InferenceServer):
             ).json(),
             indexer_pb2.AnalyseReply(),
         )
-        logging.error("WWWWWWWWWWWWWWW")
-
-        logging.error(results)
-
-        print("##########", flush=True)
-
         # logging.info(f"[AnalyserPluginManager] {run_id} plugin: {plugin_to_run}")
         # logging.info(f"[AnalyserPluginManager] {run_id} data: {[{k:x.id} for k,x in inputs.items()]}")
         # logging.info(f"[AnalyserPluginManager] {run_id} parameters: {parameters}")

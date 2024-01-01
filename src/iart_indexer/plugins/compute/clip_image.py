@@ -108,9 +108,9 @@ default_parameters = {
 
 
 @ComputePluginManager.export("ClipImageEmbeddingFeature")
-class ClipEmbeddingFeature(ComputePlugin, config=default_config, parameters=default_parameters, version="0.4"):
+class ClipImageEmbeddingFeature(ComputePlugin, config=default_config, parameters=default_parameters, version="0.4"):
     def __init__(self, **kwargs):
-        super(ClipEmbeddingFeature, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.max_dim = self.config["max_dim"]
         self.min_dim = self.config["min_dim"]
 
@@ -122,11 +122,13 @@ class ClipEmbeddingFeature(ComputePlugin, config=default_config, parameters=defa
         converted = image_resize(image_pad(img), size=crop_size)
         return converted
 
-    def call(self, inputs, parameters: Dict = None):
+    def call(self, analyse_request: indexer_pb2.AnalyseRequest):
         from sklearn.preprocessing import normalize
         import imageio.v3 as iio
         import torch
         import open_clip
+
+        inputs, parameters = self.map_analyser_request_to_dict(analyse_request)
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -142,7 +144,7 @@ class ClipEmbeddingFeature(ComputePlugin, config=default_config, parameters=defa
         result = indexer_pb2.AnalyseReply()
         for entry in inputs["image"]:
             # image = image_from_proto(entry)
-            image = iio.imread(entry)
+            image = iio.imread(entry["content"])
 
             # image = image_resize(image, max_dim=self.max_dim, min_dim=self.min_dim)
             # image = image_crop(image, [224, 224])
@@ -167,7 +169,7 @@ class ClipEmbeddingFeature(ComputePlugin, config=default_config, parameters=defa
                 indexer_pb2.PluginResult(
                     plugin=self.name,
                     type="",
-                    version="",
+                    version=self.version,
                     result=data,
                 )
             )
