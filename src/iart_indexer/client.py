@@ -251,12 +251,15 @@ class Client:
 
         for p in parameters:
             parameter_field = request.parameters.add()
-            if p["type"] == "bounding_box":
-                parameter_field.name = "bounding_box"
-                parameter_field.image.content = open(i["path"], "rb").read()
-            elif p["type"] == "string":
-                parameter_field.name = "text"
-                parameter_field.string.text = i["text"]
+            parameter_field.name = p["name"]
+            parameter_field.content = str(p["value"]).encode()
+
+            if isinstance(p["value"], float):
+                parameter_field.type = indexer_pb2.FLOAT_TYPE
+            if isinstance(p["value"], int):
+                parameter_field.type = indexer_pb2.INT_TYPE
+            if isinstance(p["value"], str):
+                parameter_field.type = indexer_pb2.STRING_TYPE
 
         request.plugin = plugin
         response = stub.analyse(request)

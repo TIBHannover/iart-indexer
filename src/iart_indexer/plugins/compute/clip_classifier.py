@@ -22,9 +22,7 @@ default_config = {
     "min_dim": 224,
 }
 
-default_parameters = {
-    "crop_size": [224, 224],
-}
+default_parameters = {"crop_size": [224, 224], "aggregation": "softmax"}
 
 
 @ComputePluginManager.export("ClipClassification")
@@ -36,6 +34,7 @@ class ClipClassification(ComputePlugin, config=default_config, parameters=defaul
 
     def call(self, analyse_request: indexer_pb2.AnalyseRequest):
         import torch
+        from sklearn.metrics.pairwise import cosine_similarity
 
         inputs, parameters = self.map_analyser_request_to_dict(analyse_request)
 
@@ -63,7 +62,16 @@ class ClipClassification(ComputePlugin, config=default_config, parameters=defaul
 
         image_embeddings = np.stack(image_embeddings, 0)
 
-        text_probs = torch.nn.functional.softmax(torch.from_numpy(100.0 * image_embeddings @ text_embeddings.T), dim=-1)
+        if parameters.get("aggregation").lower() == "softmax":
+            text_probs = torch.nn.functional.softmax(
+                torch.from_numpy(100.0 * image_embeddings @ text_embeddings.T), dim=-1
+            )
+
+        if parameters.get("aggregation").lower() == "dot":
+            text_probs = image_embeddings @ text_embeddings.T
+
+        if parameters.get("aggregation").lower() == "cosine":
+            text_probs = cosine_similarity(image_embeddings, text_embeddings)
 
         result = indexer_pb2.AnalyseReply()
 

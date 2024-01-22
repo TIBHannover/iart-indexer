@@ -91,13 +91,13 @@ class ComputePlugin(Plugin):
                 parameter_dict[parameter.name] = []
             # TODO convert datatype
             if parameter.type == indexer_pb2.FLOAT_TYPE:
-                parameter_dict[parameter.name] = float(parameter.content)
+                parameter_dict[parameter.name] = float(parameter.content.decode("utf-8"))
             if parameter.type == indexer_pb2.INT_TYPE:
-                parameter_dict[parameter.name] = int(parameter.content)
+                parameter_dict[parameter.name] = int(parameter.content.decode("utf-8"))
             if parameter.type == indexer_pb2.STRING_TYPE:
-                parameter_dict[parameter.name] = str(parameter.content)
+                parameter_dict[parameter.name] = str(parameter.content.decode("utf-8"))
             if parameter.type == indexer_pb2.BOOL_TYPE:
-                parameter_dict[parameter.name] = bool(parameter.content)
+                parameter_dict[parameter.name] = bool(parameter.content.decode("utf-8"))
 
         return input_dict, parameter_dict
 
@@ -122,8 +122,8 @@ class ComputePlugin(Plugin):
 
         for key, value in parameters.items():
             parameter = request.parameters.add()
-            parameter.content = str(value)
             parameter.name = key
+            parameter.content = str(value).encode()
 
             if isinstance(value, float):
                 parameter.type = indexer_pb2.FLOAT_TYPE
