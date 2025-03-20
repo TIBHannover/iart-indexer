@@ -1,6 +1,6 @@
 FROM python:3.9
 
-RUN pip install poetry
+RUN pip install poetry==1.3.0
 
 COPY pyproject.toml ./
 RUN poetry export -f requirements.txt  --output requirements.txt
